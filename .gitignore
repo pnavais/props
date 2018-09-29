@@ -6,11 +6,15 @@ Makefile.in
 /py-compile
 /test-driver
 /ylwrap
+/config.log
+**/**/.deps/
+**/**/.dirstamp/
 
 # http://www.gnu.org/software/autoconf
 
 /autom4te.cache
 /autoscan.log
+/build-aux
 /autoscan-*.log
 /aclocal.m4
 /compile

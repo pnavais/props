@@ -15,17 +15,15 @@
  */
 
 #include <iostream>
-#include <pthread.h>
 #include "props_reader.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-  std::cout << "Hello World" << std::endl;
-  PropsReader reader;
 
-  reader.setValues(12,20);
-  int a=reader.area();
-  std::cout << "Area of [12x20]=" << a << std::endl;
-  
+	PropsReader reader;
+	string key = "KEY2";
+	string value = reader.find_value(key);
+	cout << "Key = [" << key << "] -> [" << value << "]" << endl;
+
   return 0;
 }

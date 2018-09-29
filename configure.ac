@@ -1,11 +1,11 @@
 AC_PREREQ([2.69])
-AC_INIT([props], [0.1.0], [pnavais@gmail.com])
+AC_INIT([props], [0.1.0], [pnavais@gmail.com], [], [https://github.com/pnavais/props])
 AC_CONFIG_SRCDIR([src/props.cc])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-	LT_INIT
+AC_PROG_RANLIB
 
 # Checks for programs.
 AC_PROG_CC
@@ -60,24 +60,26 @@ else
 fi
 
 
-# Configure pthreads.
-AX_PTHREAD([AM_CONDITIONAL([HAVE_PTHREAD],[true])], [AM_CONDITIONAL([HAVE_PTHREAD],[false])])
-AC_SUBST(PTHREAD_CFLAGS)
-AC_SUBST(PTHREAD_LIBS)
-
-# Configure PCRE
-AX_PATH_LIB_PCRE([], [ AC_MSG_ERROR([No pcre library found.  You can get it at http://www.pcre.org]) ])
-AC_SUBST(PCRE_LIBS)
-AC_SUBST(PCRE_CFLAGS)
 		
 # Configure internal libraries
-PROPS_LIB=${abs_top_builddir}/lib/props-def
+CWD=`readlink -f $srcdir`
+PROPS_LIB=${CWD}/lib/props-def
 PROPS_LIB_HEADER="-I${PROPS_LIB}/include"
-PROPS_LIB_FUNC="-I${PROPS_LIB}/libprops.a"
+PROPS_LIB_FUNC="-L${PROPS_LIB} -lprops"
 AC_SUBST(PROPS_LIB_HEADER)
 AC_SUBST(PROPS_LIB_FUNC)
 
 # Checks for libraries.
+
+# Pthreads.
+AX_PTHREAD([AM_CONDITIONAL([HAVE_PTHREAD],[true])], [AM_CONDITIONAL([HAVE_PTHREAD],[false])])
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
+# PCRE
+AX_PATH_LIB_PCRE([], [ AC_MSG_ERROR([No pcre library found.  You can get it at http://www.pcre.org]) ])
+AC_SUBST(PCRE_LIBS)
+AC_SUBST(PCRE_CFLAGS)
 
 # Checks for header files.
 
@@ -101,7 +103,8 @@ Configure Information:
     CPPFLAGS        : $CPPFLAGS
     CXXFLAGS        : $CXXFLAGS
     WARN_CXXFLAGS   : $WARN_CXXFLAGS
-    DEBUG_CXXFLAGS  : $GCC_DEBUG_CXXFLAGS
+    WARNING         : $gcc_warnings
+    DEBUG           : $gcc_debug
 
   Linker            : $LD
     LDFLAGS         : $LDFLAGS
