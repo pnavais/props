@@ -4,7 +4,8 @@ AM_CPPFLAGS = $(PROPS_LIB_HEADER)
 bin_PROGRAMS = props
 
 props_SOURCES = props.cc
-props_LDADD = $(PROPS_LIB_FUNC)
+#props_LDFLAGS = -Wl,-Bdynamic
+props_LDADD = $(PROPS_LIB_FUNC) 
 
 if HAVE_PTHREAD
     AM_CXXFLAGS += $(PCRE_CFLAGS) $(PTHREAD_CFLAGS) -DHAVE_PTHREADS
