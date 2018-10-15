@@ -38,6 +38,7 @@ public:
 
 private:
 
+    std::string helpMessage_;
 };
 
 #endif //PROPS_PROPS_HELP_COMMAND_H

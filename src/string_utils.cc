@@ -78,3 +78,16 @@ std::string StringUtils::toFlatString(const std::list<std::string>& args, const 
 
     return out.str();
 }
+
+/**
+ * Converts a string to upper case.
+ *
+ * @param input the input string
+ */
+std::basic_string<char>& StringUtils::toUpper(std::basic_string<char>& input) {
+    for (char &p : input) {
+        p = static_cast<char>(toupper(p));
+    }
+
+    return input;
+}

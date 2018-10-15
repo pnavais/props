@@ -56,6 +56,13 @@ public:
      * @return the flat string
      */
     static std::string toFlatString(const std::list<std::string>& args, const std::string& separator = DEFAULT_SEPARATOR);
+
+    /**
+     * Converts a string to upper case.
+     *
+     * @param input the input string
+     */
+    static std::basic_string<char>& toUpper(std::basic_string<char>& input);
 };
 
 #endif //PROPS_STRING_UTILS_H

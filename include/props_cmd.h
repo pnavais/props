@@ -74,16 +74,26 @@ public:
     }
 
     /**
-     * Display a help message
+     * Display a help message using the
+     * standard output.
      */
-    virtual void getHelp() {
-        std::cout << "\nExpected syntax : " << PACKAGE_NAME << " " << name_ << " ";
+    void getHelp() {
+        getHelp(std::cout);
+    }
+
+    /**
+     * Display a help message
+     * on the given output stream.
+     */
+    virtual void getHelp(std::ostream& out) {
+        out << description_ ;
+        out << "\n\nExpected syntax : " << PACKAGE_NAME << " " << name_ << " ";
         std::string prefix;
         for (auto& arg : args_) {
-            std::cout << prefix << arg;
+            out << prefix << arg;
             prefix = " ";
         }
-        std::cout << std::endl;
+        out << std::endl;
     }
 
     /**
