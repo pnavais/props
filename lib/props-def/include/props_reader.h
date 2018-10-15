@@ -18,14 +18,36 @@
 #define PROPS_READER_H
 
 #include <iostream>
+#include <list>
+#include <props_search_result.h>
 
 using namespace std;
 
 class PropsReader {
 
-  public:
-	  string find_value (const string& key);
-	  string find_value (const string& key, const string& file);
+public:
+
+    /**
+     * Finds the value of the given key searching in the mater tracked file
+     * or globally on every tracked file.
+     *
+     * @param key the key to find
+     * @param global the flag enabling global search
+     * @return the results of the search
+     */
+     PropsSearchResult find_value (const string& key, const bool& global = false);
+
+    /**
+     *  Finds the value of the given key searching in the mater tracked file
+     *  or globally on every tracked file.
+     *
+     *  @param key the key to find
+     *  @param files the list of files to search
+     *  @param global the flag enabling global search
+     *  @return the results of the search
+     */
+     PropsSearchResult find_value (const string& key, const std::list<string>& files);
+
 };
 
 #endif

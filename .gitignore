@@ -9,6 +9,8 @@ Makefile.in
 /config.log
 **/**/.deps/
 **/**/.dirstamp/
+*.idea/
+*.dirstamp
 
 # http://www.gnu.org/software/autoconf
 

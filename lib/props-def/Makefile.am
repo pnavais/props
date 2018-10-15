@@ -1,11 +1,10 @@
 # We define the global AM_CPPFLAGS as everything we compile includes from these
 # directories.
-AM_CPPFLAGS = -isystem $(srcdir)/include -I$(srcdir) 
+AM_CPPFLAGS = -isystem $(srcdir)/include -I$(srcdir)  -I$(srcdir)/../../include
 #AM_CXXFLAGS =
 #AM_LDFLAGS = 
 #LDADD =
 
 # Build rules for libraries.
 noinst_LIBRARIES = libprops.a
-libprops_a_SOURCES = src/props_reader.cc include/props_reader.h
-
+libprops_a_SOURCES = src/props_reader.cc

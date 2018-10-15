@@ -2,7 +2,7 @@ AC_PREREQ([2.69])
 AC_INIT([props], [0.1.0], [pnavais@gmail.com], [], [https://github.com/pnavais/props])
 AC_CONFIG_SRCDIR([src/props.cc])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_PROG_RANLIB
@@ -64,8 +64,10 @@ fi
 # Configure internal libraries
 CWD=`readlink -f $srcdir`
 PROPS_LIB=${CWD}/lib/props-def
+MAIN_LIB_HEADER="-I${CWD}/include"
 PROPS_LIB_HEADER="-I${PROPS_LIB}/include"
 PROPS_LIB_FUNC="-L${PROPS_LIB} -lprops"
+AC_SUBST(MAIN_LIB_HEADER)
 AC_SUBST(PROPS_LIB_HEADER)
 AC_SUBST(PROPS_LIB_FUNC)
 

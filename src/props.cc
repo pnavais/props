@@ -15,15 +15,33 @@
  */
 
 #include <iostream>
+#include "props_cmd.h"
+#include "props_cli.h"
 #include "props_reader.h"
+#include "exec_exception.h"
+#include "rang.hpp"
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 
-	PropsReader reader;
-	string key = "KEY2";
-	string value = reader.find_value(key);
-	cout << "Key = [" << key << "] -> [" << value << "]" << endl;
+    int ret_code = 0;
+    PropsCommand* command = nullptr;
 
-  return 0;
+    try {
+        command = PropsCLI::parse(argc,argv);
+        if (command != nullptr) {
+            command->run();
+        }
+    } catch (InitializationException& exception) {
+        cerr << rang::fgB::yellow << exception.what() << rang::fg::reset << endl;
+        if (command != nullptr) {
+            command->getHelp();
+        }
+        ret_code = 1;
+    } catch (ExecutionException& exception) {
+        cerr << rang::fgB::red << exception.what() << rang::fg::reset << endl;
+        ret_code = 2;
+    }
+
+	return ret_code;
 }
