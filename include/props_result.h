@@ -25,6 +25,8 @@ public:
 
     PropsResult() = default;
 
+    virtual ~PropsResult() {};
+
     /**
      * Formats the contents of the result in an
      * output stream.

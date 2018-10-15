@@ -13,9 +13,11 @@ AC_PROG_CXX
 AC_LANG(C++)
 
 # Check for C++11
-AC_LANG_PUSH([C++])
-AX_CXX_COMPILE_STDCXX_11([noext])
-AC_LANG_POP([C++])
+#AC_LANG_PUSH([C++])
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+AC_PROG_INSTALL
+AC_PROG_LIBTOOL
+#AC_LANG_POP([C++])
 
 # GCC specific configuration (optional)
 GCC_WARN_CXXFLAGS="-fdiagnostics-color=auto -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow -Wnon-virtual-dtor"
