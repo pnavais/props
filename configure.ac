@@ -13,11 +13,9 @@ AC_PROG_CXX
 AC_LANG(C++)
 
 # Check for C++11
-#AC_LANG_PUSH([C++])
-AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
-#AC_LANG_POP([C++])
 
 # GCC specific configuration (optional)
 GCC_WARN_CXXFLAGS="-fdiagnostics-color=auto -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow -Wnon-virtual-dtor"
@@ -55,7 +53,7 @@ AC_ARG_ENABLE([gcc-debug],
 )
 AC_MSG_RESULT([$gcc_debug])
 if test "$gcc_debug" = yes; then
-    AC_SUBST([CXXFLAGS],"$GCC_DEBUG_CXXFLAGS")
+    AC_SUBST([CXXFLAGS],"$CXXFLAGS $GCC_DEBUG_CXXFLAGS")
     AC_DEFINE([DEBUG],[],[Debug Mode])
 else
     AC_DEFINE([NDEBUG],[],[Release Mode])

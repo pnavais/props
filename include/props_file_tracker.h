@@ -19,6 +19,7 @@
 
 #include <list>
 #include <iostream>
+#include <memory>
 
 
 class PropsFileTracker {

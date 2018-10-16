@@ -24,7 +24,7 @@ class InitializationException : public std::exception {
 
 public:
 
-    explicit InitializationException(char *info_) : info_(info_) {}
+    explicit InitializationException(char *info) : info_(info) {}
 
     const char* what () const noexcept override {
         return (("Error during initialization: ") + std::string(info_)).c_str();

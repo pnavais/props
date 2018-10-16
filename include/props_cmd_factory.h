@@ -17,8 +17,9 @@
 #ifndef PROPS_PROPS_CMD_FACTORY_H
 #define PROPS_PROPS_CMD_FACTORY_H
 
-#include <map>
 #include "props_cmd.h"
+#include <map>
+#include <memory>
 
 class PropsCommandFactory {
 

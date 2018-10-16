@@ -2,7 +2,7 @@
 /* include/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Debug Mode */
-/* #undef DEBUG */
+#define DEBUG /**/
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
@@ -50,7 +50,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Release Mode */
-#define NDEBUG /**/
+/* #undef NDEBUG */
 
 /* Name of package */
 #define PACKAGE "props"

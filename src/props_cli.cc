@@ -18,6 +18,7 @@
 #include "props_cli.h"
 #include "props_cmd_factory.h"
 #include <iostream>
+#include <string.h>
 
 /**
  * Parses the command line arguments to
