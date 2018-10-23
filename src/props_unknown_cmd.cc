@@ -34,13 +34,7 @@ void PropsUnknownCommand::execute(PropsResult &result) {
     rang::setControlMode(rang::control::Force);
 
     out << rang::fg::red << "Command \""<< command_ << "\" not found" << rang::fg::reset << std::endl;
-    
-    out << "\nThese are the current available commands : \n" << std::endl;
 
-    PropsResult helpResult;
-    PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID)->get()->execute(helpResult);
-    out << helpResult.getResult_();
-    
     rang::setControlMode(rang::control::Auto);
 
     result.setResult_(out.str());

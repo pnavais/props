@@ -26,9 +26,10 @@ class PropsVersionCommand : public PropsCommand {
 public:
 
     PropsVersionCommand() {
-        id_          = "VERSION";
+        id_          = "version";
         name_        = "-v|--version";
-        description_ = "Display current version and exit";
+        tagLine_     = "Display current version and exit";
+        description_ = tagLine_;
     }
 
     void execute(PropsResult &result) override {

@@ -20,16 +20,15 @@
 #include "rang.hpp"
 
 
-const std::string main_opts[][3] = {
-        { "track"        , "<option>"  , "Track files | List tracked files"                } ,
-        { "untrack"      , "<option"   , "Untrack files"                                   } ,
+/*const std::string main_opts[][3] = {
+        { "untrack"      , "<option>"  , "Untrack files"                                   } ,
         { "search"       , ""          , "Search a key in the target files"                } ,
         { "set"          , ""          , "Set the given key in the target files"           } ,
         { "toggle"       , ""          , "Disable/Enable the key in the target files"      } ,
         { "disable"      , ""          , "Disable the key in the target files"             } ,
         { "enable"       , ""          , "Enable the key in the target files"              } ,
         { "remove"       , ""          , "Remove the key in the target files"              } ,
-};
+};*/
 
 /**
  * Parses the supplied arguments for the help command
@@ -39,16 +38,15 @@ const std::string main_opts[][3] = {
  */
 void PropsHelpCommand::parse(const int &argc, const char **argv) {
     if (argc > 1) {
-        std::string sub_cmd = argv[1];
+        subCmd_ = argv[1];
 
-        std::unique_ptr<PropsCommand> *pPtr = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(sub_cmd));
+        std::unique_ptr<PropsCommand> *pPtr = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(subCmd_));
         if (pPtr != nullptr) {
             std::ostringstream out;
             pPtr->get()->getHelp(out);
             helpMessage_ = out.str();
         }
     }
-
 }
 
 /**
@@ -66,12 +64,17 @@ void PropsHelpCommand::execute(PropsResult &result) {
     if (!helpMessage_.empty()) {
         out << helpMessage_;
     } else {
-        out << "usage: " << rang::fg::green << PACKAGE_NAME << rang::fg::reset << " [command]" << std::endl;
+        if (!subCmd_.empty()) {
+            out << rang::fg::red << "Command \"" << subCmd_ << "\" not available" << rang::fg::reset << std::endl;
+        } else {
+            out << rang::fg::yellow << "No command specified" << rang::fg::reset << std::endl;
+        }
         out << "\nThese are the current available commands : \n" << std::endl;
 
         for (auto& command : PropsCommandFactory::getDefault().getCommands()) {
-            out << "\t" << StringUtils::padding(command->getName() + " " + StringUtils::toFlatString(command->getArgs(), " "), 20)
-                << ":  " << command->getDescription() << std::endl;
+            std::string summary = (command->getSummaryArg().empty()) ? "" : "<" + command->getSummaryArg() + ">";
+            out << "\t" << StringUtils::padding(command->getName() + " " + summary, 15)
+                << ":  " << command->getTagline() << std::endl;
         }
     }
 

@@ -59,11 +59,10 @@ else
     AC_DEFINE([NDEBUG],[],[Release Mode])
 fi
 
-
-		
 # Configure internal libraries
-CWD=`readlink -f $srcdir`
-PROPS_LIB=${CWD}/lib/props-def
+
+# Init installation directory
+PROPS_LIB=${PWD}/lib/props-def
 MAIN_LIB_HEADER="-I${CWD}/include"
 PROPS_LIB_HEADER="-I${PROPS_LIB}/include"
 PROPS_LIB_FUNC="-L${PROPS_LIB} -lprops"

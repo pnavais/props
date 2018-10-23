@@ -20,7 +20,9 @@
 #include "init_exception.h"
 #include "props_search_result.h"
 #include "config.h"
+#include "props_arg.h"
 #include <string>
+#include <vector>
 
 class PropsCommand {
 
@@ -51,8 +53,17 @@ public:
      *
      * @return the command name
      */
-    const std::string &getName() const {
+    const std::string& getName() const {
         return name_;
+    }
+
+    /**
+     * Retrieves the summary argument.
+     *
+     * @return the summary arg
+     */
+    const std::string& getSummaryArg() const {
+        return summaryArg_;
     }
 
     /**
@@ -60,8 +71,17 @@ public:
      *
      * @return the list of allowed arguments
      */
-    const std::list<std::string> &getArgs() const {
+    const std::list<PropsArg>& getArgs() const {
         return args_;
+    }
+
+    /**
+     * Retrieves the command short description.
+     *
+     * @return the command description
+     */
+    const std::string& getTagline() const {
+        return tagLine_;
     }
 
     /**
@@ -69,7 +89,7 @@ public:
      *
      * @return the command description
      */
-    const std::string &getDescription() const {
+    const std::string& getDescription() const {
         return description_;
     }
 
@@ -85,16 +105,7 @@ public:
      * Display a help message
      * on the given output stream.
      */
-    virtual void getHelp(std::ostream& out) {
-        out << description_ ;
-        out << "\n\nExpected syntax : " << PACKAGE_NAME << " " << name_ << " ";
-        std::string prefix;
-        for (auto& arg : args_) {
-            out << prefix << arg;
-            prefix = " ";
-        }
-        out << std::endl;
-    }
+    virtual void getHelp(std::ostream& out);
 
     /**
      * Parse the command line arguments to initialize the command.
@@ -103,10 +114,7 @@ public:
      * @param argv the array of arguments
      *
      */
-    virtual void parse(const int& argc, const char** argv) noexcept(false) {
-        (void)argc;
-        (void)argv;
-    };
+    virtual void parse(const int& argc, const char** argv) noexcept(false);
 
     /**
      * Executes the command and provides with a
@@ -120,17 +128,15 @@ public:
      * Executes the command and formats its results
      * using the standard output.
      */
-    virtual void run() noexcept(false) {
-        PropsResult result;
-        execute(result);
-        result.format(std::cout);
-    }
+    virtual void run() noexcept(false);
 
 protected:
 
     std::string id_;
     std::string name_;
-    std::list<std::string> args_;
+    std::string summaryArg_;
+    std::list<PropsArg> args_;
+    std::string tagLine_;
     std::string description_;
 
 };

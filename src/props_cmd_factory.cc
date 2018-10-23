@@ -15,10 +15,12 @@
  */
 
 #include <props_cli.h>
+#include <string_utils.h>
 #include "props_cmd_factory.h"
 #include "props_version_cmd.h"
 #include "props_help_cmd.h"
 #include "props_unknown_cmd.h"
+#include "props_track_cmd.h"
 
 /**
  * Adds all available commands
@@ -26,13 +28,14 @@
 PropsCommandFactory::PropsCommandFactory() {
 
     listCmds_ = {
-        new PropsHelpCommand(),
-        new PropsVersionCommand()
+            new PropsTrackCommand(),
+            new PropsHelpCommand(),
+            new PropsVersionCommand()
     };
 
     //TODO: Load commands dynamically
     for (auto& cmd : listCmds_) {
-        commandMap_[cmd->getId()] = std::unique_ptr<PropsCommand>(cmd);
+        commandMap_[StringUtils::toUpper(cmd->getId())] = std::unique_ptr<PropsCommand>(cmd);
     }
 }
 

@@ -62,7 +62,26 @@ public:
      *
      * @param input the input string
      */
-    static std::basic_string<char>& toUpper(std::basic_string<char>& input);
+    static std::basic_string<char> toUpper(const std::basic_string<char>& input);
+
+    /**
+     * Breaks the input text into lines of the same size avoiding splitting
+     * words at the end of the string.
+     *
+     * @param input the input string
+     * @param width the limit
+     *
+     * @return the list of wrapped strings
+     */
+    static std::list<std::string> wraptext(const std::string& input, const std::size_t width);
+
+    /**
+     * Retrieve current terminal size (rows x columns).
+     *
+     * @return the current terminal size.
+     */
+    static std::pair<int, int> getWindowSize();
+
 };
 
 #endif //PROPS_STRING_UTILS_H

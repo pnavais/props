@@ -19,6 +19,7 @@
 #include "props_cmd_factory.h"
 #include <iostream>
 #include <string.h>
+#include <string_utils.h>
 
 /**
  * Parses the command line arguments to
@@ -43,7 +44,12 @@ PropsCommand* PropsCLI::parse(const int& argc, const char** argv)
 	    else if ((strcmp(argv[1], "--version")==0) || (strcmp(argv[1], "-v")==0)) {
             command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_VERSION_CMD_ID);
 	    } else {
-            command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
+            command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));
+            if (command != nullptr) {
+                command->get()->parse(argc-1, argv+1);
+            } else {
+                command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
+            }
 	    }
 	}
 

@@ -28,8 +28,10 @@ public:
     PropsHelpCommand() {
         id_          = "HELP";
         name_        = "help";
-        args_        = { "<command>" };
-        description_ = "Retrieve detailed options for the given command";
+        summaryArg_  = "command";
+        args_        = { PropsArg::make_arg(summaryArg_) };
+        tagLine_     = "Retrieve detailed options for the given command";
+        description_ = tagLine_;
     }
 
     void parse(const int &argc, const char **argv) override;
@@ -39,6 +41,7 @@ public:
 private:
 
     std::string helpMessage_;
+    std::string subCmd_;
 };
 
 #endif //PROPS_PROPS_HELP_COMMAND_H

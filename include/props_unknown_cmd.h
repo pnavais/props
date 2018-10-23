@@ -26,9 +26,8 @@ public:
 
     PropsUnknownCommand(const std::string& command) {
         command_     = command;
-        id_          = "ERROR";
-        name_        = "-v|--version";
-        description_ = "Display current version and exit";
+        id_ = name_  = "UNKNOWN";
+        description_ = "Unknown command";
     }
 
     void execute(PropsResult &result) override;

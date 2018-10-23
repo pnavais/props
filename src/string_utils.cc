@@ -84,10 +84,39 @@ std::string StringUtils::toFlatString(const std::list<std::string>& args, const 
  *
  * @param input the input string
  */
-std::basic_string<char>& StringUtils::toUpper(std::basic_string<char>& input) {
-    for (char &p : input) {
+std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& input) {
+    std::basic_string<char> output = input;
+    for (auto &p : output) {
         p = static_cast<char>(toupper(p));
     }
 
-    return input;
+    return output;
+}
+
+/**
+ * Breaks the input text into lines of the same size avoiding splitting
+ * words at the end of the string.
+ *
+ * @param input the input string
+ * @param width the limit
+ *
+ * @return the list of wrapped strings
+ */
+std::list<std::string> StringUtils::wraptext(const std::string& input, const std::size_t width) {
+    size_t curpos  = 0;
+    size_t nextpos = 0;
+
+    std::list<std::string> lines;
+    std::string substr = input.substr(curpos, width + 1);
+
+    while (substr.length() == width + 1 && (nextpos = substr.rfind(' ')) != std::string::npos) {
+        lines.push_back(input.substr(curpos, nextpos));
+        curpos += nextpos + 1;
+        substr = input.substr(curpos, width + 1);
+    }
+
+    if (curpos != input.length())
+        lines.push_back(input.substr(curpos, std::string::npos));
+
+    return lines;
 }
