@@ -26,6 +26,7 @@ public:
     static PropsArg make_arg(const std::string& name, const std::string& desc = "", const std::list<PropsArg>& options = {}) {
         PropsArg arg;
         arg.setName(name);
+        arg.setShortName(name.at(0));
         arg.setDescription(desc);
         arg.setOptions(options);
         return arg;
@@ -37,6 +38,14 @@ public:
 
     void setName(const std::string& name) {
         name_ = name;
+    }
+
+    const char& getShortName() const {
+        return shortName_;
+    }
+
+    void setShortName(const char& shortName) {
+        shortName_ = shortName;
     }
 
     const std::string& getDescription() const {
@@ -58,6 +67,7 @@ public:
 private:
 
     std::string name_;
+    char shortName_{};
     std::string description_;
     std::list<PropsArg> options_;
 

@@ -39,11 +39,11 @@ public:
                        "the file would be used as main source in case global option is disabled."
                        "Additionally this command allows listing all "
                        "currently tracked properties files.";
-        args_ = { PropsArg::make_arg("file" , "File to track", { PropsArg::make_arg("-m", "Set file as master"), PropsArg::make_arg("-lapolla", "La polla records") }),
+        args_ = { PropsArg::make_arg("file" , "File to track", { PropsArg::make_arg("master", "Sets the file as new master") }),
                   PropsArg::make_arg("ls"   , "List all tracked files") };
     }
 
-    void parse(const int &argc, const char **argv) override;
+    void parse(const int &argc, char *argv[]) override;
 
     void execute(PropsResult &result) override;
 

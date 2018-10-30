@@ -17,7 +17,7 @@
 #include "props_track_cmd.h"
 #include "string_utils.h"
 #include "rang.hpp"
-
+#include <getopt.h>
 
 /**
  * Parses the supplied arguments for the help command
@@ -25,16 +25,35 @@
  * @param argc the number of arguments
  * @param argv the list of arguments
  */
-void PropsTrackCommand::parse(const int& argc, const char** argv) noexcept(false) {
-    if (argc > 1) {
-        //subCmd_ = argv[1];
+void PropsTrackCommand::parse(const int& argc, char* argv[]) noexcept(false) {
+    std::cout << "Parsing " << argc << " arguments" << std::endl;
+    std::string mandanga;
 
-        //std::unique_ptr<PropsCommand> *pPtr = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(subCmd_));
-        //if (pPtr != nullptr) {
-        //    std::ostringstream out;
-        //    pPtr->get()->getHelp(out);
-        //    helpMessage_ = out.str();
-        //}
+    if (argc > 1) {
+
+        const char* const short_opts = "m:";
+        const option long_opts[] = {  {"master", required_argument, nullptr, 'm' } ,
+                                      { nullptr, no_argument, nullptr,   0 } };
+
+        while (true) {
+            const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
+
+            if (-1 == opt) {
+                std::cout << "FIN DE CICLO [" << opt << "]" << std::endl;
+                break;
+            }
+
+            switch (opt) {
+                case 'm':
+                    options_[track_cmd::_TRACKED_FILE_] = std::string(optarg);
+                    break;
+
+                case '?':
+                default:
+                    break;
+            }
+
+        }
     }
 
 }
@@ -51,7 +70,10 @@ void PropsTrackCommand::execute(PropsResult &result) {
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
 
-    out << rang::fg::green << "File \"" << options_[track_cmd::_TRACKED_FILE_] << "\" added to tracked list" << rang::fg::reset << std::endl;
+    if (options_.count(track_cmd::_TRACKED_FILE_) > 0)
+    {
+        out << rang::fg::green << "File \"" << options_[track_cmd::_TRACKED_FILE_] << "\" added to tracked list" << rang::fg::reset << std::endl;
+    }
 
     rang::setControlMode(rang::control::Auto);
 

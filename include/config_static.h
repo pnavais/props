@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_CLI_H
-#define PROPS_PROPS_CLI_H
+#ifndef PROPS_CONFIG_STATIC_H
+#define PROPS_CONFIG_STATIC_H
 
-#include "props_cmd.h"
-#include <iostream>
+#if defined(__unix__) || defined(__unix) || defined(__linux__)
+#define IS_LINUX
+#elif defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#define IS_WIN
+#elif defined(__APPLE__) || defined(__MACH__)
+#define IS_MAC
+#endif
 
-namespace p_cli {
-    static const char DEFAULT_HELP_CMD_ID[]    = "HELP";
-    static const char DEFAULT_VERSION_CMD_ID[] = "VERSION";
-}
-
-class PropsCLI {
-
-public:
-
-    /**
-     * Process the command line arguments to retrieve
-     * the props param holder.
-     *
-     * @param argc the number of arguments
-     * @param argv the array of arguments
-     * @return the props params holder
-     */
-    static PropsCommand* parse(const int& argc, char* argv[]);
-
-};
-
-#endif //PROPS_PROPS_CLI_H
+#endif //PROPS_CONFIG_STATIC_H

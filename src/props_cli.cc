@@ -29,7 +29,7 @@
  * @param argv the array of arguments
  * @return the props parameter holder
  */
-PropsCommand* PropsCLI::parse(const int& argc, const char** argv)
+PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 {
     std::unique_ptr<PropsCommand>* command = nullptr;
 

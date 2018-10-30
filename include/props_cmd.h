@@ -114,7 +114,7 @@ public:
      * @param argv the array of arguments
      *
      */
-    virtual void parse(const int& argc, const char** argv) noexcept(false);
+    virtual void parse(const int& argc, char* argv[]) noexcept(false);
 
     /**
      * Executes the command and provides with a

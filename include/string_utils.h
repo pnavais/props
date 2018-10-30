@@ -66,6 +66,17 @@ public:
 
     /**
      * Breaks the input text into lines of the same size avoiding splitting
+     *  words at the end of the string using a maximum text occupancy with
+     *  respect to the current terminal size.
+     *
+     *  @param input        the input string
+     *  @param widthPercent the percentage occupancy with respect to screen width
+     *  @return the list of wrapped strings
+     */
+    static std::list<std::string> fitText(const std::string& input, const short& widthPercent);
+
+    /**
+     * Breaks the input text into lines of the same size avoiding splitting
      * words at the end of the string.
      *
      * @param input the input string
@@ -73,14 +84,14 @@ public:
      *
      * @return the list of wrapped strings
      */
-    static std::list<std::string> wraptext(const std::string& input, const std::size_t width);
+    static std::list<std::string> wrapText(const std::string& input, const std::size_t& width);
 
     /**
      * Retrieve current terminal size (rows x columns).
      *
      * @return the current terminal size.
      */
-    static std::pair<int, int> getWindowSize();
+    static std::pair<std::size_t, std::size_t> getWindowSize();
 
 };
 

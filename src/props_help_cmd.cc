@@ -36,7 +36,7 @@
  * @param argc the number of arguments
  * @param argv the list of arguments
  */
-void PropsHelpCommand::parse(const int &argc, const char **argv) {
+void PropsHelpCommand::parse(const int &argc, char *argv[]) {
     if (argc > 1) {
         subCmd_ = argv[1];
 

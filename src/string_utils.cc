@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-#include <string_utils.h>
+#include "string_utils.h"
+#include "config_static.h"
 #include <sstream>
 #include <iomanip>
+
+
+#if defined(IS_LINUX) || defined(IS_MAC)
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <unistd.h>
+#endif
+
+namespace str_utils {
+    const int DEFAULT_MAX_WIDTH = 120;
+}
 
 /**
  * Pads the string using an specific pattern up to a maximum length
@@ -84,7 +96,8 @@ std::string StringUtils::toFlatString(const std::list<std::string>& args, const 
  *
  * @param input the input string
  */
-std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& input) {
+std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& input)
+{
     std::basic_string<char> output = input;
     for (auto &p : output) {
         p = static_cast<char>(toupper(p));
@@ -102,21 +115,78 @@ std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& inpu
  *
  * @return the list of wrapped strings
  */
-std::list<std::string> StringUtils::wraptext(const std::string& input, const std::size_t width) {
-    size_t curpos  = 0;
-    size_t nextpos = 0;
+std::list<std::string> StringUtils::fitText(const std::string& input, const short& widthPercent)
+{
+    std::pair<std::size_t, std::size_t> winSize = getWindowSize();
+    std::size_t cols = winSize.second;
 
+    auto w = (widthPercent > 100) ? 100 : widthPercent;
+    size_t width = ((cols * w) / 100);
+    width = (width <= 0) ? str_utils::DEFAULT_MAX_WIDTH : width;
+
+    return StringUtils::wrapText(input, width);
+}
+
+
+/**
+ * Breaks the input text into lines of the same size avoiding splitting
+ * words at the end of the string.
+ *
+ * @param input the input string
+ * @param width the limit
+ *
+ * @return the list of wrapped strings
+ */
+std::list<std::string> StringUtils::wrapText(const std::string& input, const std::size_t& width)
+{
     std::list<std::string> lines;
-    std::string substr = input.substr(curpos, width + 1);
 
-    while (substr.length() == width + 1 && (nextpos = substr.rfind(' ')) != std::string::npos) {
-        lines.push_back(input.substr(curpos, nextpos));
-        curpos += nextpos + 1;
-        substr = input.substr(curpos, width + 1);
+    std::string tmp;
+    std::ostringstream out;
+
+    for (auto c : input) {
+        if (!isspace(c)) {
+            tmp += c;
+        } else {
+            // Cannot append current word to the stream (exceeds)
+            if ((tmp.size() + out.str().size() + 1) > width) {
+                // Flush current stream
+                lines.push_back(out.str());
+                out.str("");
+                out.clear();
+            }
+
+            // Append whitespace + word
+            out << tmp << c;
+            tmp.clear();
+        }
     }
 
-    if (curpos != input.length())
-        lines.push_back(input.substr(curpos, std::string::npos));
+    // Flush final word (if any)
+    out << tmp;
+    lines.push_back(out.str());
 
     return lines;
+}
+
+
+/**
+  * Retrieve current terminal size (rows x columns).
+  *
+  * @return the current terminal size.
+  */
+std::pair<std::size_t, std::size_t> StringUtils::getWindowSize()
+{
+    std::size_t rows= 0;
+    std::size_t cols = 0;
+
+#if defined(IS_LINUX) || defined(IS_MAC)
+    struct winsize w{};
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    rows = w.ws_row;
+    cols = w.ws_col;
+#endif
+
+    return std::make_pair(rows, cols);
+
 }

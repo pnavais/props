@@ -26,7 +26,7 @@
   * @param argv the array of arguments
   *
   */
-void PropsCommand::parse(const int& argc, const char** argv) noexcept(false) {
+void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
     (void)argc;
     (void)argv;
 };
@@ -47,38 +47,34 @@ void PropsCommand::getHelp(std::ostream& out)
     out << " "  << rang::style::underline << name_        << rang::style::reset;
 
     std::string prefix = " ";
-
+    std::ostringstream options;
+    std::ostringstream desc_cmd;
     for (auto& arg : args_) {
-        if (!arg.getOptions().empty()) {
-
-        }
         out << prefix << (arg.getOptions().empty() ? "" : "[");
         out << "<" << arg.getName() << ">";
         out << (arg.getOptions().empty() ? "" : " <options>...]");
         prefix = " | ";
+
+        desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", 10)
+                            << ":  " << arg.getDescription() << std::endl;
+
+        for (auto& o : arg.getOptions()) {
+            options << "\t" << "-" << o.getShortName() << ",--"<< o.getName() << std::endl
+                    << "\t\t" << o.getDescription() << std::endl;
+        }
     }
 
-    out << std::endl << rang::fgB::gray << "DESCRIPTION" << rang::style::reset << std::endl;
-    std::list<std::string> descLines = StringUtils::wraptext(description_, 120);
+    out << std::endl << std::endl << rang::fgB::gray << "DESCRIPTION" << rang::style::reset << std::endl;
+    std::list<std::string> descLines = StringUtils::fitText(description_, 50);
     for (auto& desc : descLines) {
         out << "\t" << desc << std::endl;
     }
 
+    out << "\n\tThis is the description of the arguments supported by the command : \n" << std::endl;
+    out << desc_cmd.str() << std::endl;
+
     out << std::endl << rang::fgB::gray << "OPTIONS" << rang::style::reset << std::endl;
-    //out << description_ ;
-
-
-    //std::ostringstream subArgs;
-    //std::string prefix;
-    //std::string cmdPrefix = "Where : \n";
-    //for (auto& arg : args_) {
-    //    out     << prefix    << "\t" << (arg.isParam() ? "<" : "[") << arg.getName() << (arg.isParam() ? ">" : "]");
-    //    subArgs << cmdPrefix << StringUtils::padding(arg.getName()) << ":" << arg.getDescription() << std::endl;
-    //    prefix    = " ";
-    //    cmdPrefix = "";
-    //}
-    //out << std::endl;
-    //out << subArgs.str() << std::endl;
+    out << options.str() << std::endl;
 
     rang::setControlMode(rang::control::Auto);
 }

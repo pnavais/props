@@ -21,7 +21,7 @@
 #include "exec_exception.h"
 #include "rang.hpp"
 
-int main(int argc, const char *argv[])
+int main(int argc, char **argv)
 {
 
     int ret_code = 0;

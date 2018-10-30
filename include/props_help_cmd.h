@@ -34,7 +34,7 @@ public:
         description_ = tagLine_;
     }
 
-    void parse(const int &argc, const char **argv) override;
+    void parse(const int &argc, char *argv[]) override;
 
     void execute(PropsResult &result) override;
 
