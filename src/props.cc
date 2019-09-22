@@ -17,13 +17,11 @@
 #include <iostream>
 #include "props_cmd.h"
 #include "props_cli.h"
-#include "props_reader.h"
 #include "exec_exception.h"
 #include "rang.hpp"
 
 int main(int argc, char **argv)
 {
-
     int ret_code = 0;
     PropsCommand* command = nullptr;
 
@@ -33,13 +31,13 @@ int main(int argc, char **argv)
             command->run();
         }
     } catch (InitializationException& exception) {
-        cerr << rang::fgB::yellow << exception.what() << rang::fg::reset << endl;
+        std::cerr << rang::fgB::yellow << exception.what() << rang::fg::reset << std::endl;
         if (command != nullptr) {
             command->getHelp();
         }
         ret_code = 1;
     } catch (ExecutionException& exception) {
-        cerr << rang::fgB::red << exception.what() << rang::fg::reset << endl;
+        std::cerr << rang::fgB::red << exception.what() << rang::fg::reset << std::endl;
         ret_code = 2;
     }
 

@@ -29,7 +29,7 @@
 void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
     (void)argc;
     (void)argv;
-};
+}
 
 /**
  * Display a help message
@@ -52,14 +52,14 @@ void PropsCommand::getHelp(std::ostream& out)
     for (auto& arg : args_) {
         out << prefix << (arg.getOptions().empty() ? "" : "[");
         out << "<" << arg.getName() << ">";
-        out << (arg.getOptions().empty() ? "" : " <options>...]");
+        out << (arg.getOptions().empty() ? "" : " <options_>...]");
         prefix = " | ";
 
         desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", 10)
                             << ":  " << arg.getDescription() << std::endl;
 
         for (auto& o : arg.getOptions()) {
-            options << "\t" << "-" << o.getShortName() << ",--"<< o.getName() << std::endl
+            options << "\t" << "-" << o.getShortName() << ",--"<< o.getName() << " " << StringUtils::toFlatString(o.getCmdList(), " ") << std::endl
                     << "\t\t" << o.getDescription() << std::endl;
         }
     }

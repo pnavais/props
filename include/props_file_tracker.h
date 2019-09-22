@@ -93,7 +93,6 @@ private:
          trackedFiles_->remove(file);
      }
 
-
     /** The master file */
     std::string masterFile_;
 

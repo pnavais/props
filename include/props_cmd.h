@@ -22,7 +22,6 @@
 #include "config.h"
 #include "props_arg.h"
 #include <string>
-#include <vector>
 
 class PropsCommand {
 

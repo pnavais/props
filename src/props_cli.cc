@@ -17,8 +17,7 @@
 
 #include "props_cli.h"
 #include "props_cmd_factory.h"
-#include <iostream>
-#include <string.h>
+#include <cstring>
 #include <string_utils.h>
 
 /**
@@ -33,7 +32,7 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 {
     std::unique_ptr<PropsCommand>* command = nullptr;
 
-	// Check minimum options
+	// Check minimum options_
 	if (argc < 2) {
          command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID);
 	} else {

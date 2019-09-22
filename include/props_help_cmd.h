@@ -30,7 +30,7 @@ public:
         name_        = "help";
         summaryArg_  = "command";
         args_        = { PropsArg::make_arg(summaryArg_) };
-        tagLine_     = "Retrieve detailed options for the given command";
+        tagLine_     = "Retrieve detailed options_ for the given command";
         description_ = tagLine_;
     }
 

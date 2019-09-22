@@ -19,17 +19,6 @@
 #include "string_utils.h"
 #include "rang.hpp"
 
-
-/*const std::string main_opts[][3] = {
-        { "untrack"      , "<option>"  , "Untrack files"                                   } ,
-        { "search"       , ""          , "Search a key in the target files"                } ,
-        { "set"          , ""          , "Set the given key in the target files"           } ,
-        { "toggle"       , ""          , "Disable/Enable the key in the target files"      } ,
-        { "disable"      , ""          , "Disable the key in the target files"             } ,
-        { "enable"       , ""          , "Enable the key in the target files"              } ,
-        { "remove"       , ""          , "Remove the key in the target files"              } ,
-};*/
-
 /**
  * Parses the supplied arguments for the help command
  *

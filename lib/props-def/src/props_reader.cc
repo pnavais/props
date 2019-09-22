@@ -22,10 +22,8 @@
 #include <sstream>
 #include <pcrecpp.h>
 
-
-
 /**
- * Retreives the regular expression for
+ * Retrieves the regular expression for
  * commented lines.
  *
  * @return the regex for commented lines
@@ -87,7 +85,7 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
                 }
             }
         } else {
-            std::cerr << rang::fgB::red << "File \"" << file << "\" not found" << rang::fg::reset << endl;
+            std::cerr << rang::fgB::red << "File \"" << file << "\" not found" << rang::fg::reset << std::endl;
         }
 
     }

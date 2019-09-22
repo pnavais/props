@@ -19,11 +19,15 @@
 
 #include "config.h"
 #include "props_cmd.h"
+#include "arg_store.h"
 #include <map>
 #include <sstream>
 
 namespace track_cmd {
-    static const char* _TRACKED_FILE_ = "_TRACKED_FILE_ID_";
+    static const char* _TRACKED_FILE_ = "file";
+    static const char* _ALIAS_FILE_   = "alias";
+    static const char* _MASTER_FILE_  = "master";
+    static const char* _TRACK_LS_CMD_ = "ls";
 }
 
 class PropsTrackCommand : public PropsCommand {
@@ -39,11 +43,17 @@ public:
                        "the file would be used as main source in case global option is disabled."
                        "Additionally this command allows listing all "
                        "currently tracked properties files.";
-        args_ = { PropsArg::make_arg("file" , "File to track", { PropsArg::make_arg("master", "Sets the file as new master") }),
-                  PropsArg::make_arg("ls"   , "List all tracked files") };
+        args_ = { PropsArg::make_arg(track_cmd::_TRACKED_FILE_, "File to track",
+                                     { PropsOption::make_opt(track_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
+                                       PropsOption::make_opt(track_cmd::_MASTER_FILE_, "Sets the file as master") }),
+                  PropsArg::make_cmd(track_cmd::_TRACK_LS_CMD_ , "List all tracked files") };
     }
 
     void parse(const int &argc, char *argv[]) override;
+
+    void parseArgs(ArgStore& argStore);
+
+    bool readOptions(const PropsArg& arg, ArgStore& argStore);
 
     void execute(PropsResult &result) override;
 
