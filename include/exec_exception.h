@@ -24,17 +24,18 @@ class ExecutionException : public std::runtime_error {
 
 public:
 
-    explicit ExecutionException(char* info): runtime_error(info) , info_(info) {}
+    explicit ExecutionException(const char *info) : runtime_error(info), info_(info) {}
+    explicit ExecutionException(std::string info) : runtime_error(info), info_(std::move(info)) {}
 
     const char* what () const noexcept override {
-        return (("Error during execution: ") + std::string(info_)).c_str();
+        return "Error during execution: ";
     }
 
-    const char* get_info() const { return info_; }
+    const char* get_info() const { return info_.c_str(); }
 
 private:
 
-    char* info_;
+    std::string info_;
 
 
 };

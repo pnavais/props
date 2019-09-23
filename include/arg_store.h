@@ -17,11 +17,18 @@
 #ifndef ARG_STORE_H
 #define ARG_STORE_H
 
+#include <map>
+
 /**
  * Allows storing the input arguments and the processed options.
  */
 class ArgStore {
 public:
+
+    ArgStore() {
+        argc_ = -1;
+        argv_ = nullptr;
+    }
 
     static ArgStore make_store(const int& argc, char* argv[]) {
         ArgStore argStore;
@@ -38,11 +45,15 @@ public:
         return argv_;
     }
 
-    const std::map<std::string, void *> &getOptions() const {
+    const std::map<std::string, std::string> &getOptions() const {
         return options_;
     }
 
-    void setOptions(const std::map<std::string, void *> &optionMap) {
+    void putOption(const std::string& key, const std::string& value) {
+        options_[key] = value;
+    }
+
+    void setOptions(const std::map<std::string, std::string> &optionMap) {
         ArgStore::options_ = optionMap;
     }
 
@@ -54,7 +65,7 @@ public:
         ArgStore::args_ = argList;
     }
 
-    void addOption(const std::string& key, void* value) {
+    void addOption(const std::string& key, const std::string& value) {
         options_[key] = value;
     }
 
@@ -62,6 +73,13 @@ public:
         args_.push_back(arg);
     }
 
+    const std::string &getCmdName() const {
+        return cmdName_;
+    }
+
+    void setCmdName(const std::string &cmdName) {
+        cmdName_ = cmdName;
+    }
 
 private:
 
@@ -75,9 +93,9 @@ private:
 
     int argc_;
     char** argv_;
-    std::map<std::string, void*> options_;
     std::list<std::string> args_;
-
+    std::map<std::string, std::string> options_;
+    std::string cmdName_;
 };
 
 #endif //ARG_STORE_H

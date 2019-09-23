@@ -18,6 +18,8 @@
 #include "string_utils.h"
 #include "rang.hpp"
 #include <sstream>
+#include <arg_store.h>
+#include <arg_parser.h>
 
 /**
   * Parse the command line arguments to initialize the command.
@@ -27,8 +29,14 @@
   *
   */
 void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
-    (void)argc;
-    (void)argv;
+
+    if (argc > 1) {
+        optionStore_ = ArgStore::make_store(argc, argv);
+        Result result = ArgParser::parseArgs(optionStore_, args_);
+        if (!result.isValid()) {
+            throw InitializationException(result.getMessage());
+        }
+    }
 }
 
 /**

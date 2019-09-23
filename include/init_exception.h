@@ -19,22 +19,26 @@
 
 #include <iostream>
 #include <exception>
+#include <utility>
 
 class InitializationException : public std::exception {
 
 public:
 
-    explicit InitializationException(char *info) : info_(info) {}
+    explicit InitializationException(const char *info) : info_(info) {}
+    explicit InitializationException(std::string info) : info_(std::move(info)) {}
 
     const char* what () const noexcept override {
-        return (("Error during initialization: ") + std::string(info_)).c_str();
+        return "Error during iInitialization: ";
     }
 
-    const char* get_info() const { return info_; }
+    const char* get_info() const {
+        return info_.c_str();
+    }
 
 private:
 
-    char* info_;
+    std::string info_;
 
 
 };

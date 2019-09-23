@@ -93,6 +93,15 @@ public:
      */
     static std::pair<std::size_t, std::size_t> getWindowSize();
 
+    /**
+     * Checks if a string consists only of whitespaces
+     *
+     * @param input the string to check
+     * @return true if the string contains only whitespaces, false
+     * otherwise
+     */
+    static bool isWhiteSpace(const std::string& input);
+
 };
 
 #endif //PROPS_STRING_UTILS_H

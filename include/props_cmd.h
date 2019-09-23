@@ -21,6 +21,7 @@
 #include "props_search_result.h"
 #include "config.h"
 #include "props_arg.h"
+#include "arg_store.h"
 #include <string>
 
 class PropsCommand {
@@ -137,6 +138,7 @@ protected:
     std::list<PropsArg> args_;
     std::string tagLine_;
     std::string description_;
+    ArgStore optionStore_;
 
 };
 

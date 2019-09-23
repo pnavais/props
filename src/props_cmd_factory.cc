@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <props_cli.h>
-#include <string_utils.h>
+#include "props_cli.h"
+#include "string_utils.h"
 #include "props_cmd_factory.h"
 #include "props_version_cmd.h"
 #include "props_help_cmd.h"

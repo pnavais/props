@@ -49,17 +49,9 @@ public:
                   PropsArg::make_cmd(track_cmd::_TRACK_LS_CMD_ , "List all tracked files") };
     }
 
-    void parse(const int &argc, char *argv[]) override;
-
-    void parseArgs(ArgStore& argStore);
-
-    bool readOptions(const PropsArg& arg, ArgStore& argStore);
-
     void execute(PropsResult &result) override;
 
 private:
-
-    std::map<std::string, std::string> options_;
 
 };
 

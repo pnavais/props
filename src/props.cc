@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             command->run();
         }
     } catch (InitializationException& exception) {
-        std::cerr << rang::fgB::yellow << exception.what() << rang::fg::reset << std::endl;
+        std::cerr << rang::fgB::yellow << exception.get_info() << rang::fg::reset << std::endl;
         if (command != nullptr) {
             command->getHelp();
         }
