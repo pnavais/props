@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@
 
 using namespace std;
 
+/**
+ * Performs the lookup of values in properties files
+ */
 class PropsReader {
 
 public:
@@ -35,7 +38,7 @@ public:
      * @param global the flag enabling global search
      * @return the results of the search
      */
-     PropsSearchResult find_value (const string& key, const bool& global = false);
+     static PropsSearchResult find_value(const string& key, const bool& global = false);
 
     /**
      *  Finds the value of the given key searching in the mater tracked file
@@ -46,7 +49,7 @@ public:
      *  @param global the flag enabling global search
      *  @return the results of the search
      */
-     PropsSearchResult find_value (const string& key, const std::list<string>& files);
+     static PropsSearchResult find_value(const string& key, const std::list<string>& files);
 
 };
 

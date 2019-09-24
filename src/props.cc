@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,15 @@
 #include "exec_exception.h"
 #include "rang.hpp"
 
+/**
+ * Starts the parsing of the command line arguments extracting the
+ * sub-command to execute.If available the command is then executed
+ * with the corresponding displayed in the terminal.
+ *
+ * @param argc the number of arguments
+ * @param argv the list of arguments
+ * @return the exit code
+ */
 int main(int argc, char **argv)
 {
     int ret_code = 0;
@@ -37,7 +46,8 @@ int main(int argc, char **argv)
         }
         ret_code = 1;
     } catch (ExecutionException& exception) {
-        std::cerr << rang::fgB::red << exception.what() << rang::fg::reset << std::endl;
+        std::cerr << ((exception.getResult().getSeverity() == res::WARN) ? rang::fgB::yellow : rang::fgB::red)
+                  << exception.get_info() << rang::fg::reset << std::endl;
         ret_code = 2;
     }
 

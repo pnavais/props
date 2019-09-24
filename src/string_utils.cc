@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 #include "string_utils.h"
 #include "config_static.h"
 #include <sstream>
-#include <iomanip>
 
 
 #if defined(IS_LINUX) || defined(IS_MAC)
+
 #include <sys/ioctl.h>
-#include <stdio.h>
 #include <unistd.h>
+
 #endif
 
 namespace str_utils {
@@ -38,8 +38,7 @@ namespace str_utils {
  * @param maxLength the maximum length
  * @return the padded string
  */
-std::string StringUtils::padding(const std::string& input, const std::string& pattern, const std::size_t& maxLength)
-{
+std::string StringUtils::padding(const std::string &input, const std::string &pattern, const std::size_t &maxLength) {
     std::string output;
 
     if (maxLength > input.length()) {
@@ -66,8 +65,7 @@ std::string StringUtils::padding(const std::string& input, const std::string& pa
  * @param maxLength the maximum length
  * @return the padded string
  */
-std::string StringUtils::padding(const std::string& input, const std::size_t& maxLength)
-{
+std::string StringUtils::padding(const std::string &input, const std::size_t &maxLength) {
     return StringUtils::padding(input, DEFAULT_PATTERN, maxLength);
 }
 
@@ -78,12 +76,11 @@ std::string StringUtils::padding(const std::string& input, const std::size_t& ma
  * @param args the list of arguments
  * @return
  */
-std::string StringUtils::toFlatString(const std::list<std::string>& args, const std::string& separator)
-{
+std::string StringUtils::toFlatString(const std::list<std::string> &args, const std::string &separator) {
     std::ostringstream out;
 
     std::string prefix;
-    for (auto& arg : args) {
+    for (auto &arg : args) {
         out << prefix << arg;
         prefix = separator;
     }
@@ -96,8 +93,7 @@ std::string StringUtils::toFlatString(const std::list<std::string>& args, const 
  *
  * @param input the input string
  */
-std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& input)
-{
+std::basic_string<char> StringUtils::toUpper(const std::basic_string<char> &input) {
     std::basic_string<char> output = input;
     for (auto &p : output) {
         p = static_cast<char>(toupper(p));
@@ -115,8 +111,7 @@ std::basic_string<char> StringUtils::toUpper(const std::basic_string<char>& inpu
  *
  * @return the list of wrapped strings
  */
-std::list<std::string> StringUtils::fitText(const std::string& input, const short& widthPercent)
-{
+std::list<std::string> StringUtils::fitText(const std::string &input, const short &widthPercent) {
     std::pair<std::size_t, std::size_t> winSize = getWindowSize();
     std::size_t cols = winSize.second;
 
@@ -137,8 +132,7 @@ std::list<std::string> StringUtils::fitText(const std::string& input, const shor
  *
  * @return the list of wrapped strings
  */
-std::list<std::string> StringUtils::wrapText(const std::string& input, const std::size_t& width)
-{
+std::list<std::string> StringUtils::wrapText(const std::string &input, const std::size_t &width) {
     std::list<std::string> lines;
 
     std::string tmp;
@@ -171,13 +165,12 @@ std::list<std::string> StringUtils::wrapText(const std::string& input, const std
 
 
 /**
-  * Retrieve current terminal size (rows x columns).
-  *
-  * @return the current terminal size.
-  */
-std::pair<std::size_t, std::size_t> StringUtils::getWindowSize()
-{
-    std::size_t rows= 0;
+ * Retrieve current terminal size (rows x columns).
+ *
+ * @return the current terminal size.
+ */
+std::pair<std::size_t, std::size_t> StringUtils::getWindowSize() {
+    std::size_t rows = 0;
     std::size_t cols = 0;
 
 #if defined(IS_LINUX) || defined(IS_MAC)
@@ -197,6 +190,44 @@ std::pair<std::size_t, std::size_t> StringUtils::getWindowSize()
  * @return true if the string contains only whitespaces, false
  * otherwise
  */
-bool StringUtils::isWhiteSpace(const std::string& input) {
+bool StringUtils::isWhiteSpace(const std::string &input) {
     return (input.find_first_not_of(' ') == std::string::npos);
+}
+
+/**
+ * Left trims a given string effectively removing the trailing characters
+ * supplied.
+ *
+ * @param str the input string
+ * @param chars characters to remove
+ * @return the string trimmed on its left side
+ */
+std::string &StringUtils::ltrim(std::string &str, const std::string &chars) {
+    str.erase(0, str.find_first_not_of(chars));
+    return str;
+}
+
+/**
+ * Right trims a given string effectively removing the trailing characters
+ * supplied.
+ *
+ * @param str the input string
+ * @param chars characters to remove
+ * @return the string trimmed on its right side
+ */
+std::string &StringUtils::rtrim(std::string &str, const std::string &chars) {
+    str.erase(str.find_last_not_of(chars) + 1);
+    return str;
+}
+
+/**
+ * Trims a given string on both sides effectively removing the trailing characters
+ * supplied.
+ *
+ * @param str the input string
+ * @param chars characters to remove
+ * @return the string trimmed
+ */
+std::string &StringUtils::trim(std::string &str, const std::string &chars) {
+    return ltrim(rtrim(str, chars), chars);
 }

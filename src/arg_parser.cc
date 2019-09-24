@@ -117,9 +117,9 @@ void ArgParser::mapOptions(const PropsArg &arg, ArgStore &argStore, Result &resu
         for (const auto &opt_arg : arg.getOptions()) {
             if (opt_arg.getShortName() == opt) {
                 if (optarg != nullptr) {
-                    argStore.putOption(opt_arg.getName(), optarg);
+                    argStore.addOption(opt_arg.getName(), optarg);
                 } else {
-                    argStore.putOption(opt_arg.getName(), "true");
+                    argStore.addOption(opt_arg.getName(), "true");
                 }
             }
         }

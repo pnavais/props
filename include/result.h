@@ -22,6 +22,7 @@
 namespace res {
     const static bool VALID = true;
     const static bool ERROR = false;
+    enum severity { NORMAL, WARN, CRITICAL };
 }
 
 /**
@@ -44,6 +45,7 @@ public:
     Result(bool validity, const std::string &message) {
         validity_ = validity;
         message_ = message;
+        severity_ = (validity ? res::NORMAL : res::CRITICAL);
     }
 
     /**
@@ -53,6 +55,7 @@ public:
     */
     explicit Result(bool validity) {
         validity_ = validity;
+        severity_ = (validity ? res::NORMAL : res::CRITICAL);
     }
 
     /**
@@ -63,6 +66,7 @@ public:
      */
     static Result make_error(const std::string &message) {
         Result result{false, message};
+        result.severity_ = res::CRITICAL;
         return result;
     }
 
@@ -105,6 +109,24 @@ public:
     }
 
     /**
+     * Sets the severity of the result.
+     *
+     * @param severity the severity
+     */
+    void setSeverity(const res::severity& severity) {
+        severity_ = severity;
+    }
+
+    /**
+     * Retrieves the severity of the result.
+     *
+     * @return the severity
+     */
+    const res::severity& getSeverity() const {
+        return severity_;
+    }
+
+    /**
      * Compares the result using only the
      * validity flag.
      *
@@ -114,6 +136,18 @@ public:
      */
     bool operator==(const Result &rhs) const {
         return validity_ == rhs.validity_;
+    }
+
+    /**
+     * Compares the result using only the
+     * validity flag.
+     *
+     * @param rhs the result to compare
+     * @return true if same validity, false
+     * otherwise
+     */
+    bool operator==(const bool &validity) const {
+        return validity_ == validity;
     }
 
     /**
@@ -161,8 +195,9 @@ public:
     }
 
 private:
-    bool validity_;       // The validity flag
-    std::string message_; // The description message
+    bool validity_;            // The validity flag
+    std::string message_;      // The description message
+    res::severity severity_ ;  // The severity of the message
 };
 
 #endif //PROPS_RESULT_H

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ void PropsSearchResult::add(const std::string &file, const std::string &value) {
  * @param results the results for the given key
  */
 p_search_res::result_map PropsSearchResult::get() const {
-    std::string masterFile = PropsFileTracker::getMaster();
+    std::string masterFile = PropsFileTracker::getMaster().get()->getFileName();
     return get(std::list<std::string>({masterFile}));
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,20 @@
 #include <sstream>
 #include <pcrecpp.h>
 
+// Prototypes for globals
+const pcrecpp::RE &COMMENTED_LINE();
+
 /**
  * Retrieves the regular expression for
  * commented lines.
  *
  * @return the regex for commented lines
  */
-const pcrecpp::RE& COMMENTED_LINE() {
+const pcrecpp::RE &COMMENTED_LINE() {
     static const pcrecpp::RE COMMENTED_LINE("^#");
     return COMMENTED_LINE;
 }
+
 
 /**
  * Search the key in the master tracked file or
@@ -42,7 +46,15 @@ const pcrecpp::RE& COMMENTED_LINE() {
  */
 PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
 {
-	return find_value(key, global ? PropsFileTracker::getAll() : std::list<string>({PropsFileTracker::getMaster()}));
+    std::list<string> filesTracked;
+    if (global) {
+        filesTracked.push_back(PropsFileTracker::getMaster().get()->getFileName());
+    } else {
+        for (auto &propsFile : PropsFileTracker::getAll()) {
+            filesTracked.push_back(propsFile.getFileName());
+        }
+    }
+	return find_value(key, filesTracked);
 }
 
 

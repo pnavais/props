@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,36 @@ public:
      * otherwise
      */
     static bool isWhiteSpace(const std::string& input);
+
+    /**
+     * Left trims a given string effectively removing the trailing characters
+     * supplied.
+     *
+     * @param str the input string
+     * @param chars characters to remove
+     * @return the string trimmed on its left side
+     */
+    static std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
+
+    /**
+    * Right trims a given string effectively removing the trailing characters
+    * supplied.
+    *
+    * @param str the input string
+    * @param chars characters to remove
+    * @return the string trimmed on its right side
+    */
+    static std::string& rtrim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
+
+    /**
+    * Trims a given string on both sides effectively removing the trailing characters
+    * supplied.
+    *
+    * @param str the input string
+    * @param chars characters to remove
+    * @return the string trimmed
+    */
+    static std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
 
 };
 

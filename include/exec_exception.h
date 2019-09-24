@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,58 @@
 
 #include <iostream>
 #include <exception>
+#include <utility>
+#include "result.h"
 
+/**
+ * A simple exception raised during execution detected anomalies
+ */
 class ExecutionException : public std::runtime_error {
 
 public:
 
-    explicit ExecutionException(const char *info) : runtime_error(info), info_(info) {}
-    explicit ExecutionException(std::string info) : runtime_error(info), info_(std::move(info)) {}
+    explicit ExecutionException(const char *info) : runtime_error(info), info_(info), result_(res::ERROR) {}
+    explicit ExecutionException(std::string info) : runtime_error(info), info_(std::move(info)), result_(res::ERROR) {}
+    explicit ExecutionException(Result res) : runtime_error(res.getMessage()), info_(res.getMessage()), result_(std::move(res)) {}
 
-    const char* what () const noexcept override {
+    /**
+     * Retrieves the short description message.
+     *
+     * @return the description message
+     */
+    const char* what() const noexcept override {
         return "Error during execution: ";
     }
 
+    /**
+     * Retrieves the detailed description.
+     *
+     * @return the detailed description
+     */
     const char* get_info() const { return info_.c_str(); }
+
+    /**
+     * Sets the optional result.
+     *
+     * @param res the result
+     */
+    void setResult(const Result& res) {
+        result_ = res;
+    }
+
+    /**
+     * Retrieves the optional result.
+     *
+     * @return the result
+     */
+    const Result& getResult() const {
+        return result_;
+    }
 
 private:
 
     std::string info_;
+    Result result_;
 
 
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,74 @@
  * limitations under the License.
  */
 
-#include "props_track_cmd.h"
-#include "string_utils.h"
-#include "rang.hpp"
 #include <memory>
+#include <props_file_tracker.h>
+#include <exec_exception.h>
+#include "props_track_cmd.h"
+#include "rang.hpp"
+
+void PropsTrackCommand::parse(const int& argc, char* argv[]) {
+    PropsCommand::parse(argc, argv);
+
+    // Keep the file as a regular option considering it is
+    // the first non-arg option
+    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_)
+    {
+        optionStore_.addOption(track_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
+    }
+}
 
 /**
- * Executes the help command displaying the usage for the specific
- * command or all available commands
- * general information if no specific command was supplied.
+ * Executes the track command either adding a given file
+ * to the list of tracked ones or displaying the information
+ * of this list.
  *
- * @param result the usage message for the command or all commands if no command
- * supplied
+ * @param result the result message for the command
  */
 void PropsTrackCommand::execute(PropsResult &result) {
     std::ostringstream out;
+
     rang::setControlMode(rang::control::Force);
 
-    auto option_map = optionStore_.getOptions();
-    
-    if (option_map.count(track_cmd::_TRACKED_FILE_) > 0)
+    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_)
     {
-        out << rang::fg::green << "File \"" << option_map[track_cmd::_TRACKED_FILE_] << "\" added to tracked list" << rang::fg::reset << std::endl;
+        trackFile(out);
+    } else if (optionStore_.getCmdName() == track_cmd::_TRACK_LS_CMD_) {
+        PropsFileTracker::listTracked();
     }
 
     rang::setControlMode(rang::control::Auto);
 
     result.setResult_(out.str());
+}
+
+/**
+ * Tracks the selected filed.
+ *
+ * @param out the output stream
+ *
+ * @return the result of the operation
+ */
+Result PropsTrackCommand::trackFile(std::ostringstream& out) {
+    auto option_map = optionStore_.getOptions();
+    PropsFile propsFile = PropsFile::make_file(option_map[track_cmd::_TRACKED_FILE_]);
+
+    // Sets the alias (if any)
+    if (option_map.count(track_cmd::_ALIAS_FILE_) != 0) {
+        propsFile.setAlias(option_map[track_cmd::_ALIAS_FILE_]);
+    }
+    // Sets as master (if available)
+    if (option_map.count(track_cmd::_MASTER_FILE_) != 0) {
+        propsFile.setMaster(true);
+    }
+
+    // Adds the file to the tracker
+    Result res = PropsFileTracker::add(propsFile);
+    if (res.isValid()) {
+        out << rang::fg::green << "\nNow tracking \"" << option_map[track_cmd::_TRACKED_FILE_] << "\"" << rang::fg::reset << std::endl;
+    } else {
+        throw ExecutionException(res);
+    }
+
+    return res;
 }

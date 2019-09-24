@@ -1,7 +1,7 @@
 #include <utility>
 
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public:
      *
      * @param key the key
      */
-    explicit PropsSearchResult(const std::string& key) : key_(key) {}
+    explicit PropsSearchResult(std::string  key) : key_(std::move(key)) {}
 
     /**
      * Retrieves the key
@@ -77,7 +77,7 @@ public:
      *
      * @param out the stream with formatted result.
      */
-    void format(std::ostream& out) const;
+    void format(std::ostream& out) const override;
 
 private:
 

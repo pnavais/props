@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Pablo Navais
+ * Copyright 2019 Pablo Navais
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include "config.h"
 #include "props_cmd.h"
 #include "arg_store.h"
+#include "result.h"
 #include <map>
 #include <sstream>
 
@@ -34,6 +35,9 @@ class PropsTrackCommand : public PropsCommand {
 
 public:
 
+    /**
+     * Constructor of the Track command
+     */
     PropsTrackCommand() {
         id_ = name_  = "track";
         tagLine_     = "Add | List tracked files";
@@ -49,9 +53,29 @@ public:
                   PropsArg::make_cmd(track_cmd::_TRACK_LS_CMD_ , "List all tracked files") };
     }
 
+    /**
+    * Parse the command line arguments to initialize the command.
+    *
+    * @param argc the number of arguments supplied
+    * @param argv the array of arguments
+    *
+    */
+    void parse(const int& argc, char* argv[]) noexcept(false) override;
+
+    /**
+     * Executes the command retrieving a result.
+     *
+     * @param result the result to be displayed
+     */
     void execute(PropsResult &result) override;
 
-private:
+    /**
+     * Tracks the selected filed.
+     *
+     * @param out the output stream
+     * @return the result of the operation
+     */
+    Result trackFile(std::ostringstream& out);
 
 };
 
