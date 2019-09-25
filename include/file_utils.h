@@ -54,6 +54,14 @@ public:
     static std::string getAbsolutePath(const std::string& filePath) noexcept ;
 
     /**
+     * Create directory and sub-folders recursively.
+     *
+     * @param directory the directory to create
+     * @return true if the operation succeeded, false otherwise
+     */
+    static bool createDirectories(const std::string& directory) noexcept;
+
+    /**
      * Retrieves the system temporary directory,
      *
      * @return the system temporary directory

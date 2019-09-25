@@ -25,6 +25,35 @@
 #include <pwd.h>
 #endif
 
+#if defined(__cplusplus) && __cplusplus >= 201703L && defined(__has_include)
+#if __has_include(<filesystem>)
+#define GHC_USE_STD_FS
+#include <filesystem>
+namespace fs = std::filesystem;
+#endif
+#endif
+#ifndef GHC_USE_STD_FS
+#include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
+
+
+/**
+ * Create directory and sub-folders recursively.
+ *
+ * @param directory the directory to create
+ * @return true if the operation succeeded, false otherwise
+ */
+bool FileUtils::createDirectories(const std::string& directory) noexcept {
+    bool result = true;
+    try {
+        fs::create_directories(directory);
+    } catch (fs::filesystem_error& e) {
+        result = false;
+    }
+
+    return result;
+}
 
 /**
  * Checks if a given file exists and is accessible.

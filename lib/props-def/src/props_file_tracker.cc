@@ -40,6 +40,7 @@ namespace tracker {
     const static std::string CONFIG_FOLDER_PATH = FileUtils::getHomeDir() + ftl::pathSeparator + ".config" + ftl::pathSeparator;
     const static std::string PROPS_FOLDER     = std::string("props") + ftl::pathSeparator;
     const static std::string OUTPUT_FILE_NAME = "props-tracker.conf";
+    const static std::string CONFIG_FULL_FOLDER_PATH = CONFIG_FOLDER_PATH + PROPS_FOLDER;
     const static std::string CONFIG_FILE_PATH = CONFIG_FOLDER_PATH + PROPS_FOLDER + OUTPUT_FILE_NAME;
     const static int DEFAULT_MAX_TRACKED_FILES = 20; // TODO configurable in .propsrc
 }
@@ -110,6 +111,8 @@ void PropsFileTracker::updateTrackerConfig(const PropsFile &propsFile) const {
  */
 void PropsFileTracker::writeTrackerConfig() const {
     if (!FileUtils::fileExists(tracker::CONFIG_FILE_PATH)) {
+
+        FileUtils::createDirectories(tracker::CONFIG_FULL_FOLDER_PATH);
         std::ofstream outFile(tracker::CONFIG_FILE_PATH);
         if (outFile.is_open()) {
             outFile << "[General]";
@@ -170,7 +173,7 @@ void PropsFileTracker::parseTrackerConfig() {
         } else {
             // Inconsistency detected, the master file was not present in the list of tracked ones
             // emit a warning and proceed keeping it in the list
-            std::cerr << rang::fgB::yellow << "Master file [" << fileName << "] not in tracked list. Add it to the [Tracked Files] section to avoid this warning" << rang::fg::reset << std::endl;
+            std::cerr << rang::fgB::yellow << "WARN: Master file [" << masterFileName << "] not in tracked list. Add it to the [Tracked Files] section to avoid this warning" << rang::fg::reset << std::endl;
             PropsFile propsFile;
             propsFile.setMaster(true);
             propsFile.setFileName(masterFileName);
@@ -246,10 +249,10 @@ void PropsFileTracker::storeFile(PropsFile& propsFile) {
                 aliasedMapFiles_[propsFile.getAlias()] = filePtr;
             }
         } else {
-            std::cerr << rang::fgB::yellow << "File [" << propsFile.getFileName() << "] already tracked. Skipping" << rang::fg::reset << std::endl;
+            std::cerr << rang::fgB::yellow << "WARN: File [" << propsFile.getFileName() << "] already tracked. Skipping" << rang::fg::reset << std::endl;
         }
     } else {
-        std::cerr << rang::fgB::yellow << "File [" << propsFile.getFileName() << "] cannot be read. Skipping" << rang::fg::reset << std::endl;
+        std::cerr << rang::fgB::yellow << "WARN: File [" << propsFile.getFileName() << "] cannot be read. Skipping" << rang::fg::reset << std::endl;
     }
 }
 
