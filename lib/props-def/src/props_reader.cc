@@ -48,9 +48,9 @@ PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
 {
     std::list<string> filesTracked;
     if (global) {
-        filesTracked.push_back(PropsFileTracker::getMaster().get()->getFileName());
+        filesTracked.push_back(PropsFileTracker::getDefault().getMasterFile()->getFileName());
     } else {
-        for (auto &propsFile : PropsFileTracker::getAll()) {
+        for (auto &propsFile : PropsFileTracker::getDefault().getTrackedFiles()) {
             filesTracked.push_back(propsFile.getFileName());
         }
     }

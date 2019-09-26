@@ -76,7 +76,7 @@ public:
      *
      * @return the list of tracked files
      */
-    static const std::list<PropsFile> &getAll() {
+    const std::list<PropsFile>& getTrackedFiles() const {
         return getDefault().trackedFiles_;
     }
 
@@ -85,8 +85,8 @@ public:
      *
      * @param propsFile the file to be set as master
      */
-    static void setMaster(const PropsFile &propsFile) {
-        getDefault().masterFile_ = std::make_shared<PropsFile>(propsFile);
+    void setMasterFile(const PropsFile &propsFile) {
+        masterFile_ = std::make_shared<PropsFile>(propsFile);
     }
 
     /**
@@ -94,33 +94,56 @@ public:
      *
      * @return the master file
      */
-    static const std::shared_ptr<PropsFile> &getMaster() {
-        return getDefault().masterFile_;
+    const std::shared_ptr<PropsFile> &getMasterFile() const {
+        return masterFile_;
     }
 
     /**
      * Displays the list of currently tracked files
      * in the standard output
      */
-    static void listTracked() {
+    void listTracked() {
         listTracked(std::cout);
+    }
+
+    /**
+     * Sets the maximum number of files to track.
+     * NOTE : A negative value means no limit.
+     *
+     * @param maxTrackedFiles the maximum number of files to track
+     */
+    static void setMaxTrackedFiles(const unsigned long& maxTrackedFiles) {
+        getDefault().maxTrackedFiles_ = maxTrackedFiles;
+    }
+
+    /**
+    * Retrieves the maximum number of files to track.
+    * NOTE : A negative value means no limit.
+    *
+    * @return the maximum number of files to track
+    */
+    static const unsigned long& getMaxTrackedFiles() {
+        return getDefault().maxTrackedFiles_;
     }
 
     /**
     * Retrieves the list of currently tracked files
     * using the given output stream.
     */
-    static void listTracked(std::ostream &output);
+    void listTracked(std::ostream &output);
 
 private:
 
     /**
-     * Default constructor. Reads tracker config
-     * if available.
+     * Default constructor
      */
-    PropsFileTracker() {
-        parseTrackerConfig();
-    };
+    PropsFileTracker();
+
+    /**
+     * Parses the tracker current configuration from the default
+     * user's config file.
+     */
+    void parseTrackerConfig();
 
     /**
      * Adds the given file to the tracker
@@ -144,6 +167,14 @@ private:
     void removeFileByAlias(const std::string &fileAlias, Result &result);
 
     /**
+     * Checks the file is valid and keeps a reference
+     * in the tracker.
+     *
+     * @param propsFile the properties to store in the tracker
+     */
+    Result storeFile(PropsFile& propsFile);
+
+    /**
      * Updates the tracker config file with the given tracked file.
      * In case the config file is not detected a full dump is performed.
      *
@@ -158,18 +189,12 @@ private:
     void writeTrackerConfig() const;
 
     /**
-     * Parses the tracker current configuration from the default
-     * user's config file.
-     */
-    void parseTrackerConfig();
-
-    /**
-     * Checks the file is valid and keeps a reference
-     * in the tracker.
+     * Sets the file as master and automatically tracks it
+     * if not found.
      *
-     * @param propsFile the properties to store in the tracker
+     * @param masterFileName the master file name
      */
-    void storeFile(PropsFile& propsFile);
+    Result storeMaster(const std::string &masterFileName);
 
     /** The master file */
     std::shared_ptr<PropsFile> masterFile_;
@@ -177,13 +202,14 @@ private:
     /** The list of tracked files */
     std::list<PropsFile> trackedFiles_;
 
+    /** The maximum number of files to track (Negative value means no limit) */
+    unsigned long maxTrackedFiles_;
+
     /** The map of tracked files */
     std::map<std::string, std::shared_ptr<PropsFile>> trackedMapFiles_;
 
     /** The map of aliased files */
     std::map<std::string, std::shared_ptr<PropsFile>> aliasedMapFiles_;
-
 };
-
 
 #endif //PROPS_PROPS_FILE_TRACKER_H

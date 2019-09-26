@@ -74,6 +74,23 @@ public:
     * @return the user's home directory
     */
     static std::string getHomeDir();
+
+    /**
+     * Renames a given file from source to target.
+     *
+     * @param sourceFile the source file
+     * @param targetFile the target file
+     * @return true if the operation succeeded, false otherwise
+     */
+    static bool rename(const std::string& sourceFile, const std::string& targetFile);
+
+    /**
+    * Renames a given file from source to target.
+    *
+    * @param file the file to remove
+    * @return true if the operation succeeded, false otherwise
+    */
+    static bool remove(const std::string& file);
 };
 
 #endif //PROPS_FILE_UTILS_H

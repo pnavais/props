@@ -138,3 +138,31 @@ std::string FileUtils::getHomeDir() {
     return std::string(homeDir) + ftl::pathSeparator;
 }
 
+/**
+ * Renames a given file from source to target.
+ *
+ * @param sourceFile the source file
+ * @param targetFile the target file
+ * @return true if the operation succeded, false otherwise
+ */
+bool FileUtils::rename(const std::string& sourceFile, const std::string& targetFile) {
+    bool res = true;
+    try {
+        fs::rename(sourceFile, targetFile);
+    } catch (fs::filesystem_error& e) {
+        res = false;
+    }
+
+    return res;
+}
+
+/**
+* Renames a given file from source to target.
+*
+* @param file the file to remove
+* @return true if the operation succeeded, false otherwise
+*/
+bool FileUtils::remove(const std::string& file) {
+    return fs::remove(file);
+}
+

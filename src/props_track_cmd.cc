@@ -47,7 +47,7 @@ void PropsTrackCommand::execute(PropsResult &result) {
     {
         trackFile(out);
     } else if (optionStore_.getCmdName() == track_cmd::_TRACK_LS_CMD_) {
-        PropsFileTracker::listTracked();
+        PropsFileTracker::getDefault().listTracked();
     }
 
     rang::setControlMode(rang::control::Auto);
@@ -78,7 +78,7 @@ Result PropsTrackCommand::trackFile(std::ostringstream& out) {
     // Adds the file to the tracker
     Result res = PropsFileTracker::add(propsFile);
     if (res.isValid()) {
-        out << rang::fg::green << "\nNow tracking \"" << option_map[track_cmd::_TRACKED_FILE_] << "\"" << rang::fg::reset << std::endl;
+        out << rang::fg::green << "Now tracking \"" << propsFile.getFileName() << "\"" << rang::fg::reset << std::endl;
     } else {
         throw ExecutionException(res);
     }

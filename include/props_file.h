@@ -130,7 +130,7 @@ public:
     }
 
 private:
-    bool master_;
+    bool master_ = false;
     std::string fileName_;
     std::string alias_;
 

@@ -18,6 +18,7 @@
 #define PROPS_RESULT_H
 
 #include <string>
+#include "rang.hpp"
 
 namespace res {
     const static bool VALID = true;
@@ -192,6 +193,17 @@ public:
     Result &operator=(const bool &validity) {
         validity_ = validity;
         return *this;
+    }
+
+    /**
+     * Displays the inner message (if any) using
+     * distinct colors depending on the validity and severity
+     */
+    void showMessage() {
+        if (!message_.empty()) {
+            (validity_ ? std::cout : std::cerr) << ((severity_ == res::NORMAL) ? rang::fgB::green : ((severity_ == res::WARN) ? rang::fgB::yellow : rang::fgB::red))
+            << message_ << rang::fg::reset << std::endl;
+        }
     }
 
 private:

@@ -49,7 +49,7 @@ void PropsSearchResult::add(const std::string &file, const std::string &value) {
  * @param results the results for the given key
  */
 p_search_res::result_map PropsSearchResult::get() const {
-    std::string masterFile = PropsFileTracker::getMaster().get()->getFileName();
+    std::string masterFile = PropsFileTracker::getDefault().getMasterFile()->getFileName();
     return get(std::list<std::string>({masterFile}));
 }
 
