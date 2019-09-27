@@ -20,6 +20,7 @@
 #include <exec_exception.h>
 #include <init_exception.h>
 #include <pcrecpp.h>
+#include <string_utils.h>
 
 // Prototypes for globals
 const pcrecpp::RE &SECTION_LINE();
@@ -75,9 +76,9 @@ namespace tracker {
  * if available.
  */
 PropsFileTracker::PropsFileTracker() {
-    parseTrackerConfig();
     //TODO Replace by PropsConfig::getValue(config::MAX_TRACKED_FILES, DEFAULT_MAX_TRACKED_FILES)
     maxTrackedFiles_ = tracker::DEFAULT_MAX_TRACKED_FILES;
+    parseTrackerConfig();
 };
 
 /**
@@ -91,11 +92,12 @@ void PropsFileTracker::parseTrackerConfig() {
     std::string currentSection;
     std::string masterFileName;
     std::string alias;
+    std::string aliasGroup;
     std::string fileName;
 
     std::ifstream infile(configFilePath);
 
-    // File exists, so parse it to obtain the tracked files
+    // File exists, parse it to obtain the tracked files
     if (infile) {
         std::string line;
         while (std::getline(infile, line)) {
@@ -103,7 +105,7 @@ void PropsFileTracker::parseTrackerConfig() {
                 if (currentSection == "General") {
                     pcrecpp::RE(R"(^[\s]*master=(.+)$)").FullMatch(line, &masterFileName);
                 } else if (currentSection == "Tracked Files") {
-                    if (pcrecpp::RE(R"(^[\s]*([^=]*)={0,1}(.+)$)").FullMatch(line, &alias, &fileName)) {
+                    if (pcrecpp::RE(R"(^[\s]*(([^=]*)=){0,1}(.+)[\s]*$)").FullMatch(line, &aliasGroup, &alias, &fileName)) {
                         // Creates the new props file
                         PropsFile propsFile;
                         fileName = (fileName.empty()) ? alias : fileName;
@@ -118,9 +120,9 @@ void PropsFileTracker::parseTrackerConfig() {
         }
 
         // Sets the master
-        if (!masterFileName.empty()) {
+        if (!StringUtils::isEmptyOrBlank(masterFileName)) {
             result = storeMaster(masterFileName);
-        } else {
+        } else if (!trackedFiles_.empty()){
             // no master ? take first
             setMasterFile(trackedFiles_.front());
         }
@@ -142,8 +144,6 @@ Result PropsFileTracker::storeMaster(const std::string &masterFileName) {
     if (trackedMapFiles_.count(masterFileName) != 0) {
         trackedMapFiles_[masterFileName].get()->setMaster(true);
     } else {
-        std::cout << "JODER NO ENCUENTRO EL PUTO MASTER ENTRE LOS TRACKED >> " << masterFileName << std::endl;
-        listTracked(std::cout);
         PropsFile propsFile;
         propsFile.setMaster(true);
         propsFile.setFileName(masterFileName);
@@ -310,23 +310,45 @@ void PropsFileTracker::updateTrackerConfig(const PropsFile &propsFile) const {
         if (inFile && (outFile.is_open())) {
             std::string line;
             std::string currentSection;
+            bool generalFound = false;
+            bool trackedFound = false;
+            bool masterReplaced = false;
 
-            // Replace master
-            bool match = false;
+
             while (std::getline(inFile, line)) {
-                if (!match && (!SECTION_LINE().FullMatch(line, &currentSection))) {
-                    if (propsFile.isMaster() && (currentSection == "General")) {
-                        if (pcrecpp::RE(R"((^[\s]*master=)(.+)$)").Replace("\\1" + propsFile.getFileName(), &line)) {
-                            match = true;
-                        }
+
+                std::cout << "-LINEA = |" << line << "|----" << std::endl;
+                bool newSection = SECTION_LINE().FullMatch(line, &currentSection);
+                if (currentSection == "General"){
+                    generalFound = true;
+                    std::cout << "He encontrado el general motors" << std::endl;
+                    if (propsFile.isMaster() && !newSection && (pcrecpp::RE(R"((^[\s]*master=)(.+)$)").Replace("\\1" + propsFile.getFileName(), &line))) {
+                        masterReplaced = true;
                     }
+                } else if (currentSection == "Tracked Files") {
+                    trackedFound = true;
                 }
+
+                std::cout << "NEW SECTION ?  " << (newSection ? "true" : "false") << std::endl;
+                std::cout << "General found ? " << (generalFound ? "true" : "false") << std::endl;
+                std::cout << "Is master ? " << (propsFile.isMaster() ? "true" : "false") << std::endl;
+                std::cout << "Master replaced ? " << (masterReplaced ? "true" : "false") << std::endl;
+                std::cout << "Current Section no es general ? " << ((currentSection != "General") ? "true" : "false") << "De hecho es " << currentSection << std::endl;
+
+                // If general found but new section reached without master replacement
+                if (propsFile.isMaster() && (currentSection != "General") && newSection && !masterReplaced && generalFound) {
+                    std::cout << "ME SASCAPAO EL MASTER !!!" << std::endl;
+                    outFile << "master=" << propsFile.getFileName() << std::endl;
+                }
+
+                std::cout << "-----" << std::endl;
+
                 outFile << line << std::endl;
             }
 
-            // Add new file
-            outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
-                    << propsFile.getFileName() << std::endl;
+            // Add new file at the end of the tracked files section
+            //outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
+            //        << propsFile.getFileName() << std::endl;
             outFile.close();
             inFile.close();
 

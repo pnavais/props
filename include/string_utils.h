@@ -103,6 +103,15 @@ public:
     static bool isWhiteSpace(const std::string& input);
 
     /**
+     * Checks if a string is empty or consists only of whitespaces.
+     *
+     * @param input the string to check
+     * @return true if the string is empty or contains only whitespaces,
+     * false otherwise
+     */
+    static bool isEmptyOrBlank(const std::string &input);
+
+    /**
      * Left trims a given string effectively removing the trailing characters
      * supplied.
      *

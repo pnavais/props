@@ -195,6 +195,17 @@ bool StringUtils::isWhiteSpace(const std::string &input) {
 }
 
 /**
+ * Checks if a string is empty or consists only of whitespaces.
+ *
+ * @param input the string to check
+ * @return true if the string is empty or contains only whitespaces,
+ * false otherwise
+ */
+bool StringUtils::isEmptyOrBlank(const std::string &input) {
+    return (input.empty() || (input.find_first_not_of(' ') == std::string::npos));
+}
+
+/**
  * Left trims a given string effectively removing the trailing characters
  * supplied.
  *
