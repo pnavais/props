@@ -310,45 +310,69 @@ void PropsFileTracker::updateTrackerConfig(const PropsFile &propsFile) const {
         if (inFile && (outFile.is_open())) {
             std::string line;
             std::string currentSection;
+            std::string previousSection;
             bool generalFound = false;
             bool trackedFound = false;
             bool masterReplaced = false;
+            bool fileTacked = false;
 
+            while (!inFile.eof()) {
 
-            while (std::getline(inFile, line)) {
+                std::getline(inFile, line);
 
-                std::cout << "-LINEA = |" << line << "|----" << std::endl;
+                std::string beforeSection = currentSection;
                 bool newSection = SECTION_LINE().FullMatch(line, &currentSection);
-                if (currentSection == "General"){
+                if (beforeSection != currentSection) {
+                    previousSection = beforeSection;
+                }
+
+                if (currentSection == "General") {
                     generalFound = true;
-                    std::cout << "He encontrado el general motors" << std::endl;
                     if (propsFile.isMaster() && !newSection && (pcrecpp::RE(R"((^[\s]*master=)(.+)$)").Replace("\\1" + propsFile.getFileName(), &line))) {
                         masterReplaced = true;
                     }
-                } else if (currentSection == "Tracked Files") {
+                } else if (!trackedFound && (currentSection == "Tracked Files")) {
                     trackedFound = true;
                 }
 
-                std::cout << "NEW SECTION ?  " << (newSection ? "true" : "false") << std::endl;
-                std::cout << "General found ? " << (generalFound ? "true" : "false") << std::endl;
-                std::cout << "Is master ? " << (propsFile.isMaster() ? "true" : "false") << std::endl;
-                std::cout << "Master replaced ? " << (masterReplaced ? "true" : "false") << std::endl;
-                std::cout << "Current Section no es general ? " << ((currentSection != "General") ? "true" : "false") << "De hecho es " << currentSection << std::endl;
-
                 // If general found but new section reached without master replacement
-                if (propsFile.isMaster() && (currentSection != "General") && newSection && !masterReplaced && generalFound) {
-                    std::cout << "ME SASCAPAO EL MASTER !!!" << std::endl;
+                if (propsFile.isMaster() && (previousSection == "General") && newSection && !masterReplaced && generalFound) {
                     outFile << "master=" << propsFile.getFileName() << std::endl;
+                    masterReplaced = true;
                 }
 
-                std::cout << "-----" << std::endl;
+                // If tracked found but new section reached
+                if ((propsFile.isMaster() && (previousSection == "Tracked Files") && newSection && trackedFound) ||
+                    (inFile.eof() && !fileTacked && trackedFound && currentSection == "Tracked Files")) {
+                    outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
+                            << propsFile.getFileName() << std::endl;
+                    fileTacked = true;
+                }
 
-                outFile << line << std::endl;
+                if(!inFile.eof()) {
+                    outFile << line << std::endl;
+                }
             }
 
-            // Add new file at the end of the tracked files section
-            //outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
-            //        << propsFile.getFileName() << std::endl;
+            // Create General section if not found and add the master file
+            if (!masterReplaced) {
+                if (propsFile.isMaster()) {
+                    if (!generalFound) {
+                        outFile << "[General]" << std::endl;
+                    }
+                    outFile << "master=" << propsFile.getFileName() << std::endl;
+                }
+            }
+
+            // Create tracked files section if not found and add the file
+            if (!fileTacked) {
+                if (!trackedFound) {
+                    outFile << "[Tracked Files]" << std::endl;
+                }
+                outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
+                        << propsFile.getFileName() << std::endl;
+            }
+
             outFile.close();
             inFile.close();
 
