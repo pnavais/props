@@ -16,11 +16,11 @@
 
 #include "props_file_tracker.h"
 #include "file_utils.h"
-#include <fstream>
 #include <exec_exception.h>
 #include <init_exception.h>
 #include <pcrecpp.h>
 #include <string_utils.h>
+#include <parser/toml.hpp>
 
 // Prototypes for globals
 const pcrecpp::RE &SECTION_LINE();
@@ -87,46 +87,41 @@ PropsFileTracker::PropsFileTracker() {
  */
 void PropsFileTracker::parseTrackerConfig() {
     auto& configFilePath = tracker::CONFIG_FILE_PATH();
-
-    Result result{res::VALID};
-    std::string currentSection;
     std::string masterFileName;
-    std::string alias;
-    std::string aliasGroup;
-    std::string fileName;
+    Result result{res::VALID};
 
-    std::ifstream infile(configFilePath);
+    try {
+        const auto data = toml::parse(configFilePath);
 
-    // File exists, parse it to obtain the tracked files
-    if (infile) {
-        std::string line;
-        while (std::getline(infile, line)) {
-            if (!SECTION_LINE().FullMatch(line, &currentSection)) {
-                if (currentSection == "General") {
-                    pcrecpp::RE(R"(^[\s]*master=(.+)$)").FullMatch(line, &masterFileName);
-                } else if (currentSection == "Tracked Files") {
-                    if (pcrecpp::RE(R"(^[\s]*(([^=]*)=){0,1}(.+)[\s]*$)").FullMatch(line, &aliasGroup, &alias, &fileName)) {
-                        // Creates the new props file
-                        PropsFile propsFile;
-                        fileName = (fileName.empty()) ? alias : fileName;
-                        propsFile.setFileName(fileName);
-                        propsFile.setAlias(alias);
-                        propsFile.setMaster(false);
+        const auto& generalSection = toml::find(data, "General");
+        masterFileName = toml::find<std::string>(generalSection, "master");
 
-                        result = storeFile(propsFile);
-                    }
-                }
-            }
+        toml::value trackingSection = toml::find<toml::value >(data, "Tracking");
+        toml::array fileArray = toml::find<toml::array>(trackingSection, "files");
+        for (auto& file : fileArray) {
+            toml::value fileTable = toml::get<toml::value >(file);
+
+            const auto alias = toml::find_or<std::string>(fileTable, "alias", "");
+            const auto& location = toml::find<std::string>(fileTable, "location");
+            // Creates the new props file
+            PropsFile propsFile;
+            propsFile.setFileName(location);
+            propsFile.setAlias(alias);
+            propsFile.setMaster(false);
+            result = storeFile(propsFile);
         }
+    } catch (std::exception& e) {
+        throw ExecutionException("Error parsing configuration file. Details : "+ std::string(e.what()));
+    }
 
-        // Sets the master
-        if (!StringUtils::isEmptyOrBlank(masterFileName)) {
-            result = storeMaster(masterFileName);
-        } else if (!trackedFiles_.empty()){
-            // no master ? take first
-            setMasterFile(trackedFiles_.front());
-        }
-
+    // Sets the master
+    if (!StringUtils::isEmptyOrBlank(masterFileName)) {
+        result = storeMaster(masterFileName);
+    } else if (!trackedFiles_.empty()){
+        // no master ? take first
+        auto& front = trackedFiles_.front();
+        front.setMaster(true);
+        setMasterFile(&front);
     }
 
     result.showMessage();
@@ -142,18 +137,20 @@ void PropsFileTracker::parseTrackerConfig() {
 Result PropsFileTracker::storeMaster(const std::string &masterFileName) {
     Result result{res::VALID};
     if (trackedMapFiles_.count(masterFileName) != 0) {
-        trackedMapFiles_[masterFileName].get()->setMaster(true);
+        trackedMapFiles_[masterFileName]->setMaster(true);
+        masterFile_ = trackedMapFiles_[masterFileName];
     } else {
         PropsFile propsFile;
         propsFile.setMaster(true);
         propsFile.setFileName(masterFileName);
         result = storeFile(propsFile);
+        setMasterFile(&propsFile);
 
         if (result.isValid()) {
             // Inconsistency detected, the master file was not present in the list of tracked ones
             // emit a warning and proceed keeping it in the list
             result.setMessage("WARN: Master file [" + masterFileName
-                      + "] not in tracked list. Add it to the [Tracked Files] section to avoid this warning");
+                      + "] not in tracked list. Add it to the [Tracking] section to avoid this warning");
             result.setSeverity(res::WARN);
         }
     }
@@ -175,14 +172,14 @@ void PropsFileTracker::addFile(PropsFile& file, Result& result) {
             file.setFileName(fullFilePath);
             // make it master if absent
             if (getMasterFile() == nullptr) {
-                setMasterFile(file);
+                setMasterFile(&file);
             }
 
             result = storeFile(file);
 
             // Update the config
             if (result.isValid()) {
-                updateTrackerConfig(file);
+                updateTrackerConfig();
             }
         } else {
             result = res::ERROR;
@@ -202,7 +199,7 @@ void PropsFileTracker::removeFile(const std::string &file, Result& result) {
     std::string fullFilePath = FileUtils::getAbsolutePath(file);
     result = res::ERROR;
     if (trackedMapFiles_.count(fullFilePath) != 0) {
-        auto* pFile = trackedMapFiles_[fullFilePath].get();
+        auto* pFile = trackedMapFiles_[fullFilePath];
         trackedMapFiles_.erase(fullFilePath);
         aliasedMapFiles_.erase(pFile->getAlias());
         trackedFiles_.remove(*pFile);
@@ -221,7 +218,7 @@ void PropsFileTracker::removeFile(const std::string &file, Result& result) {
 void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& result) {
     result = res::ERROR;
     if (aliasedMapFiles_.count(fileAlias) != 0) {
-        auto* pFile = aliasedMapFiles_[fileAlias].get();
+        auto* pFile = aliasedMapFiles_[fileAlias];
         aliasedMapFiles_.erase(fileAlias);
         trackedMapFiles_.erase(pFile->getFileName());
         trackedFiles_.remove(*pFile);
@@ -239,10 +236,16 @@ void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& r
  * @param output the output stream
 */
 void PropsFileTracker::listTracked(std::ostream& output) {
-    for (auto& propsFile : trackedFiles_) {
-        auto& alias = propsFile.getAlias();
-        output << (!alias.empty() ? "[" + alias + "] -> " : "")
-                  << propsFile.getFileName() << (propsFile.isMaster() ? "(M)" : "") << std::endl;
+    if (trackedFiles_.empty()) {
+        output << rang::fgB::yellow << trackedFiles_.size() << "No files tracked" << rang::fg::reset << std::endl;
+    } else {
+        output << rang::fgB::green << "Files currently tracked :\n" << rang::fg::reset << std::endl;
+        int counter = 1;
+        for (auto &propsFile : trackedFiles_) {
+            auto &alias = propsFile.getAlias();
+            output << rang::style::bold << "\t[" << counter << "] : " << rang::style::reset << rang::fgB::cyan << (!alias.empty() ? "\"" + alias + "\" => " : "")
+                   << rang::fg::reset   << propsFile.getFileName() << (propsFile.isMaster() ? " (M)" : "") << std::endl;
+        }
     }
 }
 
@@ -264,7 +267,8 @@ Result PropsFileTracker::storeFile(PropsFile& propsFile) {
             if (aliasedMapFiles_.count(propsFile.getAlias()) == 0) {
                 // Keep the file in the list
                 trackedFiles_.push_back(propsFile);
-                auto filePtr = std::make_shared<PropsFile>(propsFile);
+
+                PropsFile* filePtr = &trackedFiles_.back();
 
                 // Keep a reference for the alias and the file for fast access
                 trackedMapFiles_[propsFile.getFileName()] = filePtr;
@@ -274,7 +278,7 @@ Result PropsFileTracker::storeFile(PropsFile& propsFile) {
 
                 // Set as new master (override)
                 if (propsFile.isMaster()) {
-                    setMasterFile(propsFile);
+                    setMasterFile(&propsFile);
                 }
 
                 result = res::VALID;
@@ -298,94 +302,25 @@ Result PropsFileTracker::storeFile(PropsFile& propsFile) {
  *
  * @param propsFile the properties file to track
  */
-void PropsFileTracker::updateTrackerConfig(const PropsFile &propsFile) const {
+void PropsFileTracker::updateTrackerConfig() const {
 
-    auto& configFilePath = tracker::CONFIG_FILE_PATH();
+    auto& configFilePath          = tracker::CONFIG_FILE_PATH();
     std::string configFilePathTmp = tracker::CONFIG_FULL_PATH() + "." + tracker::CONFIG_FILE_NAME + ".tmp";
+    std::string outputFilePath    = tracker::CONFIG_FILE_PATH();;
+
     if (FileUtils::fileExists(configFilePath)) {
-        std::ofstream outFile(configFilePathTmp);
-        std::ifstream inFile(configFilePath);
+        outputFilePath = configFilePathTmp;
+    }
 
-        // File exists, so parse it to obtain the tracked files
-        if (inFile && (outFile.is_open())) {
-            std::string line;
-            std::string currentSection;
-            std::string previousSection;
-            bool generalFound = false;
-            bool trackedFound = false;
-            bool masterReplaced = false;
-            bool fileTacked = false;
+    // Perform a dump of the current config (existing extra comments are lost :()
+    writeTrackerConfig(outputFilePath);
 
-            while (!inFile.eof()) {
-
-                std::getline(inFile, line);
-
-                std::string beforeSection = currentSection;
-                bool newSection = SECTION_LINE().FullMatch(line, &currentSection);
-                if (beforeSection != currentSection) {
-                    previousSection = beforeSection;
-                }
-
-                if (currentSection == "General") {
-                    generalFound = true;
-                    if (propsFile.isMaster() && !newSection && (pcrecpp::RE(R"((^[\s]*master=)(.+)$)").Replace("\\1" + propsFile.getFileName(), &line))) {
-                        masterReplaced = true;
-                    }
-                } else if (!trackedFound && (currentSection == "Tracked Files")) {
-                    trackedFound = true;
-                }
-
-                // If general found but new section reached without master replacement
-                if (propsFile.isMaster() && (previousSection == "General") && newSection && !masterReplaced && generalFound) {
-                    outFile << "master=" << propsFile.getFileName() << std::endl;
-                    masterReplaced = true;
-                }
-
-                // If tracked found but new section reached
-                if ((propsFile.isMaster() && (previousSection == "Tracked Files") && newSection && trackedFound) ||
-                    (inFile.eof() && !fileTacked && trackedFound && currentSection == "Tracked Files")) {
-                    outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
-                            << propsFile.getFileName() << std::endl;
-                    fileTacked = true;
-                }
-
-                if(!inFile.eof()) {
-                    outFile << line << std::endl;
-                }
-            }
-
-            // Create General section if not found and add the master file
-            if (!masterReplaced) {
-                if (propsFile.isMaster()) {
-                    if (!generalFound) {
-                        outFile << "[General]" << std::endl;
-                    }
-                    outFile << "master=" << propsFile.getFileName() << std::endl;
-                }
-            }
-
-            // Create tracked files section if not found and add the file
-            if (!fileTacked) {
-                if (!trackedFound) {
-                    outFile << "[Tracked Files]" << std::endl;
-                }
-                outFile << (!propsFile.getAlias().empty() ? propsFile.getAlias() + "=" : "")
-                        << propsFile.getFileName() << std::endl;
-            }
-
-            outFile.close();
-            inFile.close();
-
-            if (!FileUtils::rename(configFilePathTmp, configFilePath)) {
-                remove(configFilePathTmp);
-                throw ExecutionException("I/O Error updating tracker configuration file");
-            }
-        } else {
-            throw ExecutionException("Error updating tracker configuration file");
+    // Rename temporary file if needed
+    if (outputFilePath == configFilePathTmp) {
+        if (!FileUtils::rename(configFilePathTmp, configFilePath)) {
+            remove(configFilePathTmp);
+            throw ExecutionException("I/O Error updating tracker configuration file");
         }
-    }  else {
-        // Perform a full dump
-        writeTrackerConfig();
     }
 }
 
@@ -393,24 +328,27 @@ void PropsFileTracker::updateTrackerConfig(const PropsFile &propsFile) const {
  * Writes the tracker current configuration to the default output file
  * under user's home directory.
  */
-void PropsFileTracker::writeTrackerConfig() const {
-    auto& configFilePath = tracker::CONFIG_FILE_PATH();
-    if (!FileUtils::fileExists(configFilePath)) {
+void PropsFileTracker::writeTrackerConfig(const std::string& outputFilePath) const {
 
-        FileUtils::createDirectories(tracker::CONFIG_FULL_PATH());
+    if (!FileUtils::fileExists(outputFilePath)) {
 
-        std::ofstream outFile(configFilePath);
+        FileUtils::createDirectories(outputFilePath);
+
+        std::ofstream outFile(outputFilePath);
         if (outFile.is_open()) {
             outFile << "[General]";
             if (getMasterFile() != nullptr) {
-                outFile << "\nmaster=" << getMasterFile().get()->getFileName() + "\n";
+                outFile << "\nmaster = \"" << getMasterFile()->getFileName() + "\"\n";
             }
-            outFile << "\n[Tracked Files]";
+            outFile << "\n[Tracking]\nfiles = [";
+            std::string prefix;
             for (auto &propFile : getTrackedFiles()) {
-                outFile << "\n" << (!propFile.getAlias().empty() ? propFile.getAlias() + "=" : "")
-                        << propFile.getFileName();
+                outFile << prefix << "\n\t{"
+                        << (!propFile.getAlias().empty() ? "alias = \"" + propFile.getAlias() + "\", " : "")
+                        << "location = \"" + propFile.getFileName() + "\"}";
+                prefix = ",";
             }
-            outFile << std::endl;
+            outFile << "\n]" << std::endl;
             outFile.close();
         } else {
             throw ExecutionException("Cannot write tracker config file");

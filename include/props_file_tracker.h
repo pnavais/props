@@ -85,8 +85,8 @@ public:
      *
      * @param propsFile the file to be set as master
      */
-    void setMasterFile(const PropsFile &propsFile) {
-        masterFile_ = std::make_shared<PropsFile>(propsFile);
+    void setMasterFile(PropsFile* propsFile) {
+        masterFile_ = propsFile;
     }
 
     /**
@@ -94,7 +94,7 @@ public:
      *
      * @return the master file
      */
-    const std::shared_ptr<PropsFile> &getMasterFile() const {
+    const PropsFile* getMasterFile() const {
         return masterFile_;
     }
 
@@ -175,18 +175,17 @@ private:
     Result storeFile(PropsFile& propsFile);
 
     /**
-     * Updates the tracker config file with the given tracked file.
-     * In case the config file is not detected a full dump is performed.
-     *
-     * @param propsFile the properties file to track
+     * Updates or creates if needed, the tracker config file with the current
+     * tracked configuration.
      */
-    void updateTrackerConfig(const PropsFile &propsFile) const;
+    void updateTrackerConfig() const;
 
     /**
-     * Writes the tracker current configuration to the default output file
-     * under user's home directory.
+     * Writes the tracker current configuration to the given output file.
+     *
+     * @param outputFilePath the path to the output file
      */
-    void writeTrackerConfig() const;
+    void writeTrackerConfig(const std::string& outputFilePath) const;
 
     /**
      * Sets the file as master and automatically tracks it
@@ -197,7 +196,7 @@ private:
     Result storeMaster(const std::string &masterFileName);
 
     /** The master file */
-    std::shared_ptr<PropsFile> masterFile_;
+    PropsFile* masterFile_;
 
     /** The list of tracked files */
     std::list<PropsFile> trackedFiles_;
@@ -206,10 +205,10 @@ private:
     unsigned long maxTrackedFiles_;
 
     /** The map of tracked files */
-    std::map<std::string, std::shared_ptr<PropsFile>> trackedMapFiles_;
+    std::map<std::string,PropsFile*> trackedMapFiles_;
 
     /** The map of aliased files */
-    std::map<std::string, std::shared_ptr<PropsFile>> aliasedMapFiles_;
+    std::map<std::string, PropsFile*> aliasedMapFiles_;
 };
 
 #endif //PROPS_PROPS_FILE_TRACKER_H

@@ -15,9 +15,6 @@
  */
 
 #include "file_utils.h"
-#include <cstdlib>
-#include <climits>
-#include <sys/stat.h>
 #include "config_static.h"
 
 #if defined(IS_LINUX) || defined(IS_MAC)
@@ -34,9 +31,10 @@ namespace fs = std::filesystem;
 #endif
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
+#include <iostream>
+
 namespace fs = ghc::filesystem;
 #endif
-
 
 /**
  * Create directory and sub-folders recursively.
@@ -47,7 +45,9 @@ namespace fs = ghc::filesystem;
 bool FileUtils::createDirectories(const std::string& directory) noexcept {
     bool result = true;
     try {
-        fs::create_directories(directory);
+        fs::path p{directory};
+        p.remove_filename();
+        fs::create_directories(p);
     } catch (fs::filesystem_error& e) {
         result = false;
     }
@@ -62,8 +62,7 @@ bool FileUtils::createDirectories(const std::string& directory) noexcept {
  * @return true if file exists, false otherwise
  */
 bool FileUtils::fileExists(const std::string& fileName) noexcept {
-    struct stat buffer{};
-    return (stat (fileName.c_str(), &buffer) == 0);
+    return fs::exists(fileName);
 }
 
 /**
@@ -73,38 +72,7 @@ bool FileUtils::fileExists(const std::string& fileName) noexcept {
  * @return retrieves the absolute file path
  */
 std::string	FileUtils::getAbsolutePath(const std::string& filePath) noexcept {
-
-    std::string fullFilePath = filePath;
-    char buff[PATH_MAX];
-
-    if (realpath(filePath.c_str(), buff) != nullptr) {
-        fullFilePath = std::string(buff);
-    }
-
-    return fullFilePath;
-}
-
-/**
- * Retrieves the temporary directory
- *
- * @return the temporary directory
- */
-std::string FileUtils::getTmpDir() {
-    const char* tmpDir = "";
-
-#if defined(IS_LINUX) || defined(IS_MAC)
-    if ((tmpDir = getenv("TMPDIR")) == nullptr) {
-        tmpDir = "/tmp";
-    }
-#elif defined(IS_WIN)
-    if ((tmpDir = getenv("TEMP")) == nullptr) {
-        if ((tmpDir = getenv("TMP")) == nullptr) {
-            tmpDir = "";
-        }
-    }
-#endif
-
-    return std::string(tmpDir) + ftl::pathSeparator;
+    return fs::absolute(filePath);
 }
 
 /**
@@ -135,7 +103,7 @@ std::string FileUtils::getHomeDir() {
     }
 #endif
 
-    return std::string(homeDir) + ftl::pathSeparator;
+    return std::string(homeDir);
 }
 
 /**
@@ -163,6 +131,6 @@ bool FileUtils::rename(const std::string& sourceFile, const std::string& targetF
 * @return true if the operation succeeded, false otherwise
 */
 bool FileUtils::remove(const std::string& file) {
-    return fs::remove(file);
+    return fileExists(file) && fs::remove(file);
 }
 
