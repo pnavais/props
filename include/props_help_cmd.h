@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_HELP_COMMAND_H
-#define PROPS_PROPS_HELP_COMMAND_H
+#ifndef PROPS_HELP_COMMAND_H
+#define PROPS_HELP_COMMAND_H
 
 #include "props_cmd.h"
 #include <sstream>
@@ -29,8 +29,8 @@ public:
         id_          = "HELP";
         name_        = "help";
         summaryArg_  = "command";
-        args_        = { PropsArg::make_arg(summaryArg_) };
-        tagLine_     = "Retrieve detailed options_ for the given command";
+        args_        = { PropsArg::make_arg(summaryArg_, "name of the command") };
+        tagLine_     = "Retrieve detailed options for the given command";
         description_ = tagLine_;
     }
 
@@ -44,4 +44,4 @@ private:
     std::string subCmd_;
 };
 
-#endif //PROPS_PROPS_HELP_COMMAND_H
+#endif //PROPS_HELP_COMMAND_H

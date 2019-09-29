@@ -62,13 +62,6 @@ public:
     static bool createDirectories(const std::string& directory) noexcept;
 
     /**
-     * Retrieves the system temporary directory,
-     *
-     * @return the system temporary directory
-     */
-    static std::string getTmpDir();
-
-    /**
     * Retrieves the user's home directory,
     *
     * @return the user's home directory

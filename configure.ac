@@ -7,6 +7,9 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_PROG_RANLIB
 
+# AC_CANONICAL_HOST is needed to access the 'host_os' variable
+AC_CANONICAL_HOST
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -69,6 +72,31 @@ PROPS_LIB_FUNC="-L${PROPS_LIB} -lprops"
 AC_SUBST(MAIN_LIB_HEADER)
 AC_SUBST(PROPS_LIB_HEADER)
 AC_SUBST(PROPS_LIB_FUNC)
+
+build_linux=no
+build_windows=no
+build_mac=no
+
+# Detect the target system
+case "${host_os}" in
+    linux*)
+        build_linux=yes
+        ;;
+    cygwin*|mingw*)
+        build_windows=yes
+        ;;
+    darwin*)
+        build_mac=yes
+        ;;
+    *)
+        AC_MSG_ERROR(["OS $host_os is not supported"])
+        ;;
+esac
+
+# Pass the conditionals to automake
+AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
+AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
+AM_CONDITIONAL([OSX], [test "$build_mac" = "yes"])
 
 # Checks for libraries.
 

@@ -17,19 +17,9 @@ template<typename Comment, // discard/preserve_comment
          template<typename ...> class Array> // vector-like class
 class basic_value;
 
-using character = char;
-using key = std::string;
 
-using boolean        = bool;
-using integer        = std::int64_t;
-using floating       = double; // "float" is a keyward, cannot use it here.
-// the following stuffs are structs defined here, so aliases are not needed.
-// - string
-// - offset_datetime
-// - offset_datetime
-// - local_datetime
-// - local_date
-// - local_time
+
+
 
 // default toml::value and default array/table. these are defined after defining
 // basic_value itself.
@@ -51,6 +41,19 @@ enum class value_t : std::uint8_t
     array           =  9,
     table           = 10,
 };
+
+using character = char;
+using key = std::string;
+using boolean        = bool;
+using integer        = std::int64_t;
+using floating       = double; // "float" is a keyward, cannot use it here.
+// the following stuffs are structs defined here, so aliases are not needed.
+// - string
+// - offset_datetime
+// - offset_datetime
+// - local_datetime
+// - local_date
+// - local_time
 
 template<typename charT, typename traits>
 inline std::basic_ostream<charT, traits>&

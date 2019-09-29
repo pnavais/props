@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_CMD_FACTORY_H
-#define PROPS_PROPS_CMD_FACTORY_H
+#ifndef PROPS_CMD_FACTORY_H
+#define PROPS_CMD_FACTORY_H
 
 #include "props_cmd.h"
 #include <map>
@@ -69,4 +69,4 @@ private:
     std::map<std::string, std::unique_ptr<PropsCommand>> commandMap_;
 };
 
-#endif //PROPS_PROPS_CMD_FACTORY_H
+#endif //PROPS_CMD_FACTORY_H

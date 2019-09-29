@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_CLI_H
-#define PROPS_PROPS_CLI_H
+#ifndef PROPS_CLI_H
+#define PROPS_CLI_H
 
 #include "props_cmd.h"
 #include <iostream>
@@ -41,4 +41,4 @@ public:
 
 };
 
-#endif //PROPS_PROPS_CLI_H
+#endif //PROPS_CLI_H

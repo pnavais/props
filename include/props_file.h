@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_FILE_H
-#define PROPS_PROPS_FILE_H
+#ifndef PROPS_FILE_H
+#define PROPS_FILE_H
 
 #include <string>
 
@@ -136,4 +136,4 @@ private:
 
 };
 
-#endif //PROPS_PROPS_FILE_H
+#endif //PROPS_FILE_H

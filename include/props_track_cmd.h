@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_TRACK_COMMAND_H
-#define PROPS_PROPS_TRACK_COMMAND_H
+#ifndef PROPS_TRACK_COMMAND_H
+#define PROPS_TRACK_COMMAND_H
 
-#include "config.h"
 #include "props_cmd.h"
-#include "arg_store.h"
-#include "result.h"
-#include <map>
 #include <sstream>
 
 namespace track_cmd {
-    static const char* _TRACKED_FILE_ = "file";
-    static const char* _ALIAS_FILE_   = "alias";
-    static const char* _MASTER_FILE_  = "master";
-    static const char* _TRACK_LS_CMD_ = "ls";
+    static const char* _TRACKED_FILE_  = "file";
+    static const char* _ALIAS_FILE_    = "alias";
+    static const char* _MASTER_FILE_   = "master";
+    static const char* _TRACK_LS_CMD_  = "--ls";
 }
 
 class PropsTrackCommand : public PropsCommand {
@@ -41,15 +37,16 @@ public:
     PropsTrackCommand() {
         id_ = name_  = "track";
         tagLine_     = "Add | List tracked files";
-        description_ = "Adds a properties file to the list of tracked files stored in $HOME/.config/props.track. In case the file does "
-                       "not exist a warning message is displayed and the file is ignored.Once added to the list of tracked files "
+        description_ = "Adds a properties file to the list of tracked files (by default the list is stored physically in $HOME/.config/props/props-tracker.conf)."
+                       "In case the file does not exist a warning message is displayed and the file is ignored.Once added to the list of tracked files "
                        ", the file will be queried in case global option is active.In case the tracked file is flagged as master, "
                        "the file would be used as main source in case global option is disabled."
                        "Additionally this command allows listing all "
                        "currently tracked properties files.";
+
         args_ = { PropsArg::make_arg(track_cmd::_TRACKED_FILE_, "File to track",
-                                     { PropsOption::make_opt(track_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
-                                       PropsOption::make_opt(track_cmd::_MASTER_FILE_, "Sets the file as master") }),
+                           { PropsOption::make_opt(track_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
+                             PropsOption::make_opt(track_cmd::_MASTER_FILE_, "Sets the file as master") }),
                   PropsArg::make_cmd(track_cmd::_TRACK_LS_CMD_ , "List all tracked files") };
     }
 
@@ -79,4 +76,4 @@ public:
 
 };
 
-#endif //PROPS_PROPS_TRACK_COMMAND_H
+#endif //PROPS_TRACK_COMMAND_H

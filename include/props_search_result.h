@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_SEARCH_RESULT_H
-#define PROPS_PROPS_SEARCH_RESULT_H
+#ifndef PROPS_SEARCH_RESULT_H
+#define PROPS_SEARCH_RESULT_H
 
 #include "props_result.h"
 #include <string>
@@ -86,4 +86,4 @@ private:
 };
 
 
-#endif //PROPS_PROPS_SEARCH_RESULT_H
+#endif //PROPS_SEARCH_RESULT_H

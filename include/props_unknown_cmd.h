@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_UNKNOWN_COMMAND_H
-#define PROPS_PROPS_UNKNOWN_COMMAND_H
+#ifndef PROPS_UNKNOWN_COMMAND_H
+#define PROPS_UNKNOWN_COMMAND_H
 
 #include "props_cmd.h"
 #include <sstream>
@@ -38,4 +38,4 @@ private:
 
 };
 
-#endif //PROPS_PROPS_UNKNOWN_COMMAND_H
+#endif //PROPS_UNKNOWN_COMMAND_H

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "config_static.h"
+
 #include "props_cli.h"
 #include "string_utils.h"
 #include "props_cmd_factory.h"
@@ -21,6 +23,7 @@
 #include "props_help_cmd.h"
 #include "props_unknown_cmd.h"
 #include "props_track_cmd.h"
+#include "props_untrack_cmd.h"
 
 /**
  * Adds all available commands
@@ -29,6 +32,7 @@ PropsCommandFactory::PropsCommandFactory() {
 
     listCmds_ = {
             new PropsTrackCommand(),
+            new PropsUntrackCommand(),
             new PropsHelpCommand(),
             new PropsVersionCommand()
     };

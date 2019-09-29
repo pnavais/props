@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "props_track_cmd.h"
+#include "props_untrack_cmd.h"
 #include <memory>
 #include <props_file_tracker.h>
 #include <exec_exception.h>
 #include "rang.hpp"
 
-void PropsTrackCommand::parse(const int& argc, char* argv[]) {
+void PropsUntrackCommand::parse(const int& argc, char* argv[]) {
     if (argc > 1) {
         PropsCommand::parse(argc, argv);
     } else {
@@ -29,28 +29,26 @@ void PropsTrackCommand::parse(const int& argc, char* argv[]) {
 
     // Keep the file as a regular option considering it is
     // the first non-arg option
-    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_) {
-        optionStore_.addOption(track_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
+    if (optionStore_.getCmdName() == untrack_cmd::_UNTRACKED_FILE_) {
+        optionStore_.addOption(untrack_cmd::_UNTRACKED_FILE_, optionStore_.getArgs().front());
     }
 }
 
 /**
- * Executes the track command either adding a given file
- * to the list of tracked ones or displaying the information
- * of this list.
+ * Executes the untrack command either removing a given file
+ * from the list of tracked ones using the file name or
+ * the alias.
  *
  * @param result the result message for the command
  */
-void PropsTrackCommand::execute(PropsResult &result) {
+void PropsUntrackCommand::execute(PropsResult &result) {
     std::ostringstream out;
 
     rang::setControlMode(rang::control::Force);
 
-    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_)
+    if (optionStore_.getCmdName() == untrack_cmd::_UNTRACKED_FILE_)
     {
-        trackFile(out);
-    } else if (optionStore_.getCmdName() == track_cmd::_TRACK_LS_CMD_) {
-        PropsFileTracker::getDefault().listTracked();
+        untrackFile(out);
     }
 
     rang::setControlMode(rang::control::Auto);
@@ -65,23 +63,25 @@ void PropsTrackCommand::execute(PropsResult &result) {
  *
  * @return the result of the operation
  */
-Result PropsTrackCommand::trackFile(std::ostringstream& out) {
+Result PropsUntrackCommand::untrackFile(std::ostringstream& out) {
     auto option_map = optionStore_.getOptions();
-    PropsFile propsFile = PropsFile::make_file(option_map[track_cmd::_TRACKED_FILE_]);
+    auto fileName = option_map[untrack_cmd::_UNTRACKED_FILE_];
+    Result res{res::ERROR};
 
     // Sets the alias (if any)
-    if (option_map.count(track_cmd::_ALIAS_FILE_) != 0) {
-        propsFile.setAlias(option_map[track_cmd::_ALIAS_FILE_]);
-    }
-    // Sets as master (if available)
-    if (option_map.count(track_cmd::_MASTER_FILE_) != 0) {
-        propsFile.setMaster(true);
+    if (option_map.count(untrack_cmd::_ALIAS_FILE_) != 0) {
+        std::string alias = fileName;
+        PropsFile* propsFile = PropsFileTracker::getDefault().getFileWithAlias(alias);
+        if (propsFile != nullptr) {
+            fileName = propsFile->getFileName();
+        }
+        res = PropsFileTracker::removeByAlias(alias);
+    } else {
+        res = PropsFileTracker::remove(fileName);
     }
 
-    // Adds the file to the tracker
-    Result res = PropsFileTracker::add(propsFile);
     if (res.isValid()) {
-        out << std::endl << rang::fg::green << "Now tracking \"" << propsFile.getFileName() << "\"" << rang::fg::reset << std::endl;
+        out << std::endl << rang::fg::green << "File \"" << fileName << "\" not tracked anymore" << rang::fg::reset << std::endl;
     } else {
         throw ExecutionException(res);
     }

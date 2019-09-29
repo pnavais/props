@@ -17,9 +17,11 @@
 #include "props_cmd.h"
 #include "string_utils.h"
 #include "rang.hpp"
+#include <config.h>
 #include <sstream>
 #include <arg_store.h>
 #include <arg_parser.h>
+#include <exec_exception.h>
 
 /**
   * Parse the command line arguments to initialize the command.
@@ -35,6 +37,17 @@ void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
         Result result = ArgParser::parseArgs(optionStore_, args_);
         if (!result.isValid()) {
             throw InitializationException(result.getMessage());
+        }
+    } else {
+        bool has_anonymous = false;
+        for (auto& arg : args_) {
+            if (arg.isAnonymous()) {
+                has_anonymous = true;
+                break;
+            }
+        }
+        if (!has_anonymous) {
+            throw ExecutionException("No arguments supplied");
         }
     }
 }
@@ -60,7 +73,7 @@ void PropsCommand::getHelp(std::ostream& out)
     for (auto& arg : args_) {
         out << prefix << (arg.getOptions().empty() ? "" : "[");
         out << "<" << arg.getName() << ">";
-        out << (arg.getOptions().empty() ? "" : " <options_>...]");
+        out << (arg.getOptions().empty() ? "" : " <options>...]");
         prefix = " | ";
 
         desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", 10)
@@ -81,8 +94,11 @@ void PropsCommand::getHelp(std::ostream& out)
     out << "\n\tThis is the description of the arguments supported by the command : \n" << std::endl;
     out << desc_cmd.str() << std::endl;
 
-    out << std::endl << rang::fgB::gray << "OPTIONS" << rang::style::reset << std::endl;
-    out << options.str() << std::endl;
+    const auto& optStr = options.str();
+    if (!optStr.empty()) {
+        out << std::endl << rang::fgB::gray << "OPTIONS" << rang::style::reset << std::endl;
+        out << optStr << std::endl;
+    }
 
     rang::setControlMode(rang::control::Auto);
 }

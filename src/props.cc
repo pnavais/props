@@ -15,6 +15,7 @@
  */
 
 #include <iostream>
+#include <props_config.h>
 #include "props_cmd.h"
 #include "props_cli.h"
 #include "exec_exception.h"
@@ -35,15 +36,15 @@ int main(int argc, char **argv)
     PropsCommand* command = nullptr;
 
     try {
+        PropsConfig::getDefault().init();
+
         command = PropsCLI::parse(argc,argv);
         if (command != nullptr) {
             command->run();
         }
     } catch (InitializationException& exception) {
-        std::cerr << rang::fgB::yellow << exception.get_info() << rang::fg::reset << std::endl;
-        if (command != nullptr) {
-            command->getHelp();
-        }
+        std::cerr << ((exception.getSeverity() == res::CRITICAL) ? rang::fgB::red : rang::fgB::yellow)
+                  << exception.get_info() << rang::fg::reset << std::endl;
         ret_code = 1;
     } catch (ExecutionException& exception) {
         std::cerr << ((exception.getResult().getSeverity() == res::WARN) ? rang::fgB::yellow : rang::fgB::red)

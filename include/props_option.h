@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_OPT_H
-#define PROPS_PROPS_OPT_H
+#ifndef PROPS_OPT_H
+#define PROPS_OPT_H
 
 #include <string>
 #include <list>
@@ -73,4 +73,4 @@ private:
 
 };
 
-#endif //PROPS_PROPS_OPT_H
+#endif //PROPS_OPT_H

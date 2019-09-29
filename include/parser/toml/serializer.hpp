@@ -22,16 +22,16 @@ namespace toml
 // Since toml restricts characters available in a bare key, generally a string
 // should be escaped. But checking whether a string needs to be surrounded by
 // a `"` and escaping some special character is boring.
-inline std::string format_key(const toml::key& key)
+inline std::string format_key(const toml::key& k)
 {
-    detail::location<toml::key> loc(key, key);
+    detail::location<toml::key> loc(k, k);
     detail::lex_unquoted_key::invoke(loc);
     if(loc.iter() == loc.end())
     {
-        return key; // all the tokens are consumed. the key is unquoted-key.
+        return k; // all the tokens are consumed. the k is unquoted-k.
     }
     std::string token("\"");
-    for(const char c : key)
+    for(const char c : k)
     {
         switch(c)
         {
@@ -435,9 +435,9 @@ struct serializer
 
   private:
 
-    std::string serialize_key(const toml::key& key) const
+    std::string serialize_key(const toml::key& k) const
     {
-        return ::toml::format_key(key);
+        return ::toml::format_key(k);
     }
 
     std::string serialize_dotted_key(const std::vector<toml::key>& keys) const

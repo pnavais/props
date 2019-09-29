@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_COMMAND_H
-#define PROPS_PROPS_COMMAND_H
+#ifndef PROPS_COMMAND_H
+#define PROPS_COMMAND_H
 
 #include "init_exception.h"
 #include "props_search_result.h"
-#include "config.h"
 #include "props_arg.h"
 #include "arg_store.h"
 #include <string>
@@ -142,4 +141,4 @@ protected:
 
 };
 
-#endif //PROPS_PROPS_COMMAND_H
+#endif //PROPS_COMMAND_H

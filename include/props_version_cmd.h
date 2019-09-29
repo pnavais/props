@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_VERSION_COMMAND_H
-#define PROPS_PROPS_VERSION_COMMAND_H
+#ifndef PROPS_VERSION_COMMAND_H
+#define PROPS_VERSION_COMMAND_H
 
 #include "config.h"
 #include "props_cmd.h"
@@ -40,4 +40,4 @@ public:
 
 };
 
-#endif //PROPS_PROPS_VERSION_COMMAND_H
+#endif //PROPS_VERSION_COMMAND_H

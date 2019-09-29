@@ -20,13 +20,15 @@
 #include <iostream>
 #include <exception>
 #include <utility>
+#include "result.h"
 
 class InitializationException : public std::exception {
 
 public:
 
-    explicit InitializationException(const char *info) : info_(info) {}
-    explicit InitializationException(std::string info) : info_(std::move(info)) {}
+    explicit InitializationException(const char *info) : info_(info), severity_(res::CRITICAL) {}
+    explicit InitializationException(std::string info) : info_(std::move(info)), severity_(res::CRITICAL) {}
+    explicit InitializationException(std::string info, const res::severity severity) : info_(std::move(info)), severity_(severity) {}
 
     const char* what () const noexcept override {
         return "Error during iInitialization: ";
@@ -36,9 +38,15 @@ public:
         return info_.c_str();
     }
 
+    const res::severity& getSeverity() const {
+        return severity_;
+    }
+
 private:
 
     std::string info_;
+    res::severity severity_;
+
 
 
 };

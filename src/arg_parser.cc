@@ -112,7 +112,8 @@ void ArgParser::mapOptions(const PropsArg &arg, ArgStore &argStore, Result &resu
     }
     else if (opt == '?') {
         result = res::ERROR;
-        result.setMessage(std::string("Invalid option supplied \"") + char(optopt) + "\"");
+        auto errorOption = (optopt != 0) ? std::string("\"") + char(optopt) + "\"" : "";
+        result.setMessage(std::string("Invalid option supplied ") + errorOption);
     } else {
         for (const auto &opt_arg : arg.getOptions()) {
             if (opt_arg.getShortName() == opt) {
@@ -124,7 +125,6 @@ void ArgParser::mapOptions(const PropsArg &arg, ArgStore &argStore, Result &resu
             }
         }
     }
-
 }
 
 /**

@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <list>
+#include <sstream>
 
 #define DEFAULT_PATTERN   " "
 #define DEFAULT_SEPARATOR ","
@@ -140,6 +141,23 @@ public:
     * @return the string trimmed
     */
     static std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
+
+    /**
+     * Converts a given string to the target variable using the
+     * given type.
+     *
+     * @tparam T the target type
+     * @param t the target
+     * @param s the source string
+     * @param f the conversion function (i.e. one of std::hex, std::dec or std::oct)
+     * @return true if the operation succeeded, false otherwise
+     */
+    template <class T>
+    static bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&) = std::dec)
+    {
+        std::istringstream iss(s);
+        return !(iss >> f >> t).fail();
+    }
 
 };
 

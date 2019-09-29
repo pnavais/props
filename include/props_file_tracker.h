@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_FILE_TRACKER_H
-#define PROPS_PROPS_FILE_TRACKER_H
+#ifndef PROPS_FILE_TRACKER_H
+#define PROPS_FILE_TRACKER_H
 
 #include <list>
 #include <iostream>
@@ -33,7 +33,7 @@ public:
      * Retrieves the singleton instance
      * @return the singleton instance
      */
-    static PropsFileTracker &getDefault() {
+    static PropsFileTracker& getDefault() {
         static PropsFileTracker instance;
         return instance;
     }
@@ -81,11 +81,15 @@ public:
     }
 
     /**
-     * Sets the given file as master.
+     * Sets the file as master, revoking current
+     * master condition.
      *
      * @param propsFile the file to be set as master
      */
-    void setMasterFile(PropsFile* propsFile) {
+    void updateMasterFile(PropsFile* propsFile) {
+        if (masterFile_ != nullptr) {
+            masterFile_->setMaster(false);
+        }
         masterFile_ = propsFile;
     }
 
@@ -132,6 +136,15 @@ public:
     */
     void listTracked(std::ostream &output);
 
+    /**
+     * Retrieves the file associated with the given alias
+     * or null if not found.
+     *
+     * @param alias the alias
+     * @return the props file or null if not found
+     */
+    PropsFile* getFileWithAlias(const std::string& alias);
+
 private:
 
     /**
@@ -144,6 +157,22 @@ private:
      * user's config file.
      */
     void parseTrackerConfig();
+
+
+    /**
+     * Sets the given file as master.
+     *
+     * @param propsFile the file to be set as master
+     */
+    void setMasterFile(PropsFile* propsFile) {
+        masterFile_ = propsFile;
+    }
+
+    /**
+     * Sets the front of the tracked files list (if any)
+     * as master.
+     */
+    void setFirstAsMaster();
 
     /**
      * Adds the given file to the tracker
@@ -187,21 +216,13 @@ private:
      */
     void writeTrackerConfig(const std::string& outputFilePath) const;
 
-    /**
-     * Sets the file as master and automatically tracks it
-     * if not found.
-     *
-     * @param masterFileName the master file name
-     */
-    Result storeMaster(const std::string &masterFileName);
-
     /** The master file */
     PropsFile* masterFile_;
 
     /** The list of tracked files */
     std::list<PropsFile> trackedFiles_;
 
-    /** The maximum number of files to track (Negative value means no limit) */
+    /** The maximum number of files to track (0 value means no limit) */
     unsigned long maxTrackedFiles_;
 
     /** The map of tracked files */
@@ -211,4 +232,4 @@ private:
     std::map<std::string, PropsFile*> aliasedMapFiles_;
 };
 
-#endif //PROPS_PROPS_FILE_TRACKER_H
+#endif //PROPS_FILE_TRACKER_H

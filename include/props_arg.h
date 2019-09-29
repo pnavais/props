@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_PROPS_ARG_H
-#define PROPS_PROPS_ARG_H
+#ifndef PROPS_ARG_H
+#define PROPS_ARG_H
 
 #include <string>
 #include <list>
@@ -100,4 +100,4 @@ private:
 
 };
 
-#endif //PROPS_PROPS_ARG_H
+#endif //PROPS_ARG_H

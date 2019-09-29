@@ -18,7 +18,6 @@
 #include "config_static.h"
 #include <sstream>
 
-
 #if defined(IS_LINUX) || defined(IS_MAC)
 
 #include <sys/ioctl.h>
@@ -213,7 +212,7 @@ bool StringUtils::isEmptyOrBlank(const std::string &input) {
  * @param chars characters to remove
  * @return the string trimmed on its left side
  */
-std::string &StringUtils::ltrim(std::string &str, const std::string &chars) {
+std::string& StringUtils::ltrim(std::string &str, const std::string &chars) {
     str.erase(0, str.find_first_not_of(chars));
     return str;
 }
@@ -226,7 +225,7 @@ std::string &StringUtils::ltrim(std::string &str, const std::string &chars) {
  * @param chars characters to remove
  * @return the string trimmed on its right side
  */
-std::string &StringUtils::rtrim(std::string &str, const std::string &chars) {
+std::string& StringUtils::rtrim(std::string &str, const std::string &chars) {
     str.erase(str.find_last_not_of(chars) + 1);
     return str;
 }
@@ -239,6 +238,6 @@ std::string &StringUtils::rtrim(std::string &str, const std::string &chars) {
  * @param chars characters to remove
  * @return the string trimmed
  */
-std::string &StringUtils::trim(std::string &str, const std::string &chars) {
+std::string& StringUtils::trim(std::string &str, const std::string &chars) {
     return ltrim(rtrim(str, chars), chars);
 }

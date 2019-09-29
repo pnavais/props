@@ -31,7 +31,6 @@ namespace fs = std::filesystem;
 #endif
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
-#include <iostream>
 
 namespace fs = ghc::filesystem;
 #endif
