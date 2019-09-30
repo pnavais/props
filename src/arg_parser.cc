@@ -51,6 +51,9 @@ Result ArgParser::parseArgs(ArgStore &argStore, const std::list<PropsArg>& args)
     if (propsCmd != nullptr) {
         argStore.setCmdName(propsCmd->getName());
         readOptions(*propsCmd, argStore, result);
+    } else {
+        result = res::ERROR;
+        result.setMessage("Invalid command supplied");
     }
 
     return result;
@@ -83,6 +86,9 @@ void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& res
 
         delete[] long_opts;
         opt_index = optind;
+
+        // Skip first non-option if matches argument
+        opt_index = (arg.getName() == argStore.getArgv()[opt_index]) ? opt_index+1 : opt_index;
     }
 
     // Map non options
@@ -91,6 +97,11 @@ void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& res
         argStore.addArg(std::string(argStore.getArgv()[index]));
     }
 
+    // Check at least same attached args than non options
+    if (arg.getAttachedArgs().size() > argStore.getArgs().size()) {
+        result = res::ERROR;
+        result.setMessage("Missing arguments");
+    }
 }
 
 /**

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "props_track_cmd.h"
 #include <memory>
-#include <props_file_tracker.h>
-#include <exec_exception.h>
+#include "props_tracker_cmd.h"
+#include "props_file_tracker.h"
+#include "exec_exception.h"
 #include "rang.hpp"
 
-void PropsTrackCommand::parse(const int& argc, char* argv[]) {
+void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     if (argc > 1) {
         PropsCommand::parse(argc, argv);
     } else {
@@ -29,9 +29,9 @@ void PropsTrackCommand::parse(const int& argc, char* argv[]) {
 
     // Keep the file as a regular option considering it is
     // the first non-arg option
-    if ((optionStore_.getCmdName() == track_cmd::_ALIAS_FILE_) || 
-        (optionStore_.getCmdName() == track_cmd::_TRACKER_UNALIAS_CMD_)) {
-        optionStore_.addOption(track_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
+    if ((optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_) ||
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_)) {
+        optionStore_.addOption(tracker_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
     }
 }
 
@@ -42,17 +42,17 @@ void PropsTrackCommand::parse(const int& argc, char* argv[]) {
  *
  * @param result the result message for the command
  */
-void PropsTrackCommand::execute(PropsResult &result) {
+void PropsTrackerCommand::execute(PropsResult &result) {
     std::ostringstream out;
 
     rang::setControlMode(rang::control::Force);
 
-    if (optionStore_.getCmdName() == track_cmd::_TRACKER_ADD_CMD_)
+    if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_)
     {
         trackFile(out);
-    } else if (optionStore_.getCmdName() == track_cmd::_TRACKER_LS_CMD_) {
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_LS_CMD_) {
         PropsFileTracker::getDefault().listTracked();
-    } else if (optionStore_.getCmdName() == track_cmd::_TRACKER_UNALIAS_CMD_) {
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) {
         auto &alias = optionStore_.getArgs().front();
         std::cout << "Hay que borrar el alias => [" << alias << "]" << std::endl;
     }
@@ -69,16 +69,16 @@ void PropsTrackCommand::execute(PropsResult &result) {
  *
  * @return the result of the operation
  */
-Result PropsTrackCommand::trackFile(std::ostringstream& out) {
+Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
     auto option_map = optionStore_.getOptions();
-    PropsFile propsFile = PropsFile::make_file(option_map[track_cmd::_TRACKED_FILE_]);
+    PropsFile propsFile = PropsFile::make_file(option_map[tracker_cmd::_TRACKED_FILE_]);
 
     // Sets the alias (if any)
-    if (option_map.count(track_cmd::_ALIAS_FILE_) != 0) {
-        propsFile.setAlias(option_map[track_cmd::_ALIAS_FILE_]);
+    if (option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) {
+        propsFile.setAlias(option_map[tracker_cmd::_ALIAS_FILE_]);
     }
     // Sets as master (if available)
-    if (option_map.count(track_cmd::_MASTER_FILE_) != 0) {
+    if (option_map.count(tracker_cmd::_MASTER_FILE_) != 0) {
         propsFile.setMaster(true);
     }
 

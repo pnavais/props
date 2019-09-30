@@ -22,8 +22,7 @@
 #include "props_version_cmd.h"
 #include "props_help_cmd.h"
 #include "props_unknown_cmd.h"
-#include "props_track_cmd.h"
-#include "props_untrack_cmd.h"
+#include "props_tracker_cmd.h"
 
 /**
  * Adds all available commands
@@ -31,8 +30,7 @@
 PropsCommandFactory::PropsCommandFactory() {
 
     listCmds_ = {
-            new PropsTrackCommand(),
-            new PropsUntrackCommand(),
+            new PropsTrackerCommand(),
             new PropsHelpCommand(),
             new PropsVersionCommand()
     };

@@ -38,18 +38,8 @@ void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
         if (!result.isValid()) {
             throw InitializationException(result.getMessage());
         }
-    } else {
-        bool has_anonymous = false;
-        for (auto& arg : args_) {
-            if (arg.isAnonymous()) {
-                has_anonymous = true;
-                break;
-            }
-        }
-        if (!has_anonymous) {
-            throw ExecutionException("No arguments supplied");
-        }
     }
+
 }
 
 /**
@@ -72,7 +62,10 @@ void PropsCommand::getHelp(std::ostream& out)
     std::ostringstream desc_cmd;
     for (auto& arg : args_) {
         out << prefix << (arg.getOptions().empty() ? "" : "[");
-        out << "<" << arg.getName() << ">";
+        out << arg.getName();
+        for (auto& attachedArg : arg.getAttachedArgs()) {
+            out << " " << attachedArg;
+        }
         out << (arg.getOptions().empty() ? "" : " <options>...]");
         prefix = " | ";
 

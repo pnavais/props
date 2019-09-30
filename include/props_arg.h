@@ -25,11 +25,19 @@ class PropsArg {
 public:
 
     static PropsArg make_cmd(const std::string& name, const std::string& desc = "", const std::list<PropsOption>& options = {}) {
-        return make_full_arg(name, desc, false, options);
+        return make_full_arg(name, {}, desc, false, options);
     }
 
     static PropsArg make_arg(const std::string& name, const std::string& desc = "", const std::list<PropsOption>& options = {}) {
-        return make_full_arg(name, desc, true, options);
+        return make_full_arg(name, {}, desc, true, options);
+    }
+
+    static PropsArg make_cmd(const std::string& name, const std::list<std::string>& attachedArgs = {}, const std::string& desc = "", const std::list<PropsOption>& options = {}) {
+        return make_full_arg(name, attachedArgs, desc, false, options);
+    }
+
+    static PropsArg make_arg(const std::string& name, const std::list<std::string>& attachedArgs = {}, const std::string& desc = "", const std::list<PropsOption>& options = {}) {
+        return make_full_arg(name, attachedArgs, desc, true, options);
     }
 
     const std::string& getName() const {
@@ -46,6 +54,14 @@ public:
 
     void setShortName(const char& shortName) {
         shortName_ = shortName;
+    }
+
+    const std::list<std::string>& getAttachedArgs() const {
+        return attachedArgs_;
+    }
+
+    void setAttachedArgs(const std::list<std::string>& attachedArgs) {
+        attachedArgs_ = attachedArgs;
     }
 
     const std::string& getDescription() const {
@@ -82,10 +98,11 @@ public:
 
 private:
 
-    static PropsArg make_full_arg(const std::string& name, const std::string& desc = "", const bool& anonymous = false, const std::list<PropsOption>& options = {}) {
+    static PropsArg make_full_arg(const std::string& name, const std::list<std::string>& attachedArgs = {}, const std::string& desc = "", const bool& anonymous = false, const std::list<PropsOption>& options = {}) {
         PropsArg arg;
         arg.setName(name);
         arg.setShortName(name.at(0));
+        arg.setAttachedArgs(attachedArgs);
         arg.setDescription(desc);
         arg.setOptions(options);
         arg.setAnonymous(anonymous);
@@ -95,6 +112,7 @@ private:
     std::string name_;
     char shortName_{};
     std::string description_;
+    std::list<std::string> attachedArgs_; // The attached arguments
     std::list<PropsOption> options_;
     bool anonymous_{false};
 

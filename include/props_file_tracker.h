@@ -24,8 +24,9 @@
 #include <map>
 #include "result.h"
 #include "props_file.h"
+#include "props_tracker.h"
 
-class PropsFileTracker {
+class PropsFileTracker : public PropsTracker {
 
 public:
 
@@ -43,9 +44,9 @@ public:
      *
      * @param file the file to add
      */
-    static Result add(PropsFile &file) {
+    Result add(PropsFile &file) override {
         Result result{res::VALID};
-        getDefault().addFile(file, result);
+        addFile(file, result);
         return result;
     }
 
@@ -54,9 +55,9 @@ public:
      *
      * @param the file to remove from the tracker
      */
-    static Result remove(const std::string &filePath) {
+    Result remove(const std::string &filePath) override {
         Result result{res::VALID};
-        getDefault().removeFile(filePath, result);
+        removeFile(filePath, result);
         return result;
     }
 
@@ -65,9 +66,9 @@ public:
     *
     * @param the file to remove from the tracker
     */
-    static Result removeByAlias(const std::string &fileAlias) {
+    Result removeByAlias(const std::string &fileAlias) override {
         Result result{res::VALID};
-        getDefault().removeFileByAlias(fileAlias, result);
+        removeFileByAlias(fileAlias, result);
         return result;
     }
 
@@ -76,65 +77,16 @@ public:
      *
      * @return the list of tracked files
      */
-    const std::list<PropsFile>& getTrackedFiles() const {
-        return getDefault().trackedFiles_;
+    const std::list<PropsFile>& getTrackedFiles() const override {
+        return trackedFiles_;
     }
 
-    /**
-     * Sets the file as master, revoking current
-     * master condition.
-     *
-     * @param propsFile the file to be set as master
-     */
-    void updateMasterFile(PropsFile* propsFile) {
-        if (masterFile_ != nullptr) {
-            masterFile_->setMaster(false);
-        }
-        masterFile_ = propsFile;
-    }
-
-    /**
-     * Retrieves the master file
-     *
-     * @return the master file
-     */
-    const PropsFile* getMasterFile() const {
-        return masterFile_;
-    }
-
-    /**
-     * Displays the list of currently tracked files
-     * in the standard output
-     */
-    void listTracked() {
-        listTracked(std::cout);
-    }
-
-    /**
-     * Sets the maximum number of files to track.
-     * NOTE : A negative value means no limit.
-     *
-     * @param maxTrackedFiles the maximum number of files to track
-     */
-    static void setMaxTrackedFiles(const unsigned long& maxTrackedFiles) {
-        getDefault().maxTrackedFiles_ = maxTrackedFiles;
-    }
-
-    /**
-    * Retrieves the maximum number of files to track.
-    * NOTE : A negative value means no limit.
-    *
-    * @return the maximum number of files to track
-    */
-    static const unsigned long& getMaxTrackedFiles() {
-        return getDefault().maxTrackedFiles_;
-    }
 
     /**
     * Retrieves the list of currently tracked files
     * using the given output stream.
     */
-    void listTracked(std::ostream &output);
+    void listTracked(std::ostream &output) override;
 
     /**
      * Retrieves the file associated with the given alias
@@ -143,7 +95,7 @@ public:
      * @param alias the alias
      * @return the props file or null if not found
      */
-    PropsFile* getFileWithAlias(const std::string& alias);
+    PropsFile* getFileWithAlias(const std::string& alias) override;
 
 private:
 
@@ -216,14 +168,8 @@ private:
      */
     void writeTrackerConfig(const std::string& outputFilePath) const;
 
-    /** The master file */
-    PropsFile* masterFile_;
-
     /** The list of tracked files */
     std::list<PropsFile> trackedFiles_;
-
-    /** The maximum number of files to track (0 value means no limit) */
-    unsigned long maxTrackedFiles_;
 
     /** The map of tracked files */
     std::map<std::string,PropsFile*> trackedMapFiles_;

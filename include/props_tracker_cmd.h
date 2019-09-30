@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_TRACK_COMMAND_H
-#define PROPS_TRACK_COMMAND_H
+#ifndef PROPS_TRACKER_COMMAND_H
+#define PROPS_TRACKER_COMMAND_H
 
 #include "props_cmd.h"
 #include <sstream>
 
-namespace track_cmd {
+namespace tracker_cmd {
     static const char* _TRACKED_FILE_        = "file";
     static const char* _ALIAS_FILE_          = "alias";
     static const char* _MASTER_FILE_         = "master";
@@ -29,14 +29,14 @@ namespace track_cmd {
     static const char* _TRACKER_UNALIAS_CMD_ = "unalias";
 }
 
-class PropsTrackCommand : public PropsCommand {
+class PropsTrackerCommand : public PropsCommand {
 
 public:
 
     /**
      * Constructor of the Track command
      */
-    PropsTrackCommand() {
+    PropsTrackerCommand() {
         id_ = name_  = "tracker";
         tagLine_     = "Add | List tracked files";
         description_ = "Adds a properties file to the list of tracked files (by default the list is stored physically in $HOME/.config/props/props-tracker.conf)."
@@ -46,11 +46,11 @@ public:
                        "Additionally this command allows listing all "
                        "currently tracked properties files.";
 
-        args_ = { PropsArg::make_cmd(track_cmd::_TRACKER_ADD_CMD_, "File to track",
-                           { PropsOption::make_opt(track_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
-                             PropsOption::make_opt(track_cmd::_MASTER_FILE_, "Sets the file as master") }),
-                  PropsArg::make_cmd(track_cmd::_TRACKER_LS_CMD_ , "List all tracked files"),
-                  PropsArg::make_cmd(track_cmd::_TRACKER_UNALIAS_CMD_ , "Removes a given alias") };
+        args_ = { PropsArg::make_cmd(tracker_cmd::_TRACKER_ADD_CMD_, { "<file>" } , "Adds the file to the tracker",
+                           { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
+                             PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master") }),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_LS_CMD_ , "List all tracked files"),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNALIAS_CMD_ , { "<file>" } , "Removes a given alias") };
     }
 
     /**
@@ -79,4 +79,4 @@ public:
 
 };
 
-#endif //PROPS_TRACK_COMMAND_H
+#endif //PROPS_TRACKER_COMMAND_H

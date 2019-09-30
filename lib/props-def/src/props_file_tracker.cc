@@ -188,29 +188,39 @@ void PropsFileTracker::listTracked(std::ostream& output) {
     if (trackedFiles_.empty()) {
         output << std::endl << rang::fgB::yellow << "No files tracked" << rang::fg::reset << std::endl;
     } else {
-        // get max alias size
+        // get max file size
         size_t maxFileNameSize = 0;
-        for (auto& fileName : trackedMapFiles_) {
-            maxFileNameSize = (maxFileNameSize < fileName.first.size()) ? fileName.first.size() : maxFileNameSize;
+        for (auto& file : trackedMapFiles_) {
+            std::string fileName = file.second->isMaster() ? "(M) " + file.first : file.first;
+            maxFileNameSize = (maxFileNameSize < fileName.size()) ? fileName.size() : maxFileNameSize;
         }
 
+        if (!trackedFiles_.empty()) {
+            output << rang::fgB::green << "\n " << trackedFiles_.size() << " file" << ((trackedFiles_.size()!=1) ? "s" : "") << " tracked" << rang::fg::reset << std::endl;
+        }
+
+        size_t i=0;
         for (auto& propsFile : trackedFiles_) {
-    
+            bool last = (i==trackedFiles_.size()-1);
             std::string masterDetail = propsFile.getFileName();
             if (propsFile.isMaster()) {
                 output << rang::style::bold;
-                masterDetail += " (M)";
+                masterDetail.insert(0, "(M) ");
             }
-            output << std::endl << " * " << masterDetail << rang::style::reset << rang::fg::reset;
+            output << std::endl << " " << (last ? "└" : "├") << "─ " << masterDetail << rang::style::reset << rang::fg::reset;
 
-            auto alias = propsFile.getAlias();
-            alias = alias.empty() ? alias : StringUtils::padding("\""+ propsFile.getFileName()+"\"", maxFileNameSize+2);
-            output << rang::fgB::yellow << (alias.empty() ? "" : (" => " + alias))
+            const auto& alias = propsFile.getAlias();
+            std::string padding = (masterDetail.size() == maxFileNameSize) ? "" :  StringUtils::padding(" ", maxFileNameSize-masterDetail.size());
+
+            output << rang::fgB::yellow << (alias.empty() ? "" : padding.append(" => \"") + alias + "\"")
                    << rang::fg::reset;
+            i++;
         }
+
         if (!trackedFiles_.empty()) {
-            output << std::endl << rang::fgB::green << "\n " << trackedFiles_.size() << " file" << ((trackedFiles_.size()!=1) ? "s" : "") << " tracked" << rang::fg::reset << std::endl;
+            output << std::endl;
         }
+
     }
 }
 
