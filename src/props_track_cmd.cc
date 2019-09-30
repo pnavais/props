@@ -51,6 +51,9 @@ void PropsTrackCommand::execute(PropsResult &result) {
         trackFile(out);
     } else if (optionStore_.getCmdName() == track_cmd::_TRACK_LS_CMD_) {
         PropsFileTracker::getDefault().listTracked();
+    } else if (optionStore_.getCmdName() == track_cmd::_UNALIAS_CMD_) {
+        auto &alias = optionStore_.getArgs().front();
+        std::cout << "Hay que borrar el alias => [" << alias << "]" << std::endl;
     }
 
     rang::setControlMode(rang::control::Auto);

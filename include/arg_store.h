@@ -61,7 +61,7 @@ public:
      *
      * @return the list of arguments
      */
-    char* const * getArgv() const {
+    char** getArgv() const {
         return argv_;
     }
 
