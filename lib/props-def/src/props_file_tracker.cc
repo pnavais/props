@@ -189,23 +189,24 @@ void PropsFileTracker::listTracked(std::ostream& output) {
         output << std::endl << rang::fgB::yellow << "No files tracked" << rang::fg::reset << std::endl;
     } else {
         // get max alias size
-        size_t maxAliasSize = 0;
-        for (auto& alias : aliasedMapFiles_) {
-            maxAliasSize = (maxAliasSize < alias.first.size()) ? alias.first.size() : maxAliasSize;
+        size_t maxFileNameSize = 0;
+        for (auto& fileName : trackedMapFiles_) {
+            maxFileNameSize = (maxFileNameSize < fileName.first.size()) ? fileName.first.size() : maxFileNameSize;
         }
 
         for (auto& propsFile : trackedFiles_) {
-            auto alias = propsFile.getAlias();
-            alias = alias.empty() ? alias : StringUtils::padding("\""+ propsFile.getAlias()+"\"", maxAliasSize+2);
-            output <<  std::endl << " * " << rang::fgB::yellow << (alias.empty() ? "" : (alias +" => "))
-                   << rang::fg::reset;
-
+    
             std::string masterDetail = propsFile.getFileName();
             if (propsFile.isMaster()) {
                 output << rang::style::bold;
                 masterDetail += " (M)";
             }
-            output << masterDetail << rang::style::reset << rang::fg::reset;
+            output << std::endl << " * " << masterDetail << rang::style::reset << rang::fg::reset;
+
+            auto alias = propsFile.getAlias();
+            alias = alias.empty() ? alias : StringUtils::padding("\""+ propsFile.getFileName()+"\"", maxFileNameSize+2);
+            output << rang::fgB::yellow << (alias.empty() ? "" : (" => " + alias))
+                   << rang::fg::reset;
         }
         if (!trackedFiles_.empty()) {
             output << std::endl << rang::fgB::green << "\n " << trackedFiles_.size() << " file" << ((trackedFiles_.size()!=1) ? "s" : "") << " tracked" << rang::fg::reset << std::endl;

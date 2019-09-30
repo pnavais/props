@@ -29,7 +29,8 @@ void PropsTrackCommand::parse(const int& argc, char* argv[]) {
 
     // Keep the file as a regular option considering it is
     // the first non-arg option
-    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_) {
+    if ((optionStore_.getCmdName() == track_cmd::_ALIAS_FILE_) || 
+        (optionStore_.getCmdName() == track_cmd::_TRACKER_UNALIAS_CMD_)) {
         optionStore_.addOption(track_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
     }
 }
@@ -46,12 +47,12 @@ void PropsTrackCommand::execute(PropsResult &result) {
 
     rang::setControlMode(rang::control::Force);
 
-    if (optionStore_.getCmdName() == track_cmd::_TRACKED_FILE_)
+    if (optionStore_.getCmdName() == track_cmd::_TRACKER_ADD_CMD_)
     {
         trackFile(out);
-    } else if (optionStore_.getCmdName() == track_cmd::_TRACK_LS_CMD_) {
+    } else if (optionStore_.getCmdName() == track_cmd::_TRACKER_LS_CMD_) {
         PropsFileTracker::getDefault().listTracked();
-    } else if (optionStore_.getCmdName() == track_cmd::_UNALIAS_CMD_) {
+    } else if (optionStore_.getCmdName() == track_cmd::_TRACKER_UNALIAS_CMD_) {
         auto &alias = optionStore_.getArgs().front();
         std::cout << "Hay que borrar el alias => [" << alias << "]" << std::endl;
     }
