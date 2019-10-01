@@ -83,7 +83,7 @@ Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
     }
 
     // Adds the file to the tracker
-    Result res = PropsFileTracker::add(propsFile);
+    Result res = PropsFileTracker::getDefault().add(propsFile);
     if (res.isValid()) {
         out << std::endl << rang::fg::green << "Now tracking \"" << propsFile.getFileName() << "\"" << rang::fg::reset << std::endl;
     } else {

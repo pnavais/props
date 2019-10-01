@@ -81,12 +81,11 @@ public:
         return trackedFiles_;
     }
 
-
     /**
     * Retrieves the list of currently tracked files
     * using the given output stream.
     */
-    void listTracked(std::ostream &output) override;
+    void listTracked(std::ostream &output) const override;
 
     /**
      * Retrieves the file associated with the given alias

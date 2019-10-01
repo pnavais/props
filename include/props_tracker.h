@@ -76,14 +76,6 @@ public:
     }
 
     /**
-     * Displays the list of currently tracked files
-     * in the standard output
-     */
-    void listTracked() {
-        listTracked(std::cout);
-    }
-
-    /**
      * Sets the maximum number of files to track.
      * NOTE : A negative value means no limit.
      *
@@ -104,10 +96,17 @@ public:
     }
 
     /**
+     * Retrieves the list of currently tracked files
+     * using the given output stream.
+     */
+    virtual void listTracked() const {
+        listTracked(std::cout);
+    }
+    /**
     * Retrieves the list of currently tracked files
     * using the given output stream.
     */
-    virtual void listTracked(std::ostream &output) = 0;
+    virtual void listTracked(std::ostream &output) const = 0;
 
     /**
      * Retrieves the file associated with the given alias

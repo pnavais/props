@@ -184,7 +184,7 @@ void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& r
  *
  * @param output the output stream
 */
-void PropsFileTracker::listTracked(std::ostream& output) {
+void PropsFileTracker::listTracked(std::ostream& output) const {
     if (trackedFiles_.empty()) {
         output << std::endl << rang::fgB::yellow << "No files tracked" << rang::fg::reset << std::endl;
     } else {
@@ -314,7 +314,7 @@ void PropsFileTracker::updateTrackerConfig() const {
     // Rename temporary file if needed
     if (outputFilePath == configFilePathTmp) {
         if (!FileUtils::rename(configFilePathTmp, configFilePath)) {
-            remove(configFilePathTmp);
+            FileUtils::remove(configFilePathTmp);
             throw ExecutionException("I/O Error updating tracker configuration file");
         }
     }
