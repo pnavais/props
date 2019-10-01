@@ -25,6 +25,8 @@ class PropsTracker {
 
 public:
 
+    virtual ~PropsTracker() {};
+
     /**
      * Adds a new file to the tracker
      *
@@ -99,14 +101,7 @@ public:
      * Retrieves the list of currently tracked files
      * using the given output stream.
      */
-    virtual void listTracked() const {
-        listTracked(std::cout);
-    }
-    /**
-    * Retrieves the list of currently tracked files
-    * using the given output stream.
-    */
-    virtual void listTracked(std::ostream &output) const = 0;
+    virtual void listTracked() const = 0;
 
     /**
      * Retrieves the file associated with the given alias

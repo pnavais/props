@@ -51,9 +51,10 @@ void PropsTrackerCommand::execute(PropsResult &result) {
     {
         trackFile(out);
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_LS_CMD_) {
-        PropsFileTracker::getDefault().listTracked();
+        PropsFileTracker::getDefault().listTracked();        
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) {
-        auto &alias = optionStore_.getArgs().front();
+        const auto& option_map = optionStore_.getOptions();
+        auto &alias = option_map.at(tracker_cmd::_TRACKED_FILE_);
         std::cout << "Hay que borrar el alias => [" << alias << "]" << std::endl;
     }
 
@@ -70,12 +71,12 @@ void PropsTrackerCommand::execute(PropsResult &result) {
  * @return the result of the operation
  */
 Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
-    auto option_map = optionStore_.getOptions();
-    PropsFile propsFile = PropsFile::make_file(option_map[tracker_cmd::_TRACKED_FILE_]);
+    const auto& option_map = optionStore_.getOptions();
+    PropsFile propsFile = PropsFile::make_file(option_map.at(tracker_cmd::_TRACKED_FILE_));
 
     // Sets the alias (if any)
     if (option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) {
-        propsFile.setAlias(option_map[tracker_cmd::_ALIAS_FILE_]);
+        propsFile.setAlias(option_map.at(tracker_cmd::_ALIAS_FILE_));
     }
     // Sets as master (if available)
     if (option_map.count(tracker_cmd::_MASTER_FILE_) != 0) {
