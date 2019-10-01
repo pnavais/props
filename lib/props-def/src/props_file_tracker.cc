@@ -143,6 +143,7 @@ void PropsFileTracker::removeFile(const std::string &file, Result& result) {
         aliasedMapFiles_.erase(pFile->getAlias());
         trackedFiles_.remove(*pFile);
         result = res::VALID;
+        result.setMessage("File \""+file+"\" removed from tracker");
 
         // Update the config
         if (result.isValid()) {
@@ -205,7 +206,7 @@ void PropsFileTracker::listTracked(std::ostream& output) const {
             std::string masterDetail = propsFile.getFileName();
             if (propsFile.isMaster()) {
                 output << rang::style::bold;
-                masterDetail.insert(0, "(M) ");
+                masterDetail.append(" (M)");
             }
             output << std::endl << " " << (last ? "└" : "├") << "─ " << masterDetail << rang::style::reset << rang::fg::reset;
 
@@ -222,6 +223,27 @@ void PropsFileTracker::listTracked(std::ostream& output) const {
         }
 
     }
+}
+
+/**
+ * Removes the given alias from the file.
+ *
+ * @param alias alias to remove
+ */
+Result PropsFileTracker::removeAlias(const std::string& alias) {
+    Result res{res::VALID};
+    PropsFile* propsFile = getFileWithAlias(alias);
+    if (propsFile != nullptr) {
+        propsFile->setAlias("");
+        aliasedMapFiles_.erase(alias);
+        updateTrackerConfig();
+        res.setMessage("Alias \""+alias+"\" removed");
+    } else {
+        res.setSeverity(res::WARN);
+        res.setMessage("Alias \""+alias+"\" not found");
+    }
+
+    return res;
 }
 
 /**

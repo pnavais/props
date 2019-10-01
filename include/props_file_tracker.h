@@ -31,13 +31,9 @@ class PropsFileTracker : public PropsTracker {
 public:
 
     /**
-     * Retrieves the singleton instance
-     * @return the singleton instance
+     * Default constructor
      */
-    static PropsFileTracker& getDefault() {
-        static PropsFileTracker instance;
-        return instance;
-    }
+    PropsFileTracker();
 
     /**
      * Adds a new file to the tracker
@@ -62,15 +58,22 @@ public:
     }
 
     /**
-    * Removes a tracked file using its alias
-    *
-    * @param the file to remove from the tracker
-    */
+     * Removes a tracked file using its alias
+     *
+     * @param the file to remove from the tracker
+     */
     Result removeByAlias(const std::string &fileAlias) override {
         Result result{res::VALID};
         removeFileByAlias(fileAlias, result);
         return result;
     }
+
+    /**
+     * Removes the given alias from the file.
+     *
+     * @param alias alias to remove
+     */
+    Result removeAlias(const std::string& alias) override;
 
     /**
      * Retrieve all tracked files
@@ -105,11 +108,6 @@ public:
     PropsFile* getFileWithAlias(const std::string& alias) override;
 
 private:
-
-    /**
-     * Default constructor
-     */
-    PropsFileTracker();
 
     /**
      * Parses the tracker current configuration from the default

@@ -41,14 +41,14 @@ public:
      * @param id the identifier of the command
      * @return the command identified or null if not found
      */
-    std::unique_ptr<PropsCommand>* getCommand(const std::string& id);
+    PropsCommand* getCommand(const std::string& id) const;
 
     /**
      * Retrieve all commands in the factory
      *
      * @return the list of commands
      */
-    const std::list<PropsCommand *>& getCommands() const {
+    const std::list<std::unique_ptr<PropsCommand>>& getCommands() const {
         return listCmds_;
     }
 
@@ -59,14 +59,14 @@ public:
      * @param command the command not recognized
      * @return the wrapped command
      */
-     std::unique_ptr<PropsCommand>* getUnknownCommand(const std::string& command);
+    PropsCommand* getUnknownCommand(const std::string& command);
 
 private:
 
     PropsCommandFactory();
 
-    std::list<PropsCommand*> listCmds_;
-    std::map<std::string, std::unique_ptr<PropsCommand>> commandMap_;
+    std::list<std::unique_ptr<PropsCommand>> listCmds_;
+    std::map<std::string, PropsCommand*> commandMap_;
 };
 
 #endif //PROPS_CMD_FACTORY_H

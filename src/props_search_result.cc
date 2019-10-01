@@ -16,6 +16,7 @@
 
 #include <props_search_result.h>
 #include <props_file_tracker.h>
+#include <props_tracker_factory.h>
 
 #include "props_search_result.h"
 
@@ -49,7 +50,7 @@ void PropsSearchResult::add(const std::string &file, const std::string &value) {
  * @param results the results for the given key
  */
 p_search_res::result_map PropsSearchResult::get() const {
-    std::string masterFile = PropsFileTracker::getDefault().getMasterFile()->getFileName();
+    std::string masterFile = PropsTrackerFactory::getDefaultTracker().getMasterFile()->getFileName();
     return get(std::list<std::string>({masterFile}));
 }
 

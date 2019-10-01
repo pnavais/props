@@ -18,6 +18,7 @@
 #define PROPS_PROPS_RESULT_H
 
 #include <ostream>
+#include "result.h"
 
 class PropsResult {
 

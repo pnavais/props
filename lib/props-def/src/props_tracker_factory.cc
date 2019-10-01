@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef PROPS_CLI_H
-#define PROPS_CLI_H
+#include <props_file_tracker.h>
+#include "props_tracker_factory.h"
 
-#include "props_cmd.h"
-#include <iostream>
-
-namespace p_cli {
-    const char DEFAULT_HELP_CMD_ID[]    = "HELP";
-    const char DEFAULT_VERSION_CMD_ID[] = "VERSION";
+/**
+ * Default constructor.
+ * Sets the default tracker to PropsFileTracker.
+ */
+PropsTrackerFactory::PropsTrackerFactory() {
+    defaultTracker_ = std::unique_ptr<PropsTracker>(new PropsFileTracker());
 }
 
-class PropsCLI {
-
-public:
-
-    /**
-     * Process the command line arguments to retrieve
-     * the props param holder.
-     *
-     * @param argc the number of arguments
-     * @param argv the array of arguments
-     * @return the props params holder
-     */
-    static PropsCommand* parse(const int& argc, char* argv[]);
-
-};
-
-#endif //PROPS_CLI_H

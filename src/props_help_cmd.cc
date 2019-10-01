@@ -29,10 +29,10 @@ void PropsHelpCommand::parse(const int &argc, char *argv[]) {
     if (argc > 1) {
         subCmd_ = argv[1];
 
-        std::unique_ptr<PropsCommand> *pPtr = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(subCmd_));
+        PropsCommand* pPtr = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(subCmd_));
         if (pPtr != nullptr) {
             std::ostringstream out;
-            pPtr->get()->getHelp(out);
+            pPtr->getHelp(out);
             helpMessage_ = out.str();
         }
     }

@@ -25,7 +25,7 @@ class PropsTracker {
 
 public:
 
-    virtual ~PropsTracker() {};
+    virtual ~PropsTracker() = default;
 
     /**
      * Adds a new file to the tracker
@@ -47,6 +47,13 @@ public:
     * @param the file to remove from the tracker
     */
     virtual Result removeByAlias(const std::string &fileAlias) = 0;
+
+    /**
+     * Removes the given alias from the file.
+     *
+     * @param alias alias to remove
+     */
+    virtual Result removeAlias(const std::string& alias) = 0;
 
     /**
      * Retrieve all tracked files

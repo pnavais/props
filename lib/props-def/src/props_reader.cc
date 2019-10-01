@@ -21,6 +21,7 @@
 #include <fstream>
 #include <sstream>
 #include <pcrecpp.h>
+#include <props_tracker_factory.h>
 
 // Prototypes for globals
 const pcrecpp::RE &COMMENTED_LINE();
@@ -47,10 +48,11 @@ const pcrecpp::RE &COMMENTED_LINE() {
 PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
 {
     std::list<string> filesTracked;
+    PropsTracker* propsTracker = &PropsTrackerFactory::getDefaultTracker();
     if (global) {
-        filesTracked.push_back(PropsFileTracker::getDefault().getMasterFile()->getFileName());
+        filesTracked.push_back(propsTracker->getMasterFile()->getFileName());
     } else {
-        for (auto &propsFile : PropsFileTracker::getDefault().getTrackedFiles()) {
+        for (auto &propsFile : propsTracker->getTrackedFiles()) {
             filesTracked.push_back(propsFile.getFileName());
         }
     }

@@ -30,7 +30,7 @@
  */
 PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 {
-    std::unique_ptr<PropsCommand>* command = nullptr;
+    PropsCommand* command = nullptr;
 
 	// Check minimum options
 	if (argc < 2) {
@@ -38,19 +38,19 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 	} else {
 	    if (strcmp(argv[1], "help")==0) {
             command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID);
-            command->get()->parse(argc-1, argv+1);
+            command->parse(argc-1, argv+1);
 	    }
 	    else if ((strcmp(argv[1], "--version")==0) || (strcmp(argv[1], "-v")==0)) {
             command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_VERSION_CMD_ID);
 	    } else {
             command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));
             if (command != nullptr) {
-                command->get()->parse(argc-1, argv+1);
+                command->parse(argc-1, argv+1);
             } else {
                 command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
             }
 	    }
 	}
 
-	return (command != nullptr) ? command->get() : nullptr;
+	return (command != nullptr) ? command : nullptr;
 }

@@ -30,7 +30,8 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     // Keep the file as a regular option considering it is
     // the first non-arg option
     if ((optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_) ||
-        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_)) {
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) ||
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNTRACK_CMD_)) {
         optionStore_.addOption(tracker_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
     }
 }
@@ -44,6 +45,7 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
  */
 void PropsTrackerCommand::execute(PropsResult &result) {
     std::ostringstream out;
+    const auto& option_map = optionStore_.getOptions();
 
     rang::setControlMode(rang::control::Force);
 
@@ -51,11 +53,13 @@ void PropsTrackerCommand::execute(PropsResult &result) {
     {
         trackFile(out);
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_LS_CMD_) {
-        PropsFileTracker::getDefault().listTracked();        
+        propsTracker_->listTracked();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) {
-        const auto& option_map = optionStore_.getOptions();
-        auto &alias = option_map.at(tracker_cmd::_TRACKED_FILE_);
-        std::cout << "Hay que borrar el alias => [" << alias << "]" << std::endl;
+        auto res = propsTracker_->removeAlias(option_map.at(tracker_cmd::_TRACKED_FILE_));
+        res.showMessage();
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNTRACK_CMD_) {
+        auto res = propsTracker_->remove(option_map.at(tracker_cmd::_TRACKED_FILE_));
+        res.showMessage();
     }
 
     rang::setControlMode(rang::control::Auto);
@@ -84,7 +88,7 @@ Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
     }
 
     // Adds the file to the tracker
-    Result res = PropsFileTracker::getDefault().add(propsFile);
+    Result res = propsTracker_->add(propsFile);
     if (res.isValid()) {
         out << std::endl << rang::fg::green << "Now tracking \"" << propsFile.getFileName() << "\"" << rang::fg::reset << std::endl;
     } else {

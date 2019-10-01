@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "config_static.h"
-
 #include "props_cli.h"
 #include "string_utils.h"
 #include "props_cmd_factory.h"
@@ -29,15 +27,13 @@
  */
 PropsCommandFactory::PropsCommandFactory() {
 
-    listCmds_ = {
-            new PropsTrackerCommand(),
-            new PropsHelpCommand(),
-            new PropsVersionCommand()
-    };
+    listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsTrackerCommand()));
+    listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsHelpCommand()));
+    listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsVersionCommand()));
 
     //TODO: Load commands dynamically
     for (auto& cmd : listCmds_) {
-        commandMap_[StringUtils::toUpper(cmd->getId())] = std::unique_ptr<PropsCommand>(cmd);
+        commandMap_[StringUtils::toUpper(cmd->getId())] = cmd.get();
     }
 }
 
@@ -48,10 +44,10 @@ PropsCommandFactory::PropsCommandFactory() {
  * @param id the identifier
  * @return
  */
-std::unique_ptr<PropsCommand>* PropsCommandFactory::getCommand(const std::string &id) {
-    std::unique_ptr<PropsCommand>* command = nullptr;
+PropsCommand* PropsCommandFactory::getCommand(const std::string &id) const {
+    PropsCommand* command = nullptr;
     if (commandMap_.find(id) != commandMap_.end()) {
-        command = &commandMap_[id];
+        command = commandMap_.at(id);
     }
 
     return command;
@@ -64,7 +60,12 @@ std::unique_ptr<PropsCommand>* PropsCommandFactory::getCommand(const std::string
  * @param command the command not recognized
  * @return the wrapped command
  */
-std::unique_ptr<PropsCommand>* PropsCommandFactory::getUnknownCommand(const std::string& command) {
-    commandMap_["UNKNOWN_CMD_"+command] = std::unique_ptr<PropsCommand>(new PropsUnknownCommand(command));
-    return &(commandMap_["UNKNOWN_CMD_"+command]);
+PropsCommand* PropsCommandFactory::getUnknownCommand(const std::string& command) {
+    std::string commandName = "UNKNOWN_CMD_"+command;
+    if (commandMap_.count(commandName) == 0) {
+        auto unknownCmd = std::unique_ptr<PropsCommand>(new PropsUnknownCommand(command));
+        commandMap_[commandName] = unknownCmd.get();
+        listCmds_.push_back(std::move(unknownCmd));
+    }
+    return commandMap_[commandName];
 }
