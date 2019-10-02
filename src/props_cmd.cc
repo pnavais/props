@@ -33,11 +33,15 @@
 void PropsCommand::parse(const int& argc, char* argv[]) noexcept(false) {
 
     if (argc > 1) {
-        optionStore_ = ArgStore::make_store(argc, argv);
-        Result result = ArgParser::parseArgs(optionStore_, args_);
-        if (!result.isValid()) {
-            throw InitializationException(result.getMessage());
-        }
+		if ((argc == 2) && (strcmp(argv[1],"--help")==0)) {
+			getHelp(std::cout);
+		} else {
+			optionStore_ = ArgStore::make_store(argc, argv);
+			Result result = ArgParser::parseArgs(optionStore_, args_);
+			if (!result.isValid()) {
+				throw InitializationException(result.getMessage());
+			}
+		}
     }
 
 }
