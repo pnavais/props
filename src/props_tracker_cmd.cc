@@ -15,10 +15,10 @@
  */
 
 #include <memory>
+#include <file_utils.h>
 #include "props_tracker_cmd.h"
 #include "props_file_tracker.h"
 #include "exec_exception.h"
-#include "rang.hpp"
 
 void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     if (argc > 1) {
@@ -30,7 +30,9 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     // Keep the file as a regular option considering it is
     // the first non-arg option
     if ((optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_) ||
-        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) ||
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_SET_MASTER_CMD_) ||
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_SET_ALIAS_CMD_)  ||
+        (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_)    ||
         (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNTRACK_CMD_)) {
         optionStore_.addOption(tracker_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
     }
@@ -46,35 +48,39 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
 void PropsTrackerCommand::execute(PropsResult &result) {
     std::ostringstream out;
     const auto& option_map = optionStore_.getOptions();
+    Result res{res::VALID};
 
-    rang::setControlMode(rang::control::Force);
-
-    if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_)
-    {
-        trackFile(out);
+    if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_) {
+        res = trackFile();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_LS_CMD_) {
         propsTracker_->listTracked();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) {
-        auto res = propsTracker_->removeAlias(option_map.at(tracker_cmd::_TRACKED_FILE_));
-        res.showMessage();
+        res = propsTracker_->removeAlias(option_map.at(tracker_cmd::_TRACKED_FILE_));
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNTRACK_CMD_) {
-        auto res = propsTracker_->remove(option_map.at(tracker_cmd::_TRACKED_FILE_));
-        res.showMessage();
+        res = untrackFile();
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_SET_MASTER_CMD_) {
+        res = setMaster();
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_SET_ALIAS_CMD_) {
+        // Check alias is set
+        if (option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) {
+            std::cout << "Setting alias [" << option_map.at(tracker_cmd::_TRACKED_FILE_) << "]" << std::endl;
+            std::cout << "ES UN ALIAS !" << option_map.at(tracker_cmd::_ALIAS_FILE_) << "]" << std::endl;
+        } else {
+            res = res::ERROR;
+            res.setMessage("Alias not specified");
+        }
     }
 
-    rang::setControlMode(rang::control::Auto);
-
+    res.showMessage(out);
     result.setResult_(out.str());
 }
 
 /**
  * Tracks the selected filed.
  *
- * @param out the output stream
- *
  * @return the result of the operation
  */
-Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
+Result PropsTrackerCommand::trackFile() {
     const auto& option_map = optionStore_.getOptions();
     PropsFile propsFile = PropsFile::make_file(option_map.at(tracker_cmd::_TRACKED_FILE_));
 
@@ -90,9 +96,74 @@ Result PropsTrackerCommand::trackFile(std::ostringstream& out) {
     // Adds the file to the tracker
     Result res = propsTracker_->add(propsFile);
     if (res.isValid()) {
-        out << std::endl << rang::fg::green << "Now tracking \"" << propsFile.getFileName() << "\"" << rang::fg::reset << std::endl;
+        res.setMessage("Now tracking \"" + propsFile.getFileName() + "\"");
+    }
+
+    return res;
+}
+
+/**
+ * Removes from the tracker the selected filed using the file
+ * name or the alias (if set).
+ *
+ * @return the result of the operation
+ */
+Result PropsTrackerCommand::untrackFile() {
+    Result res{res::VALID};
+    const auto& option_map = optionStore_.getOptions();
+
+    // Use name as alias
+    if (option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) {
+        res = propsTracker_->removeByAlias(option_map.at(tracker_cmd::_TRACKED_FILE_));
     } else {
-        throw ExecutionException(res);
+        res = propsTracker_->remove(option_map.at(tracker_cmd::_TRACKED_FILE_));
+    }
+
+    return res;
+}
+
+
+/**
+ * Sets the given file/alias as the new master.
+ *
+ * @return the result of the operation
+ */
+Result PropsTrackerCommand::setMaster() {
+    Result res{res::VALID};
+    const auto& option_map = optionStore_.getOptions();
+    PropsFile* propsFile = nullptr;
+    bool hasAlias = false;
+    const std::string* inputFile = &(option_map.at(tracker_cmd::_TRACKED_FILE_));
+
+    // Use name as hasAlias
+    if (option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) {
+        propsFile = propsTracker_->getFileWithAlias(*inputFile);
+        hasAlias = true;
+    } else {
+        propsFile = propsTracker_->getFile(*inputFile);
+        if (propsFile == nullptr) {
+            // Maybe relative ?
+            const std::string &absolutePath = FileUtils::getAbsolutePath(*inputFile);
+            if (FileUtils::fileExists(absolutePath)) {
+                propsFile = propsTracker_->getFile(absolutePath);
+                if (propsFile == nullptr) {
+                    std::cout << "Oye, que esto no estaba |" << absolutePath << "|" << std::endl;
+                    // Track it automatically
+                    PropsFile newFile = PropsFile::make_file(absolutePath);
+                    res = propsTracker_->add(newFile);
+                    res.showMessage();
+                    propsFile = &newFile;
+                }
+            }
+        }
+    }
+
+    if (res.isValid() && (propsFile != nullptr)) {
+        propsTracker_->updateMasterFile(propsFile);
+        res.setMessage("File \"" + propsFile->getFileName() + "\" set as new master");
+    } else {
+        res = res::ERROR;
+        res.setMessage(std::string((hasAlias ? "Alias" : "File")) + " \"" + *inputFile + "\" not found");
     }
 
     return res;

@@ -198,12 +198,36 @@ public:
     /**
      * Displays the inner message (if any) using
      * distinct colors depending on the validity and severity
+     * and stdout/stderr streams for valid/error messages
+     * respectively.
      */
     void showMessage() {
+        showMessage(std::cout, std::cerr);
+    }
+
+    /**
+     * Displays the inner message (if any) using
+     * distinct colors depending on the validity and severity
+     * and the supplied stream for both valid/error messages.
+     */
+    void showMessage(std::ostream& outputStream) {
+        showMessage(outputStream, outputStream);
+    }
+
+    /**
+     * Displays the inner message (if any) using
+     * distinct colors depending on the validity and severity
+     *
+     * @param okStream the stream to output valid messages
+     * @param errorStream the stream to output error messages
+     */
+    void showMessage(std::ostream& okStream , std::ostream& errorStream) {
+        rang::setControlMode(rang::control::Force);
         if (!message_.empty()) {
-            (validity_ ? std::cout : std::cerr) << ((severity_ == res::NORMAL) ? rang::fgB::green : ((severity_ == res::WARN) ? rang::fgB::yellow : rang::fgB::red))
+            (validity_ ? okStream : errorStream) << ((severity_ == res::NORMAL && validity_) ? rang::fgB::green : ((severity_ == res::WARN) ? rang::fgB::yellow : rang::fgB::red))
             << message_ << rang::fg::reset << std::endl;
         }
+        rang::setControlMode(rang::control::Auto);
     }
 
 private:

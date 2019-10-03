@@ -23,13 +23,15 @@
 #include <sstream>
 
 namespace tracker_cmd {
-    const char* const _TRACKED_FILE_        = "file";
-    const char* const _ALIAS_FILE_          = "alias";
-    const char* const _MASTER_FILE_         = "master";
-    const char* const _TRACKER_ADD_CMD_     = "add";
-    const char* const _TRACKER_LS_CMD_      = "ls";
-    const char* const _TRACKER_UNALIAS_CMD_ = "unalias";
-    const char* const _TRACKER_UNTRACK_CMD_ = "untrack";
+    const char* const _TRACKED_FILE_           = "file";
+    const char* const _ALIAS_FILE_             = "alias";
+    const char* const _MASTER_FILE_            = "master";
+    const char* const _TRACKER_ADD_CMD_        = "add";
+    const char* const _TRACKER_LS_CMD_         = "ls";
+    const char* const _TRACKER_UNALIAS_CMD_    = "unalias";
+    const char* const _TRACKER_UNTRACK_CMD_    = "untrack";
+    const char* const _TRACKER_SET_MASTER_CMD_ = "set-master";
+    const char* const _TRACKER_SET_ALIAS_CMD_  = "set-alias";
 }
 
 class PropsTrackerCommand : public PropsCommand {
@@ -53,8 +55,13 @@ public:
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
                              PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_LS_CMD_ , "List all tracked files"),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_MASTER_CMD_ , { "<file|alias>" } , "Sets the file as master",
+                           { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_ALIAS_CMD_, { "<file>" } , "Sets an alias for the tracked file",
+                                     { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "The alias for the file", {"<name>"}) }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_UNALIAS_CMD_ , { "<file>" } , "Removes a given alias"),
-                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNTRACK_CMD_ , { "<file>" } , "Removes a given file from the tracker") };
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNTRACK_CMD_ , { "<file|alias>" } , "Removes a given file from the tracker",
+                                     { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }) };
         propsTracker_ = &PropsTrackerFactory::getDefaultTracker();
     }
 
@@ -74,15 +81,30 @@ public:
      */
     void execute(PropsResult &result) override;
 
+
+private:
+
     /**
      * Tracks the selected filed.
      *
-     * @param out the output stream
      * @return the result of the operation
      */
-    Result trackFile(std::ostringstream& out);
+    Result trackFile();
 
-private:
+    /**
+     * Removes from the tracker the selected filed using the file
+     * name or the alias (if set).
+     *
+     * @return the result of the operation
+     */
+    Result untrackFile();
+
+    /**
+     * Sets the given file/alias as the new master.
+     *
+     * @return the result of the operation
+     */
+    Result setMaster();
 
     /**
      * The property tracker

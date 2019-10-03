@@ -54,16 +54,25 @@ void PropsCommand::getHelp(std::ostream& out)
 {
     rang::setControlMode(rang::control::Force);
 
-    out << std::endl     << rang::fgB::gray << "NAME" << rang::style::reset << std::endl;
+    out << std::endl     << rang::fgB::gray << "NAME" << rang::fg::reset << std::endl;
     out << "\t" << name_ << " - " << tagLine_     << std::endl;
 
-    out << std::endl << rang::fgB::gray   << "SYNOPSIS"   << rang::style::reset << std::endl;
+    out << std::endl << rang::fgB::gray   << "SYNOPSIS"   << rang::fg::reset << std::endl;
     out << "\t" << rang::style::underline << PACKAGE_NAME << rang::style::reset;
     out << " "  << rang::style::underline << name_        << rang::style::reset;
 
     std::string prefix = " ";
     std::ostringstream options;
     std::ostringstream desc_cmd;
+
+    // Find max sizes
+    size_t max_size = 0;
+    for (auto& arg : args_) {
+        const auto& current_size = arg.getName().size();
+        max_size = (current_size > max_size) ? current_size : max_size;
+    }
+
+    // Display argument information
     for (auto& arg : args_) {
         out << prefix << (arg.getOptions().empty() ? "" : "[");
         out << arg.getName();
@@ -73,8 +82,16 @@ void PropsCommand::getHelp(std::ostream& out)
         out << (arg.getOptions().empty() ? "" : " <options>...]");
         prefix = " | ";
 
-        desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", 10)
+        desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", max_size+2)
                             << ":  " << arg.getDescription() << std::endl;
+
+        if (!arg.getOptions().empty()) {
+            options << rang::fgB::yellow << "\n " << arg.getName();
+            for (auto& attachedArg : arg.getAttachedArgs()) {
+                options << " " << attachedArg;
+            }
+            options << " :" << rang::fg::reset << std::endl;
+        }
 
         for (auto& o : arg.getOptions()) {
             options << "\t" << "-" << o.getShortName() << ",--"<< o.getName() << " " << StringUtils::toFlatString(o.getCmdList(), " ") << std::endl

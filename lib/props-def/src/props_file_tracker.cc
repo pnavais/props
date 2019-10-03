@@ -164,10 +164,12 @@ void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& r
     result = res::ERROR;
     if (aliasedMapFiles_.count(fileAlias) != 0) {
         auto* pFile = aliasedMapFiles_[fileAlias];
+        auto file = pFile->getFileName();
         aliasedMapFiles_.erase(fileAlias);
         trackedMapFiles_.erase(pFile->getFileName());
         trackedFiles_.remove(*pFile);
         result = res::VALID;
+        result.setMessage("File \""+file+"\" removed from tracker");
 
         // Update the config
         if (result.isValid()) {
@@ -204,11 +206,13 @@ void PropsFileTracker::listTracked(std::ostream& output) const {
         for (auto& propsFile : trackedFiles_) {
             bool last = (i==trackedFiles_.size()-1);
             std::string masterDetail = propsFile.getFileName();
+
+            output << std::endl << " " << (last ? "└" : "├") << "─ ";
             if (propsFile.isMaster()) {
                 output << rang::style::bold;
                 masterDetail.append(" (M)");
             }
-            output << std::endl << " " << (last ? "└" : "├") << "─ " << masterDetail << rang::style::reset << rang::fg::reset;
+            output << masterDetail << rang::style::reset << rang::fg::reset;
 
             const auto& alias = propsFile.getAlias();
             std::string padding = (masterDetail.size() == maxFileNameSize) ? "" :  StringUtils::padding(" ", maxFileNameSize-masterDetail.size());
@@ -239,7 +243,7 @@ Result PropsFileTracker::removeAlias(const std::string& alias) {
         updateTrackerConfig();
         res.setMessage("Alias \""+alias+"\" removed");
     } else {
-        res.setSeverity(res::WARN);
+        res = res::ERROR;
         res.setMessage("Alias \""+alias+"\" not found");
     }
 
@@ -257,6 +261,22 @@ PropsFile* PropsFileTracker::getFileWithAlias(const std::string& alias) {
     PropsFile* propsFile = nullptr;
     if (aliasedMapFiles_.count(alias)!=0) {
         propsFile = aliasedMapFiles_[alias];
+    }
+
+    return propsFile;
+}
+
+/**
+ * Retrieves the file with the given name
+ * or null if not found.
+ *
+ * @param file the file name
+ * @return the props file or null if not found
+ */
+PropsFile* PropsFileTracker::getFile(const std::string& file) {
+    PropsFile* propsFile = nullptr;
+    if (trackedMapFiles_.count(file)!=0) {
+        propsFile = trackedMapFiles_[file];
     }
 
     return propsFile;

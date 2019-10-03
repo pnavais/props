@@ -107,6 +107,15 @@ public:
      */
     PropsFile* getFileWithAlias(const std::string& alias) override;
 
+    /**
+     * Retrieves the file with the given name
+     * or null if not found.
+     *
+     * @param file the file name
+     * @return the props file or null if not found
+     */
+    PropsFile* getFile(const std::string& file) override;
+
 private:
 
     /**

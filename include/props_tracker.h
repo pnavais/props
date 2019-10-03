@@ -119,6 +119,15 @@ public:
      */
     virtual PropsFile* getFileWithAlias(const std::string& alias) = 0;
 
+    /**
+     * Retrieves the file with the given name
+     * or null if not found.
+     *
+     * @param file the file name
+     * @return the props file or null if not found
+     */
+    virtual PropsFile* getFile(const std::string& file) = 0;
+
 protected:
 
     /** The master file */
