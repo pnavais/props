@@ -34,7 +34,7 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 
 	// Check minimum options
 	if (argc < 2) {
-         command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID);
+        command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID);
 	} else {
 	    if (strcmp(argv[1], "help")==0) {
             command = PropsCommandFactory::getDefault().getCommand(p_cli::DEFAULT_HELP_CMD_ID);

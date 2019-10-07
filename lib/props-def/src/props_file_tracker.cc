@@ -121,7 +121,7 @@ void PropsFileTracker::addFile(PropsFile &file, Result &result) {
 
         // Update the config
         if (result.isValid()) {
-            updateTrackerConfig();
+            result = save();
         }
     } else {
         result = res::ERROR;
@@ -142,12 +142,11 @@ void PropsFileTracker::removeFile(const std::string &file, Result& result) {
         trackedMapFiles_.erase(fullFilePath);
         aliasedMapFiles_.erase(pFile->getAlias());
         trackedFiles_.remove(*pFile);
-        result = res::VALID;
-        result.setMessage("File \""+file+"\" removed from tracker");
+        result = save();
 
         // Update the config
         if (result.isValid()) {
-            updateTrackerConfig();
+            result.setMessage("File \""+file+"\" removed from tracker");
         }
     } else {
         result = res::ERROR;
@@ -168,12 +167,11 @@ void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& r
         aliasedMapFiles_.erase(fileAlias);
         trackedMapFiles_.erase(pFile->getFileName());
         trackedFiles_.remove(*pFile);
-        result = res::VALID;
-        result.setMessage("File \""+file+"\" removed from tracker");
+        result = save();
 
         // Update the config
         if (result.isValid()) {
-            updateTrackerConfig();
+            result.setMessage("File \""+file+"\" removed from tracker");
         }
     } else {
         result = res::ERROR;
@@ -230,6 +228,41 @@ void PropsFileTracker::listTracked(std::ostream& output) const {
 }
 
 /**
+ * Sets the alias for a given file
+ *
+ * @param fileName the file to alias
+ * @param fileAlias the alias to be set
+ * @return the result of the operation
+ */
+Result PropsFileTracker::setAlias(const std::string& fileName, const std::string &fileAlias) {
+    Result res{res::VALID};
+
+    std::string fullFilePath = FileUtils::getAbsolutePath(fileName);
+
+    PropsFile* propsFile = getFile(fullFilePath);
+
+    if (propsFile != nullptr) {
+        if (getFileWithAlias(fileAlias) != nullptr) {
+            res = res::ERROR;
+            res.setSeverity(res::CRITICAL);
+            res.setMessage("The alias \"" + fileAlias + "\" is already used");
+        } else {
+            propsFile->setAlias(fileAlias);
+            res = save();
+            if (res.isValid()) {
+                res.setMessage("Alias \"" + fileAlias + "\" set for file \"" + fileName + "\"");
+            }
+        }
+    } else {
+        res = res::ERROR;
+        res.setSeverity(res::CRITICAL);
+        res.setMessage("File \"" + fileName + "\" not tracked");
+    }
+
+    return res;
+}
+
+/**
  * Removes the given alias from the file.
  *
  * @param alias alias to remove
@@ -240,14 +273,51 @@ Result PropsFileTracker::removeAlias(const std::string& alias) {
     if (propsFile != nullptr) {
         propsFile->setAlias("");
         aliasedMapFiles_.erase(alias);
-        updateTrackerConfig();
-        res.setMessage("Alias \""+alias+"\" removed");
+        res = save();
+        if (res.isValid()) {
+            res.setMessage("Alias \""+alias+"\" removed");
+        }
     } else {
         res = res::ERROR;
         res.setMessage("Alias \""+alias+"\" not found");
     }
 
     return res;
+}
+
+/**
+ * Removes the current alias from the file.
+ *
+ * @param fileName the file to remove the alias from
+ * @return the result of the operation
+ */
+Result PropsFileTracker::removeFileAlias(const std::string& fileName) {
+    Result res{res::VALID};
+
+    std::string fullFilePath = FileUtils::getAbsolutePath(fileName);
+
+    PropsFile* propsFile = getFile(fullFilePath);
+    
+    if (propsFile != nullptr) {
+        const std::string alias = propsFile->getAlias();
+        if (alias.empty()) {
+            res.setSeverity(res::WARN);
+            res.setMessage("File \"" + fileName + "\" not aliased");
+        } else {
+            propsFile->setAlias("");
+            res = save();
+            if (res.isValid()) {
+                res.setMessage("Alias \""+alias+"\" removed");
+            }
+        }
+    } else {
+        res = res::ERROR;
+        res.setSeverity(res::CRITICAL);
+        res.setMessage("File \"" + fileName + "\" not tracked");
+    }
+
+    return res;
+    
 }
 
 /**
@@ -332,6 +402,24 @@ Result PropsFileTracker::storeFile(PropsFile &propsFile) {
     }
 
     return result;
+}
+
+/**
+ * Stores the current configuration of the tracker
+ *
+ * @return the result of the operation
+ */
+Result PropsFileTracker::save() {
+    Result res{res::VALID};
+    try {
+        updateTrackerConfig();
+    } catch (std::exception& e) {
+        res = res::ERROR;
+        res.setSeverity(res::CRITICAL);
+        res.setMessage(e.what());
+    }
+
+    return res;
 }
 
 /**

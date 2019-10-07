@@ -69,11 +69,28 @@ public:
     }
 
     /**
+     * Sets the alias for a given file
+     *
+     * @param fileName the file to alias
+     * @param fileAlias the alias to be set
+     * @return the result of the operation
+     */
+    Result setAlias(const std::string& fileName, const std::string &fileAlias) override;
+
+    /**
      * Removes the given alias from the file.
      *
      * @param alias alias to remove
      */
     Result removeAlias(const std::string& alias) override;
+
+    /**
+     * Removes the current alias from the file.
+     *
+     * @param fileName the file to remove the alias from
+     * @return the result of the operation
+     */
+    Result removeFileAlias(const std::string& fileName) override;
 
     /**
      * Retrieve all tracked files
@@ -83,6 +100,13 @@ public:
     const std::list<PropsFile>& getTrackedFiles() const override {
         return trackedFiles_;
     }
+
+    /**
+     * Stores the current configuration of the tracker
+     *
+     * @return the result of the operation
+     */
+    Result save() override;
 
     /**
      * Retrieves the list of currently tracked files

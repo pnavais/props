@@ -19,7 +19,6 @@
 
 #include "props_cmd.h"
 #include "props_tracker.h"
-#include "props_tracker_factory.h"
 #include <sstream>
 
 namespace tracker_cmd {
@@ -59,10 +58,10 @@ public:
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_ALIAS_CMD_, { "<file>" } , "Sets an alias for the tracked file",
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "The alias for the file", {"<name>"}) }),
-                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNALIAS_CMD_ , { "<file>" } , "Removes a given alias"),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNALIAS_CMD_ , { "<file|alias>" } , "Removes a given alias from a file",
+                                     { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_UNTRACK_CMD_ , { "<file|alias>" } , "Removes a given file from the tracker",
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }) };
-        propsTracker_ = &PropsTrackerFactory::getDefaultTracker();
     }
 
     /**
@@ -107,9 +106,23 @@ private:
     Result setMaster();
 
     /**
+     * Sets an alias for a given file.
+     *
+     * @return the result of the operation
+     */
+    Result setAlias();
+
+    /**
+     * Removes an alias from a given file.
+     *
+     * @return the result of the operation
+     */
+    Result unalias();
+
+    /**
      * The property tracker
      */
-    PropsTracker* propsTracker_;
+    PropsTracker* propsTracker_{nullptr};
 
 };
 

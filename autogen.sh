@@ -21,6 +21,8 @@ then
     AC_SEARCH_OPTS="-I /usr/local/share/aclocal"
 fi
 
+case `uname` in Darwin*) glibtoolize --copy ;;
+  *) libtoolize --copy ;; esac
 aclocal 
 autoconf 
 autoheader

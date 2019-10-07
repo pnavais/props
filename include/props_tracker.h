@@ -37,23 +37,42 @@ public:
     /**
      * Removes a tracked file using the file name
      *
-     * @param the file to remove from the tracker
+     * @param filePath the file to remove from the tracker
      */
     virtual Result remove(const std::string &filePath)  = 0;
 
     /**
-    * Removes a tracked file using its alias
-    *
-    * @param the file to remove from the tracker
-    */
+     * Removes a tracked file using its alias
+     *
+     * @param fileAlias the file to remove from the tracker
+     * @return the result of the operation
+     */
     virtual Result removeByAlias(const std::string &fileAlias) = 0;
+
+    /**
+     * Sets the alias for a given file
+     *
+     * @param fileName the file to alias
+     * @param fileAlias the alias to be set
+     * @return the result of the operation
+     */
+    virtual Result setAlias(const std::string& fileName, const std::string &fileAlias) = 0;
 
     /**
      * Removes the given alias from the file.
      *
      * @param alias alias to remove
+     * @return the result of the operation
      */
     virtual Result removeAlias(const std::string& alias) = 0;
+
+    /**
+     * Removes the current alias from the file.
+     *
+     * @param fileName the file to remove the alias from
+     * @return the result of the operation
+     */
+    virtual Result removeFileAlias(const std::string& fileName) = 0;
 
     /**
      * Retrieve all tracked files
@@ -63,14 +82,24 @@ public:
     virtual const std::list<PropsFile>& getTrackedFiles() const = 0;
 
     /**
+     * Stores the current configuration of the tracker
+     *
+     * @return the result of the operation
+     */
+    virtual Result save() = 0;
+
+    /**
      * Sets the file as master, revoking current
      * master condition.
      *
      * @param propsFile the file to be set as master
      */
-    void updateMasterFile(PropsFile* propsFile) {
+     void updateMasterFile(PropsFile* propsFile) {
         if (masterFile_ != nullptr) {
             masterFile_->setMaster(false);
+        }
+        if (propsFile != nullptr) {
+            propsFile->setMaster(true);
         }
         masterFile_ = propsFile;
     }
