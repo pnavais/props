@@ -16,7 +16,6 @@
 
 #include "props_reader.h"
 #include "props_search_result.h"
-#include "props_file_tracker.h"
 #include "rang.hpp"
 #include <fstream>
 #include <sstream>
@@ -50,10 +49,12 @@ PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
     std::list<string> filesTracked;
     PropsTracker* propsTracker = &PropsTrackerFactory::getDefaultTracker();
     if (global) {
-        filesTracked.push_back(propsTracker->getMasterFile()->getFileName());
-    } else {
         for (auto &propsFile : propsTracker->getTrackedFiles()) {
             filesTracked.push_back(propsFile.getFileName());
+        }
+    } else {
+        if (propsTracker->getMasterFile() != nullptr) {
+            filesTracked.push_back(propsTracker->getMasterFile()->getFileName());
         }
     }
 	return find_value(key, filesTracked);
@@ -76,7 +77,6 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
 	regex_str << "^" << key << "=(.+)";
     pcrecpp::RE regex(regex_str.str());
 	string value_r;
-
 
 	// TODO: Process using a queue and threads
 	for (auto &file : files)
@@ -101,7 +101,6 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
         } else {
             std::cerr << rang::fgB::red << "File \"" << file << "\" not found" << rang::fg::reset << std::endl;
         }
-
     }
 
 	return result;

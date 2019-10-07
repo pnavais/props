@@ -74,7 +74,7 @@ public:
         result_ = result;
     }
 
-private:
+protected:
 
     std::string output_;
     Result result_{res::VALID};
