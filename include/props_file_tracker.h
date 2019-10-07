@@ -28,6 +28,7 @@
 
 class PropsFileTracker : public PropsTracker {
 
+
 public:
 
     /**
@@ -117,9 +118,9 @@ public:
     };
 
     /**
-    * Retrieves the list of currently tracked files
-    * using the given output stream.
-    */
+     * Retrieves the list of currently tracked files
+     * using the given output stream.
+     */
     void listTracked(std::ostream &output) const;
 
     /**
@@ -139,6 +140,22 @@ public:
      * @return the props file or null if not found
      */
     PropsFile* getFile(const std::string& file) override;
+
+    /**
+     * Retrieves the files associated with a given
+     * group.
+     *
+     * @param group the group name
+     * @return the list of files of the group
+     */
+    const std::list<PropsFile*>* getGroup(const std::string& group) {
+        std::list<PropsFile *> *groupFiles = nullptr;
+        if (trackedGroups_.count(group) != 0) {
+            groupFiles = &trackedGroups_.at(group);
+        }
+        return groupFiles;
+    }
+
 
 private:
 
@@ -206,6 +223,22 @@ private:
      */
     void writeTrackerConfig(const std::string& outputFilePath) const;
 
+    /**
+     * Removes the given file from its groups (if any).
+     *
+     * @param propsFile the props file
+     */
+    void removeFileFromGroup(PropsFile* propsFile);
+
+    /**
+     * Print the tracked group.
+     *
+     * @param output the output stream
+     * @param maxFileNameSize  the maximum file name size
+     * @param groupName the group name
+     */
+    void printTrackedGroup(std::ostream &output, size_t maxFileNameSize, const std::string& groupName) const;
+
     /** The list of tracked files */
     std::list<PropsFile> trackedFiles_;
 
@@ -214,6 +247,10 @@ private:
 
     /** The map of aliased files */
     std::map<std::string, PropsFile*> aliasedMapFiles_;
+
+    /** The groups of tracked files */
+    std::map<std::string, std::list<PropsFile*>> trackedGroups_;
+
 };
 
 #endif //PROPS_FILE_TRACKER_H

@@ -22,7 +22,7 @@ AC_PROG_LIBTOOL
 
 # GCC specific configuration (optional)
 GCC_WARN_CXXFLAGS="-fdiagnostics-color=auto -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow -Wnon-virtual-dtor"
-GCC_WARN_CXXFLAGS_EXTRA="-Wcast-align -Wcast-qual -Wformat -Wpointer-arith -Wwrite-strings"
+GCC_WARN_CXXFLAGS_EXTRA="-Wcast-align -Wcast-qual -Wformat -Wpointer-arith -Wwrite-strings -Wmissing-declarations"
 GCC_DEBUG_CXXFLAGS="-g -O0 -fno-omit-frame-pointer -fno-inline"
 
 # Check for GCC warning flags (optional)

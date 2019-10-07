@@ -19,6 +19,10 @@
 #include <init_exception.h>
 #include "props_config.h"
 
+/**
+ * Private function prototypes.
+ */
+void convertValue(const toml::value& value, std::string& s);
 
 /**
  * Converts a TOML value to a string.

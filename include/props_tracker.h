@@ -21,6 +21,10 @@
 #include "result.h"
 #include "props_file.h"
 
+namespace tracker {
+    static const char DEFAULT_GROUP[] = "_default";
+}
+
 class PropsTracker {
 
 public:
@@ -156,6 +160,15 @@ public:
      * @return the props file or null if not found
      */
     virtual PropsFile* getFile(const std::string& file) = 0;
+
+    /**
+     * Retrieves the files associated with a given
+     * group.
+     *
+     * @param group the group name
+     * @return the list of files of the group
+     */
+    virtual const std::list<PropsFile*>* getGroup(const std::string& group) = 0;
 
 protected:
 

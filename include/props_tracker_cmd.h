@@ -25,6 +25,7 @@ namespace tracker_cmd {
     const char* const _TRACKED_FILE_           = "file";
     const char* const _ALIAS_FILE_             = "alias";
     const char* const _MASTER_FILE_            = "master";
+    const char* const _GROUP_NAME_             = "group";
     const char* const _TRACKER_ADD_CMD_        = "add";
     const char* const _TRACKER_LS_CMD_         = "ls";
     const char* const _TRACKER_UNALIAS_CMD_    = "unalias";
@@ -52,7 +53,8 @@ public:
 
         args_ = { PropsArg::make_cmd(tracker_cmd::_TRACKER_ADD_CMD_, { "<file>" } , "Adds the file to the tracker",
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
-                             PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master") }),
+                             PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master"),
+                             PropsOption::make_opt(tracker_cmd::_GROUP_NAME_, "Sets a group for the file", {"<name>"})}),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_LS_CMD_ , "List all tracked files"),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_MASTER_CMD_ , { "<file|alias>" } , "Sets the file as master",
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),

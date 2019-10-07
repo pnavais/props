@@ -86,6 +86,10 @@ Result PropsTrackerCommand::trackFile() {
     if (option_map.count(tracker_cmd::_MASTER_FILE_) != 0) {
         propsFile.setMaster(true);
     }
+    // Sets group (if available)
+    if (option_map.count(tracker_cmd::_GROUP_NAME_) != 0) {
+        propsFile.setGroup(option_map.at(tracker_cmd::_GROUP_NAME_));
+    }
 
     // Adds the file to the tracker
     Result res = propsTracker_->add(propsFile);

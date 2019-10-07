@@ -62,6 +62,7 @@ void PropsFileTracker::parseTrackerConfig() {
 
                 const auto alias     = toml::find_or<std::string>(fileTable, "alias", "");
                 const auto master    = toml::find_or<bool>(fileTable, "master", false);
+                const auto group     = toml::find_or<std::string>(fileTable, "group", "");
                 const auto &location = toml::find<std::string>(fileTable, "location");
 
                 // Creates the new props file
@@ -69,6 +70,7 @@ void PropsFileTracker::parseTrackerConfig() {
                 propsFile.setFileName(location);
                 propsFile.setAlias(alias);
                 propsFile.setMaster(master);
+                propsFile.setGroup(group);
                 result = storeFile(propsFile);
                 if (!result.isValid()) {
                     std::string msg = "WARN: "+result.getMessage()+".Skipping";
@@ -141,6 +143,7 @@ void PropsFileTracker::removeFile(const std::string &file, Result& result) {
         auto* pFile = trackedMapFiles_[fullFilePath];
         trackedMapFiles_.erase(fullFilePath);
         aliasedMapFiles_.erase(pFile->getAlias());
+        removeFileFromGroup(pFile);
         trackedFiles_.remove(*pFile);
         result = save();
 
@@ -166,6 +169,7 @@ void PropsFileTracker::removeFileByAlias(const std::string &fileAlias, Result& r
         auto file = pFile->getFileName();
         aliasedMapFiles_.erase(fileAlias);
         trackedMapFiles_.erase(pFile->getFileName());
+        removeFileFromGroup(pFile);
         trackedFiles_.remove(*pFile);
         result = save();
 
@@ -197,33 +201,63 @@ void PropsFileTracker::listTracked(std::ostream& output) const {
         }
 
         if (!trackedFiles_.empty()) {
-            output << rang::fgB::green << "\n " << trackedFiles_.size() << " file" << ((trackedFiles_.size()!=1) ? "s" : "") << " tracked" << rang::fg::reset << std::endl;
+            output << rang::fgB::green << "\n " << trackedFiles_.size() << " file" << ((trackedFiles_.size()!=1) ? "s" : "") << " tracked";
+            // Hide group count if only 1 group, default group
+            if (!((trackedGroups_.size() == 1) && (trackedGroups_.count(tracker::DEFAULT_GROUP) != 0))) {
+                output << ", " << trackedGroups_.size() << " group" << ((trackedGroups_.size() != 1) ? "s" : "");
+            }
+            output << rang::fg::reset << std::endl;
         }
 
-        size_t i=0;
-        for (auto& propsFile : trackedFiles_) {
-            bool last = (i==trackedFiles_.size()-1);
-            std::string masterDetail = propsFile.getFileName();
+        for (auto& trackedGroup : trackedGroups_) {
+            printTrackedGroup(output, maxFileNameSize, trackedGroup.first);
+        }
+
+        if (!trackedFiles_.empty()) {
+            output << std::endl;
+        }
+    }
+}
+
+/**
+ * Print the tracked
+ * @param output
+ * @param maxFileNameSize
+ * @param trackedFiles
+ * @return
+ */
+void PropsFileTracker::printTrackedGroup(std::ostream &output, size_t maxFileNameSize, const std::string& groupName) const {
+    size_t i = 0;
+    if (trackedGroups_.count(groupName) != 0) {
+        const auto &trackedFiles = trackedGroups_.at(groupName);
+
+        // Hide title if only 1 group, default group
+        if (!((trackedGroups_.size() == 1) && (trackedGroups_.count(tracker::DEFAULT_GROUP) != 0))) {
+            output << rang::fgB::blue << "\n " << ((groupName == tracker::DEFAULT_GROUP) ? groupName.substr(1, groupName.size()-1) : groupName) << rang::fg::reset;
+        }
+
+        for (auto &propsFile : trackedFiles) {
+            bool last = (i == trackedFiles.size() - 1);
+            std::string masterDetail = propsFile->getFileName();
 
             output << std::endl << " " << (last ? "└" : "├") << "─ ";
-            if (propsFile.isMaster()) {
+            if (propsFile->isMaster()) {
                 output << rang::style::bold;
                 masterDetail.append(" (M)");
             }
             output << masterDetail << rang::style::reset << rang::fg::reset;
 
-            const auto& alias = propsFile.getAlias();
-            std::string padding = (masterDetail.size() == maxFileNameSize) ? "" :  StringUtils::padding(" ", maxFileNameSize-masterDetail.size());
+            const auto &alias = propsFile->getAlias();
+            std::string padding = (masterDetail.size() == maxFileNameSize) ? "" : StringUtils::padding(" ",
+                                                                                                       maxFileNameSize -
+                                                                                                       masterDetail.size());
 
             output << rang::fgB::yellow << (alias.empty() ? "" : padding.append(" => \"") + alias + "\"")
                    << rang::fg::reset;
             i++;
         }
 
-        if (!trackedFiles_.empty()) {
-            output << std::endl;
-        }
-
+        output << std::endl;
     }
 }
 
@@ -380,6 +414,17 @@ Result PropsFileTracker::storeFile(PropsFile &propsFile) {
                             aliasedMapFiles_[propsFile.getAlias()] = filePtr;
                         }
 
+                        // Keep a reference in the group
+                        std::string groupName = propsFile.getGroup();
+                        groupName = groupName.empty() ? tracker::DEFAULT_GROUP : groupName;
+
+                        if (trackedGroups_.count(groupName) == 0) {
+                            trackedGroups_[groupName] = std::list<PropsFile*>{};
+                        }
+
+                        trackedGroups_[groupName].push_back(filePtr);
+
+
                         // Set as new master (override)
                         if (filePtr->isMaster()) {
                             updateMasterFile(filePtr);
@@ -472,13 +517,30 @@ void PropsFileTracker::writeTrackerConfig(const std::string& outputFilePath) con
                 outFile << prefix << " {"
                         << (!propFile.getAlias().empty() ? "alias = \"" + propFile.getAlias() + "\", " : "")
                         << "location = \"" + propFile.getFileName() + "\""
-                        << (propFile.isMaster() ? ", master = true" : "") << "}";
+                        << (propFile.isMaster() ? ", master = true" : "")
+                        << (!propFile.getGroup().empty() ? ", group = \"" + propFile.getGroup() + "\"" : "") << "}";
                 prefix = ",\n"+ spacer + " ";
             }
             outFile << ((trackedFiles_.size()>1) ? "\n" + spacer : " ") << "]" << std::endl;
             outFile.close();
         } else {
             throw ExecutionException("Cannot write tracker config file");
+        }
+    }
+}
+
+/**
+ * Removes the given file from its group (if any).
+ *
+ * @param propsFile the props file
+ */
+void PropsFileTracker::removeFileFromGroup(PropsFile* propsFile) {
+    if (propsFile != nullptr) {
+        std::string groupName = propsFile->getGroup();
+        groupName = (groupName.empty()) ? tracker::DEFAULT_GROUP : groupName;
+        if (trackedGroups_.count(groupName) != 0) {
+            trackedGroups_.at(groupName).remove(propsFile);
+            propsFile->setGroup("");
         }
     }
 }

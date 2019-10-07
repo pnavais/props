@@ -100,6 +100,24 @@ public:
     }
 
     /**
+     * Retrieves the group for the file.
+     *
+     * @return the file group
+     */
+    const std::string& getGroup() const {
+        return group_;
+    }
+
+    /**
+     * Sets the group for the file.
+     *
+     * @param group the group name
+     */
+    void setGroup(const std::string& group) {
+        group_ = group;
+    }
+
+    /**
     * Equality operator.
     *
     * @param rhs the other props file
@@ -133,6 +151,7 @@ private:
     bool master_ = false;
     std::string fileName_;
     std::string alias_;
+    std::string group_;
 
 };
 
