@@ -121,9 +121,10 @@ void PropsCommand::getHelp(std::ostream& out)
  * Executes the command and formats its results
  * using the standard output.
  */
-void PropsCommand::run() noexcept(false)
+PropsResult PropsCommand::run() noexcept(false)
 {
     PropsResult result;
     execute(result);
     result.format(std::cout);
+    return result;
 }

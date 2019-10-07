@@ -40,16 +40,19 @@ int main(int argc, char **argv)
 
         command = PropsCLI::parse(argc,argv);
         if (command != nullptr) {
-            command->run();
+            PropsResult res = command->run();
+            ret_code = ((res.getExecResult().isValid() || res.getExecResult().getSeverity() == res::WARN) ? 0 : 1);
+        } else {
+            ret_code = 1;
         }
     } catch (InitializationException& exception) {
         std::cerr << ((exception.getSeverity() == res::CRITICAL) ? rang::fgB::red : rang::fgB::yellow)
                   << exception.get_info() << rang::fg::reset << std::endl;
-        ret_code = 1;
+        ret_code = 2;
     } catch (ExecutionException& exception) {
         std::cerr << ((exception.getResult().getSeverity() == res::WARN) ? rang::fgB::yellow : rang::fgB::red)
                   << exception.get_info() << rang::fg::reset << std::endl;
-        ret_code = 2;
+        ret_code = 3;
     }
 
 	return ret_code;

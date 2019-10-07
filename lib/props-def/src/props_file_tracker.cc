@@ -301,6 +301,7 @@ Result PropsFileTracker::removeFileAlias(const std::string& fileName) {
     if (propsFile != nullptr) {
         const std::string alias = propsFile->getAlias();
         if (alias.empty()) {
+            res = res::ERROR;
             res.setSeverity(res::WARN);
             res.setMessage("File \"" + fileName + "\" not aliased");
         } else {

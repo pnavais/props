@@ -15,7 +15,6 @@
  */
 
 #include <props_cli.h>
-#include "props_cmd_factory.h"
 #include "props_unknown_cmd.h"
 #include "string_utils.h"
 #include "rang.hpp"
@@ -37,5 +36,6 @@ void PropsUnknownCommand::execute(PropsResult &result) {
 
     rang::setControlMode(rang::control::Auto);
 
-    result.setResult_(out.str());
+    result.setResult(Result{res::ERROR});
+    result.setOutput(out.str());
 }

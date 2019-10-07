@@ -35,7 +35,7 @@ public:
     void execute(PropsResult &result) override {
         std::ostringstream out;
         out << PACKAGE_NAME << " version " << PACKAGE_VERSION << std::endl;
-        result.setResult_(out.str());
+        result.setOutput(out.str());
     }
 
 };

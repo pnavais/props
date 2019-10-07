@@ -127,7 +127,7 @@ public:
      * Executes the command and formats its results
      * using the standard output.
      */
-    virtual void run() noexcept(false);
+    virtual PropsResult run() noexcept(false);
 
 protected:
 

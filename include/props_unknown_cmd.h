@@ -24,7 +24,7 @@ class PropsUnknownCommand : public PropsCommand {
 
 public:
 
-    PropsUnknownCommand(const std::string& command) {
+    explicit PropsUnknownCommand(const std::string& command) {
         command_     = command;
         id_ = name_  = "UNKNOWN";
         description_ = "Unknown command";

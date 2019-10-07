@@ -35,15 +35,33 @@ public:
      * @param out the stream with formatted result.
      */
     virtual void format(std::ostream& out) const {
-        out << result_;
+        out << output_;
     };
 
     /**
-     * Retrieves the execution result
+     * Retrieves the description message
      *
      * @return the execution result
      */
-    const std::string &getResult_() const {
+    const std::string &getOutput() const {
+        return output_;
+    }
+
+    /**
+     * Sets the execution result
+     *
+     * @param result the execution result
+     */
+    void setOutput(const std::string &output) {
+        output_ = output;
+    }
+
+    /**
+     * Retrieves the description message
+     *
+     * @return the execution result
+     */
+    const Result& getExecResult() const {
         return result_;
     }
 
@@ -52,13 +70,14 @@ public:
      *
      * @param result the execution result
      */
-    void setResult_(const std::string &result) {
+    void setResult(const Result& result) {
         result_ = result;
     }
 
 private:
 
-    std::string result_;
+    std::string output_;
+    Result result_{res::VALID};
 
 };
 

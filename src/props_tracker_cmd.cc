@@ -65,7 +65,8 @@ void PropsTrackerCommand::execute(PropsResult &result) {
     }
 
     res.showMessage(out);
-    result.setResult_(out.str());
+    result.setResult(res);
+    result.setOutput(out.str());
 }
 
 /**
@@ -151,10 +152,16 @@ Result PropsTrackerCommand::setMaster() {
     }
 
     if (res.isValid() && (propsFile != nullptr)) {
-        propsTracker_->updateMasterFile(propsFile);
-        res = propsTracker_->save();
-        if (res.isValid()) {
-            res.setMessage("File \"" + propsFile->getFileName() + "\" set as new master");
+        if (propsTracker_->getMasterFile() != propsFile) {
+            propsTracker_->updateMasterFile(propsFile);
+            res = propsTracker_->save();
+            if (res.isValid()) {
+                res.setMessage("File \"" + propsFile->getFileName() + "\" set as new master");
+            }
+        } else {
+            res = res::ERROR;
+            res.setSeverity(res::WARN);
+            res.setMessage("File \"" + propsFile->getFileName() + "\" is already master");
         }
     } else {
         res = res::ERROR;

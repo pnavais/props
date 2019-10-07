@@ -105,7 +105,7 @@ public:
      *
      * @return the validity flag
      */
-    bool isValid() {
+    bool isValid() const {
         return validity_;
     }
 

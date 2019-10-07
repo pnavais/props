@@ -69,5 +69,5 @@ void PropsHelpCommand::execute(PropsResult &result) {
 
     rang::setControlMode(rang::control::Auto);
 
-    result.setResult_(out.str());
+    result.setOutput(out.str());
 }
