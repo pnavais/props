@@ -170,6 +170,27 @@ public:
      */
     virtual const std::list<PropsFile*>* getGroup(const std::string& group) = 0;
 
+    /**
+     * Removes the group effectively moving all its
+     * contained files to the default group.
+     *
+     * @param group the group to remove
+     * @return the result of the operation
+     */
+    virtual Result removeGroup(const std::string& group) = 0;
+
+    /**
+     * Moves the files from source group to target group.
+     * If target group exists, the rename operation only is
+     * effected if the force flag is supplied.
+     *
+     * @param sourceGroup the source group
+     * @param targetGroup the target group
+     * @param force forces the operation if target group exists
+     * @return the result of the operation
+     */
+    virtual Result renameGroup(const std::string& sourceGroup, const std::string& targetGroup, const bool& force) = 0;
+
 protected:
 
     /** The master file */

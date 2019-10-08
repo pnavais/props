@@ -24,12 +24,35 @@
 
 
 /**
+ * Prototypes for local functions
+ */
+std::string normalizeGroup(const std::string& group);
+
+/**
  * Namespace for constants
  */
 namespace tracker {
     static const char* TRACKER_CONFIG_FILE_NAME = "props-tracker.conf";
     static const long DEFAULT_MAX_TRACKED_FILES = 20;
     static const char* MAX_TRACKED_FILES = "general.max_tracked_files";
+}
+
+/**
+ * Normalizes the group in case the default one
+ * is used.
+ *
+ * @param group the group
+ * @return the normalized group name
+ */
+std::string normalizeGroup(const std::string& group) {
+    std::string nGroup = group;
+    if (group == std::string(tracker::DEFAULT_GROUP).erase(0,1)) {
+        nGroup = tracker::DEFAULT_GROUP;
+    } else if (group.empty()) {
+        nGroup = tracker::DEFAULT_GROUP;
+    }
+
+    return nGroup;
 }
 
 /**
@@ -415,8 +438,7 @@ Result PropsFileTracker::storeFile(PropsFile &propsFile) {
                         }
 
                         // Keep a reference in the group
-                        std::string groupName = propsFile.getGroup();
-                        groupName = groupName.empty() ? tracker::DEFAULT_GROUP : groupName;
+                        std::string groupName = normalizeGroup(propsFile.getGroup());
 
                         if (trackedGroups_.count(groupName) == 0) {
                             trackedGroups_[groupName] = std::list<PropsFile*>{};
@@ -536,13 +558,100 @@ void PropsFileTracker::writeTrackerConfig(const std::string& outputFilePath) con
  */
 void PropsFileTracker::removeFileFromGroup(PropsFile* propsFile) {
     if (propsFile != nullptr) {
-        std::string groupName = propsFile->getGroup();
-        groupName = (groupName.empty()) ? tracker::DEFAULT_GROUP : groupName;
-        if (trackedGroups_.count(groupName) != 0) {
+        std::string groupName = normalizeGroup(propsFile->getGroup());
+
+        if ((groupName != tracker::DEFAULT_GROUP) && (trackedGroups_.count(groupName) != 0)) {
             trackedGroups_.at(groupName).remove(propsFile);
             propsFile->setGroup("");
         }
     }
+}
+
+/**
+ * Removes the group effectively moving all its
+ * contained files to the default group.
+ *
+ * @param group the group to remove
+ * @return the result of the operation
+ */
+Result PropsFileTracker::removeGroup(const std::string& group) {
+    Result res{res::VALID};
+    const std::string nGroup = normalizeGroup(group);
+
+    if (nGroup != tracker::DEFAULT_GROUP) {
+        const std::list<PropsFile *> *groups = getGroup(nGroup);
+
+        if (groups != nullptr) {
+            for (auto &propsFile : *groups) {
+                propsFile->setGroup("");
+            }
+            trackedGroups_.erase(nGroup);
+            res = save();
+            if (res.isValid()) {
+                res.setMessage("Group \"" + nGroup + "\" removed from tracker");
+            }
+        } else {
+            res = res::ERROR;
+            res.setMessage("Group \"" + nGroup + "\" not found");
+        }
+    } else {
+        res = res::ERROR;
+        res.setMessage("Cannot remove default group");
+    }
+
+    return res;
+}
+
+/**
+ * Removes the group effectively moving all its
+ * contained files to the default group.
+ *
+ * @param group the group to remove
+ * @return the result of the operation
+ */
+Result PropsFileTracker::renameGroup(const std::string& sourceGroup, const std::string& targetGroup, const bool& force) {
+    Result res{res::VALID};
+
+    std::string nSrcGroup = normalizeGroup(sourceGroup);
+    std::string nTrgGroup = normalizeGroup(targetGroup);
+
+    if (nSrcGroup != tracker::DEFAULT_GROUP) {
+
+        const std::list<PropsFile *> *files = getGroup(nSrcGroup);
+
+        if (files != nullptr) {
+            if (nSrcGroup != nTrgGroup) {
+                if ((trackedGroups_.count(nTrgGroup) == 0) || force) {
+                    if (trackedGroups_.count(nTrgGroup) == 0) {
+                        trackedGroups_[nTrgGroup] = std::list<PropsFile *>{};
+                    }
+                    for (auto &propsFile : *files) {
+                        propsFile->setGroup(nTrgGroup);
+                        trackedGroups_[nTrgGroup].push_back(propsFile);
+                    }
+                    trackedGroups_.erase(nSrcGroup);
+                    res = save();
+                    if (res.isValid()) {
+                        res.setMessage("Group \"" + nSrcGroup + "\" renamed to \"" + targetGroup + "\"");
+                    }
+                } else {
+                    res = res::ERROR;
+                    res.setMessage("Target group \"" + targetGroup + "\" already exists");
+                }
+            } else {
+                res = res::ERROR;
+                res.setMessage("Same source and target groups specified");
+            }
+        } else {
+            res = res::ERROR;
+            res.setMessage("Group \"" + nSrcGroup + "\" not found");
+        }
+    } else {
+        res = res::ERROR;
+        res.setMessage("Cannot rename default group");
+    }
+
+    return res;
 }
 
 

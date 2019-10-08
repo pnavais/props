@@ -148,7 +148,7 @@ public:
      * @param group the group name
      * @return the list of files of the group
      */
-    const std::list<PropsFile*>* getGroup(const std::string& group) {
+    const std::list<PropsFile*>* getGroup(const std::string& group) override {
         std::list<PropsFile *> *groupFiles = nullptr;
         if (trackedGroups_.count(group) != 0) {
             groupFiles = &trackedGroups_.at(group);
@@ -156,6 +156,26 @@ public:
         return groupFiles;
     }
 
+    /**
+     * Removes the group effectively moving all its
+     * contained files to the default group.
+     *
+     * @param group the group to remove
+     * @return the result of the operation
+     */
+    Result removeGroup(const std::string& group) override;
+
+    /**
+     * Moves the files from source group to target group.
+     * If target group exists, the rename operation only is
+     * effected if the force flag is supplied.
+     *
+     * @param sourceGroup the source group
+     * @param targetGroup the target group
+     * @param force forces the operation if target group exists
+     * @return the result of the operation
+     */
+    Result renameGroup(const std::string& sourceGroup, const std::string& targetGroup, const bool& force) override;
 
 private:
 
