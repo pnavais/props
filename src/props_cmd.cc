@@ -123,8 +123,7 @@ void PropsCommand::getHelp(std::ostream& out)
  */
 PropsResult PropsCommand::run() noexcept(false)
 {
-    PropsResult result;
-    execute(result);
+    PropsResult result = execute();
     result.format(std::cout);
     return result;
 }

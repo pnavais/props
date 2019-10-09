@@ -45,8 +45,10 @@ void PropsHelpCommand::parse(const int &argc, char *argv[]) {
  *
  * @param result the usage message for the command or all commands if no command
  * supplied
+ * @retun the result of the command
  */
-void PropsHelpCommand::execute(PropsResult &result) {
+PropsResult PropsHelpCommand::execute() {
+    PropsResult result;
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
 
@@ -70,4 +72,6 @@ void PropsHelpCommand::execute(PropsResult &result) {
     rang::setControlMode(rang::control::Auto);
 
     result.setOutput(out.str());
+
+    return result;
 }

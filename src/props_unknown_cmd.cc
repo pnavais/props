@@ -27,8 +27,10 @@
  *
  * @param result the usage message for the command or all commands if no command
  * supplied
+ * @retun the result of the command
  */
-void PropsUnknownCommand::execute(PropsResult &result) {
+PropsResult PropsUnknownCommand::execute() {
+    PropsResult result;
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
 
@@ -38,4 +40,6 @@ void PropsUnknownCommand::execute(PropsResult &result) {
 
     result.setResult(Result{res::ERROR});
     result.setOutput(out.str());
+
+    return result;
 }

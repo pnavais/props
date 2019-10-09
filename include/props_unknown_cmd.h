@@ -30,7 +30,7 @@ public:
         description_ = "Unknown command";
     }
 
-    void execute(PropsResult &result) override;
+    PropsResult execute() override;
 
 private:
 

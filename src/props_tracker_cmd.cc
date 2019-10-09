@@ -18,6 +18,7 @@
 #include "props_tracker_cmd.h"
 #include "props_tracker_factory.h"
 #include "exec_exception.h"
+#include <sstream>
 
 void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     if (argc > 1) {
@@ -54,7 +55,8 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
  *
  * @param result the result message for the command
  */
-void PropsTrackerCommand::execute(PropsResult &result) {
+PropsResult PropsTrackerCommand::execute() {
+    PropsResult result;
     std::ostringstream out;
     Result res{res::VALID};
 
@@ -81,6 +83,8 @@ void PropsTrackerCommand::execute(PropsResult &result) {
     res.showMessage(out);
     result.setResult(res);
     result.setOutput(out.str());
+
+    return result;
 }
 
 /**

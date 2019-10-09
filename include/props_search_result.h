@@ -37,7 +37,7 @@ public:
      *
      * @param key the key
      */
-    explicit PropsSearchResult(std::string  key) : key_(std::move(key)) {}
+    explicit PropsSearchResult(std::string key) : key_(std::move(key)) {}
 
     /**
      * Retrieves the key

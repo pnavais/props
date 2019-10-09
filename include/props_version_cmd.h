@@ -32,10 +32,13 @@ public:
         description_ = tagLine_;
     }
 
-    void execute(PropsResult &result) override {
+    PropsResult execute() override {
+        PropsResult result;
         std::ostringstream out;
         out << PACKAGE_NAME << " version " << PACKAGE_VERSION << std::endl;
         result.setOutput(out.str());
+
+        return result;
     }
 
 };

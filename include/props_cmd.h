@@ -120,8 +120,9 @@ public:
      * result.
      *
      * @param result the result of the command execution
+     * @retun the result of the command
      */
-    virtual void execute(PropsResult& result) noexcept(false) = 0;
+    virtual PropsResult execute() noexcept(false) = 0;
 
     /**
      * Executes the command and formats its results

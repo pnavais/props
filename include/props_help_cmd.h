@@ -36,7 +36,7 @@ public:
 
     void parse(const int &argc, char *argv[]) override;
 
-    void execute(PropsResult &result) override;
+    PropsResult execute() override;
 
 private:
 

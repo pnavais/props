@@ -19,7 +19,6 @@
 
 #include "props_cmd.h"
 #include "props_tracker.h"
-#include <sstream>
 
 namespace tracker_cmd {
     const char* const _TRACKED_FILE_             = "file";
@@ -90,7 +89,7 @@ public:
      *
      * @param result the result to be displayed
      */
-    void execute(PropsResult &result) override;
+    PropsResult execute() override;
 
 
 private:
