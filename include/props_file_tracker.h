@@ -157,6 +157,18 @@ public:
     }
 
     /**
+     * Moves the object specified by its file/alias
+     * to the target group. If the group does not
+     * exist it is created automatically.
+     *
+     * @param name the file name or alias
+     * @param targetGroup the target group
+     * @param isAlias true if the name is an alias
+     * @return the result of the operation
+     */
+    Result group(const std::string& name, const std::string& targetGroup, const bool& isAlias) override;
+
+    /**
      * Removes the group effectively moving all its
      * contained files to the default group.
      *

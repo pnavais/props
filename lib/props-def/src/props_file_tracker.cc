@@ -568,6 +568,54 @@ void PropsFileTracker::removeFileFromGroup(PropsFile* propsFile) {
 }
 
 /**
+ * Moves the object specified by its file/alias
+ * to the target group. If the group does not
+ * exist it is created automatically.
+ *
+ * @param name the file name or alias
+ * @param targetGroup the target group
+ * @param isAlias true if the name is an alias
+ * @return the result of the operation
+ */
+Result PropsFileTracker::group(const std::string& name, const std::string& targetGroup, const bool& isAlias) {
+    Result res{res::VALID};
+    std::string nTrgGroup = normalizeGroup(targetGroup);
+
+    PropsFile* file = (isAlias) ? getFileWithAlias(name) : getFile(FileUtils::getAbsolutePath(name));
+
+    if (file != nullptr) {
+        if (normalizeGroup(file->getGroup()) != nTrgGroup) {
+            // Insert file in target group creating the group if not existing
+            if (trackedGroups_.count(nTrgGroup) == 0) {
+            } else {
+                trackedGroups_[nTrgGroup] = std::list<PropsFile *>{};
+            }
+            trackedGroups_[nTrgGroup].push_back(file);
+
+            // Switch file groups
+            const std::string &previousGroup = normalizeGroup(file->getGroup());
+            if (trackedGroups_.count(previousGroup) != 0) {
+                trackedGroups_[previousGroup].remove(file);
+                file->setGroup(nTrgGroup);
+            }
+            res = save();
+            if (res.isValid()) {
+                res.setMessage("File \"" + file->getFileName() + "\" moved to group \"" + (nTrgGroup == tracker::DEFAULT_GROUP ? nTrgGroup.erase(0,1) : nTrgGroup) + "\"");
+            }
+        } else {
+            res = res::ERROR;
+            res.setSeverity(res::WARN);
+            res.setMessage("File \"" + file->getFileName() + "\" already in group \"" + (nTrgGroup == tracker::DEFAULT_GROUP ? nTrgGroup.erase(0,1) : nTrgGroup) + "\"");
+        }
+    } else {
+        res = res::ERROR;
+        res.setMessage(std::string((isAlias ? "Alias" : "File")) + " \"" + name + "\" not found");
+    }
+
+    return res;
+}
+
+/**
  * Removes the group effectively moving all its
  * contained files to the default group.
  *

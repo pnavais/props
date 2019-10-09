@@ -40,7 +40,11 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_RENAME_GROUP_CMD_) {
         optionStore_.addOption(tracker_cmd::_OLD_GROUP_NAME_, optionStore_.getArgs().front());
         optionStore_.addOption(tracker_cmd::_GROUP_NAME_, *std::next(optionStore_.getArgs().begin(), 1));
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_GROUP_CMD_) {
+        optionStore_.addOption(tracker_cmd::_TRACKED_FILE_, optionStore_.getArgs().front());
+        optionStore_.addOption(tracker_cmd::_GROUP_NAME_, *std::next(optionStore_.getArgs().begin(), 1));
     }
+
 }
 
 /**
@@ -66,7 +70,9 @@ void PropsTrackerCommand::execute(PropsResult &result) {
         res = setMaster();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_SET_ALIAS_CMD_) {
         res = setAlias();
-    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNGROUP_CMD_) {
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_GROUP_CMD_) {
+        res = group();
+    }  else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNGROUP_CMD_) {
         res = ungroup();
     }  else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_RENAME_GROUP_CMD_) {
         res = renameGroup();
@@ -240,6 +246,35 @@ Result PropsTrackerCommand::unalias() {
 }
 
 /**
+ * Moves a file to a group from the tracker.
+ *
+ * @return the result of the operation
+ */
+Result PropsTrackerCommand::group() {
+    Result res{res::VALID};
+    const auto& option_map = optionStore_.getOptions();
+    const std::string* sourceObject = nullptr;
+    const std::string* targetGroup = nullptr;
+
+    // Obtain parameters
+    if (option_map.count(tracker_cmd::_TRACKED_FILE_) != 0) {
+        sourceObject = &option_map.at(tracker_cmd::_TRACKED_FILE_);
+        if (option_map.count(tracker_cmd::_GROUP_NAME_) != 0) {
+            targetGroup = &option_map.at(tracker_cmd::_GROUP_NAME_);
+            res = propsTracker_->group(*sourceObject, *targetGroup, option_map.count(tracker_cmd::_ALIAS_FILE_) != 0);
+        } else {
+            res = res::ERROR;
+            res.setMessage("Missing target group");
+        }
+    } else {
+        res = res::ERROR;
+        res.setMessage("Missing source file/alias");
+    }
+
+    return res;
+}
+
+/**
  * Removes an a group from the tracker, effectively
  * moving all its contained files to the default
  * group.
@@ -258,7 +293,6 @@ Result PropsTrackerCommand::ungroup() {
     }
 
     return res;
-
 }
 
 /**

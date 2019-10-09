@@ -171,6 +171,17 @@ public:
     virtual const std::list<PropsFile*>* getGroup(const std::string& group) = 0;
 
     /**
+     * Moves the object specified by its file/alias
+     * to the target group.
+     *
+     * @param name the file name or alias
+     * @param targetGroup the target group
+     * @param isAlias true if the name is an alias
+     * @return the result of the operation
+     */
+    virtual Result group(const std::string& name, const std::string& targetGroup, const bool& isAlias) = 0;
+
+    /**
      * Removes the group effectively moving all its
      * contained files to the default group.
      *

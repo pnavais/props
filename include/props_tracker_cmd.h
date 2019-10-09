@@ -34,6 +34,7 @@ namespace tracker_cmd {
     const char* const _TRACKER_UNTRACK_CMD_      = "untrack";
     const char* const _TRACKER_UNGROUP_CMD_      = "ungroup";
     const char* const _TRACKER_RENAME_GROUP_CMD_ = "rename-group";
+    const char* const _TRACKER_GROUP_CMD_        = "group";
     const char* const _TRACKER_SET_MASTER_CMD_   = "set-master";
     const char* const _TRACKER_SET_ALIAS_CMD_    = "set-alias";
 }
@@ -67,6 +68,8 @@ public:
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_UNALIAS_CMD_ , { "<file|alias>" } , "Removes a given alias from a file",
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_UNTRACK_CMD_ , { "<file|alias>" } , "Removes a given file from the tracker",
+                                     { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_GROUP_CMD_, { "<file|alias>", "<group>" } , "Moves file to the group",
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_UNGROUP_CMD_, { "<group>" } , "Removes a given group moving all its contained files to the default group"),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_RENAME_GROUP_CMD_, { "<old_group>", "<new_group>" } , "Changes the name of an existing group",
@@ -127,6 +130,15 @@ private:
      * @return the result of the operation
      */
     Result unalias();
+
+    /**
+     * Moves a file to a group from the tracker.
+     * If the group does no exist yet it is
+     * effectively created.
+     *
+     * @return the result of the operation
+     */
+    Result group();
 
     /**
      * Removes an a group from the tracker, effectively
