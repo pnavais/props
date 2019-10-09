@@ -27,11 +27,6 @@ void PropsSearchCommand::parse(const int& argc, char* argv[]) {
         throw ExecutionException("No arguments supplied");
     }
 
-    // Keep the file as a regular option considering it is
-    // the first non-arg option
-    if (optionStore_.getCmdName() == search_cmd::_SEARCH_CMD_) {
-        //optionStore_.getArgs()
-    }
 }
 
 /**
@@ -43,20 +38,17 @@ void PropsSearchCommand::parse(const int& argc, char* argv[]) {
  * @return the result of the command
  */
 PropsResult PropsSearchCommand::execute() {
-    PropsResult result;
     std::ostringstream out;
-    Result res{res::VALID};
+    PropsSearchResult searchResult("");
 
     if (optionStore_.getCmdName() == search_cmd::_SEARCH_CMD_) {
-        search();
-
+        searchResult = search();
     }
 
-    res.showMessage(out);
-    result.setResult(res);
-    result.setOutput(out.str());
+    searchResult.getExecResult().showMessage(out);
+    searchResult.setOutput(out.str());
     
-    return result;
+    return searchResult;
 }
 
 /**

@@ -210,7 +210,7 @@ public:
      * distinct colors depending on the validity and severity
      * and the supplied stream for both valid/error messages.
      */
-    void showMessage(std::ostream& outputStream) {
+    void showMessage(std::ostream& outputStream) const {
         showMessage(outputStream, outputStream);
     }
 
@@ -221,7 +221,7 @@ public:
      * @param okStream the stream to output valid messages
      * @param errorStream the stream to output error messages
      */
-    void showMessage(std::ostream& okStream , std::ostream& errorStream) {
+    void showMessage(std::ostream& okStream , std::ostream& errorStream) const {
         rang::setControlMode(rang::control::Force);
         if (!message_.empty()) {
             (validity_ ? okStream : errorStream) << ((severity_ == res::NORMAL && validity_) ? rang::fgB::green : ((severity_ == res::WARN) ? rang::fgB::yellow : rang::fgB::red))

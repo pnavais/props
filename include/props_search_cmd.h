@@ -26,7 +26,7 @@ namespace search_cmd {
     const char* const _GROUP_SEARCH_  = "group";
     const char* const _GLOBAL_SEARCH_ = "global";
     const char* const _USE_REGEX_     = "expression";
-    const char* const _SEARCH_CMD_    = "search";
+    const char *const _SEARCH_CMD_    = "search";
 }
 
 class PropsSearchCommand : public PropsCommand {
@@ -45,7 +45,7 @@ public:
                        "all tracked files can be queried simultaneously if a global search is performed. It is also possible "
                        "to query files present in groups, or files using aliases.";
 
-        args_ = { PropsArg::make_cmd(search_cmd::_SEARCH_CMD_, { "<term>", "[files...]" } , "Searches the files for a given key/value",
+        args_ = { PropsArg::make_arg(search_cmd::_SEARCH_CMD_, { "<term>", "[files...]" } , "Searches the files for a given key/value",
                                      { PropsOption::make_opt(search_cmd::_ALIAS_FILE_, "Searches the file using the alias", {"<alias>"}),
                                        PropsOption::make_opt(search_cmd::_SEARCH_VALUE_, "Perform a search by value"),
                                        PropsOption::make_opt(search_cmd::_USE_REGEX_, "The term is expressed as a regular expression"),
