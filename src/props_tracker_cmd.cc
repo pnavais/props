@@ -55,8 +55,8 @@ void PropsTrackerCommand::parse(const int& argc, char* argv[]) {
  *
  * @param result the result message for the command
  */
-PropsResult PropsTrackerCommand::execute() {
-    PropsResult result;
+std::unique_ptr<PropsResult> PropsTrackerCommand::execute() {
+    auto result = new PropsResult;
     std::ostringstream out;
     Result res{res::VALID};
 
@@ -78,13 +78,15 @@ PropsResult PropsTrackerCommand::execute() {
         res = ungroup();
     }  else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_RENAME_GROUP_CMD_) {
         res = renameGroup();
+    } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_CLEAR_CMD_) {
+        res = propsTracker_->clear();
     }
 
     res.showMessage(out);
-    result.setResult(res);
-    result.setOutput(out.str());
+    result->setResult(res);
+    result->setOutput(out.str());
 
-    return result;
+    return std::unique_ptr<PropsResult>(result);
 }
 
 /**

@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 
         command = PropsCLI::parse(argc,argv);
         if (command != nullptr) {
-            PropsResult res = command->run();
-            ret_code = ((res.getExecResult().isValid() || res.getExecResult().getSeverity() == res::WARN) ? 0 : 1);
+            auto res = command->run();
+            ret_code = ((res->getExecResult().isValid() || res->getExecResult().getSeverity() == res::WARN) ? 0 : 1);
         } else {
             ret_code = 1;
         }

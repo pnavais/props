@@ -47,8 +47,8 @@ void PropsHelpCommand::parse(const int &argc, char *argv[]) {
  * supplied
  * @retun the result of the command
  */
-PropsResult PropsHelpCommand::execute() {
-    PropsResult result;
+std::unique_ptr<PropsResult> PropsHelpCommand::execute() {
+    auto result = new PropsResult();
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
 
@@ -71,7 +71,7 @@ PropsResult PropsHelpCommand::execute() {
 
     rang::setControlMode(rang::control::Auto);
 
-    result.setOutput(out.str());
+    result->setOutput(out.str());
 
-    return result;
+    return std::unique_ptr<PropsResult>(result);
 }

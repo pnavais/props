@@ -68,7 +68,6 @@ Result ArgParser::parseArgs(ArgStore &argStore, const std::list<PropsArg>& args)
  * @param result   the result of the operation
  */
 void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& result) {
-
     int opt_index = 2;
     if (!arg.getOptions().empty()) {
         std::string optionShortList;
@@ -76,7 +75,6 @@ void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& res
         createParserArgs(arg, optionShortList, long_opts);
 
         int opt;
-
         // Retrieve the options
         while (((opt = getopt_long(argStore.getArgc(), argStore.getArgv(),
                                    optionShortList.c_str(),
@@ -87,8 +85,11 @@ void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& res
         delete[] long_opts;
         opt_index = optind;
 
-        // Skip first non-option if matches argument
-        opt_index = (arg.getName() == argStore.getArgv()[opt_index]) ? opt_index+1 : opt_index;
+
+        if (opt_index < argStore.getArgc()) {
+            // Skip first non-option if matches argument
+            opt_index = (arg.getName() == argStore.getArgv()[opt_index]) ? opt_index + 1 : opt_index;
+        }
     }
 
     // Map non options

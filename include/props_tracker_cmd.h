@@ -36,6 +36,7 @@ namespace tracker_cmd {
     const char* const _TRACKER_GROUP_CMD_        = "group";
     const char* const _TRACKER_SET_MASTER_CMD_   = "set-master";
     const char* const _TRACKER_SET_ALIAS_CMD_    = "set-alias";
+    const char* const _TRACKER_CLEAR_CMD_        = "clear";
 }
 
 class PropsTrackerCommand : public PropsCommand {
@@ -60,6 +61,7 @@ public:
                              PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master"),
                              PropsOption::make_opt(tracker_cmd::_GROUP_NAME_, "Sets a group for the file", {"<name>"})}),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_LS_CMD_ , "List all tracked files"),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_CLEAR_CMD_ , "Removes all tracked files"),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_MASTER_CMD_ , { "<file|alias>" } , "Sets the file as master",
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_SET_ALIAS_CMD_, { "<file>" } , "Sets an alias for the tracked file",
@@ -89,7 +91,7 @@ public:
      *
      * @param result the result to be displayed
      */
-    PropsResult execute() override;
+    std::unique_ptr<PropsResult> execute() override;
 
 
 private:

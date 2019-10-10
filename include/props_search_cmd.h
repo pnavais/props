@@ -24,7 +24,7 @@ namespace search_cmd {
     const char* const _ALIAS_FILE_    = "alias";
     const char* const _SEARCH_VALUE_  = "value";
     const char* const _GROUP_SEARCH_  = "group";
-    const char* const _GLOBAL_SEARCH_ = "global";
+    const char* const _MULTI_SEARCH_  = "multi";
     const char* const _USE_REGEX_     = "expression";
     const char *const _SEARCH_CMD_    = "search";
 }
@@ -43,14 +43,14 @@ public:
                        "or the list of currently tracked files if no file is supplied."
                        "In case no options are specified, the master file of the tracker is the default file to lookup but "
                        "all tracked files can be queried simultaneously if a global search is performed. It is also possible "
-                       "to query files present in groups, or files using aliases.";
+                       "to query files present in tracker groups, or files using aliases.";
 
-        args_ = { PropsArg::make_arg(search_cmd::_SEARCH_CMD_, { "<term>", "[files...]" } , "Searches the files for a given key/value",
-                                     { PropsOption::make_opt(search_cmd::_ALIAS_FILE_, "Searches the file using the alias", {"<alias>"}),
+        args_ = { PropsArg::make_arg(search_cmd::_SEARCH_CMD_, { "<term> [files...]" } , "Searches the files for a given key/value",
+                                     { PropsOption::make_opt(search_cmd::_ALIAS_FILE_, "Searches in a tracked file using the alias", {"<alias>"}),
                                        PropsOption::make_opt(search_cmd::_SEARCH_VALUE_, "Perform a search by value"),
                                        PropsOption::make_opt(search_cmd::_USE_REGEX_, "The term is expressed as a regular expression"),
-                                       PropsOption::make_opt(search_cmd::_GLOBAL_SEARCH_, "Perform a global search"),
-                                       PropsOption::make_opt(search_cmd::_GROUP_SEARCH_, "Perform a search group", {"<group_name>"})}) };
+                                       PropsOption::make_opt(search_cmd::_MULTI_SEARCH_, "Perform a global search in all tracked files"),
+                                       PropsOption::make_opt(search_cmd::_GROUP_SEARCH_, "Perform a search by a tracker group", {"<group_name>"})}) };
     }
 
     /**
@@ -67,7 +67,7 @@ public:
      *
      * @param result the result to be displayed
      */
-    PropsResult execute() override;
+    std::unique_ptr<PropsResult> execute() override;
 
 
 private:
@@ -77,7 +77,15 @@ private:
      *
      * @return the search results
      */
-     PropsSearchResult search();
+    std::unique_ptr<PropsResult> search();
+
+    /**
+     * Retrieves the list of files to lookup from the given options.
+     *
+     * @param fileList the list of files
+     * @param res the output result in case of errors.
+     */
+    void retrieveFileList(std::list<PropsFile>& fileList, Result& res);
 
     /**
      * The property tracker

@@ -36,7 +36,7 @@ public:
 
     void parse(const int &argc, char *argv[]) override;
 
-    PropsResult execute() override;
+    std::unique_ptr<PropsResult> execute() override;
 
 private:
 

@@ -110,6 +110,13 @@ public:
     Result save() override;
 
     /**
+     * Removes all currently tracked files
+     *
+     * @return the result of the operation
+     */
+    Result clear() override;
+
+    /**
      * Retrieves the list of currently tracked files
      * using the given output stream.
      */

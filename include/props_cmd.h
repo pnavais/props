@@ -22,6 +22,7 @@
 #include "props_arg.h"
 #include "arg_store.h"
 #include <string>
+#include <memory>
 
 class PropsCommand {
 
@@ -122,13 +123,13 @@ public:
      * @param result the result of the command execution
      * @retun the result of the command
      */
-    virtual PropsResult execute() noexcept(false) = 0;
+    virtual std::unique_ptr<PropsResult> execute() noexcept(false) = 0;
 
     /**
      * Executes the command and formats its results
      * using the standard output.
      */
-    virtual PropsResult run() noexcept(false);
+    virtual std::unique_ptr<PropsResult> run() noexcept(false);
 
 protected:
 

@@ -30,7 +30,7 @@ public:
         description_ = "Unknown command";
     }
 
-    PropsResult execute() override;
+    std::unique_ptr<PropsResult> execute() override;
 
 private:
 

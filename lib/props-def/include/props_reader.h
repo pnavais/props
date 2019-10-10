@@ -19,7 +19,9 @@
 
 #include <iostream>
 #include <list>
+#include <memory>
 #include <props_search_result.h>
+#include <props_file.h>
 
 using namespace std;
 
@@ -31,16 +33,6 @@ class PropsReader {
 public:
 
     /**
-     * Finds the value of the given key searching in the mater tracked file
-     * or globally on every tracked file.
-     *
-     * @param key the key to find
-     * @param global the flag enabling global search
-     * @return the results of the search
-     */
-     static PropsSearchResult find_value(const string& key, const bool& global = false);
-
-    /**
      *  Finds the value of the given key searching in the mater tracked file
      *  or globally on every tracked file.
      *
@@ -49,7 +41,7 @@ public:
      *  @param global the flag enabling global search
      *  @return the results of the search
      */
-     static PropsSearchResult find_value(const string& key, const std::list<string>& files);
+     static std::unique_ptr<PropsSearchResult> find_value(const string& key, const std::list<PropsFile>& files);
 
 };
 

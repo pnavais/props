@@ -18,8 +18,10 @@
 #include <props_tracker_factory.h>
 #include <exec_exception.h>
 #include <sstream>
+#include <props_reader.h>
 
 void PropsSearchCommand::parse(const int& argc, char* argv[]) {
+
     if (argc > 1) {
         propsTracker_ = &PropsTrackerFactory::getDefaultTracker();
         PropsCommand::parse(argc, argv);
@@ -27,6 +29,27 @@ void PropsSearchCommand::parse(const int& argc, char* argv[]) {
         throw ExecutionException("No arguments supplied");
     }
 
+    int searchOptions = 0;
+
+    // Check only one search option has been supplied
+    if (optionStore_.getOptions().count(search_cmd::_ALIAS_FILE_) != 0) {
+        searchOptions++;
+    }
+    if (optionStore_.getOptions().count(search_cmd::_GROUP_SEARCH_) != 0) {
+        searchOptions++;
+    }
+    if (optionStore_.getOptions().count(search_cmd::_MULTI_SEARCH_) != 0) {
+        searchOptions++;
+    }
+
+    // Check that only files or search options are supplied
+    if (optionStore_.getArgs().size() > 1 && searchOptions > 0) {
+        throw ExecutionException("Only one search option allowed [Files or Tracker]");
+    }
+
+    if (searchOptions > 1) {
+        throw ExecutionException("Only one search option allowed [Alias, Group, Multi]");
+    }
 }
 
 /**
@@ -37,17 +60,19 @@ void PropsSearchCommand::parse(const int& argc, char* argv[]) {
  * @param result the result message for the command
  * @return the result of the command
  */
-PropsResult PropsSearchCommand::execute() {
+std::unique_ptr<PropsResult> PropsSearchCommand::execute() {
     std::ostringstream out;
-    PropsSearchResult searchResult("");
+    std::unique_ptr<PropsResult> searchResult = nullptr;
 
     if (optionStore_.getCmdName() == search_cmd::_SEARCH_CMD_) {
         searchResult = search();
     }
 
-    searchResult.getExecResult().showMessage(out);
-    searchResult.setOutput(out.str());
-    
+    if (searchResult != nullptr) {
+        searchResult->getExecResult().showMessage(out);
+        searchResult->setOutput(out.str());
+    }
+
     return searchResult;
 }
 
@@ -56,10 +81,83 @@ PropsResult PropsSearchCommand::execute() {
  *
  * @return the search results
  */
-PropsSearchResult PropsSearchCommand::search() {
-    std::string term;
-    std::cout << "Buscando term => [" << term << "]" << std::endl;
-    PropsSearchResult searchResult(term);
+std::unique_ptr<PropsResult> PropsSearchCommand::search() {
+    Result res{res::VALID};
+    std::string term = optionStore_.getArgs().front();
+    std::unique_ptr<PropsSearchResult> searchResult(nullptr);
+
+    std::cout << "Searching term [" << term << "]" << std::endl;
+
+    // Compute the list of input files
+    std::list<PropsFile> fileList;
+
+    retrieveFileList(fileList, res);
+
+    if (fileList.empty()) {
+        res = res::ERROR;
+        res.setSeverity(res::WARN);
+        res.setMessage("There are no files to lookup");
+        searchResult.reset(new PropsSearchResult(term));
+        searchResult->setResult(res);
+    } else {
+        std::cout << "Files to lookup" << std::endl;
+        for (auto& movida : fileList) {
+            std::cout << "File -> [" << movida.getFileName() << "]" << std::endl;
+        }
+
+        searchResult = PropsReader::find_value(term, fileList);
+        searchResult->setResult(res);
+    }
 
     return searchResult;
+}
+
+/**
+ * Retrieves the list of files to lookup from the given options.
+ *
+ * @param fileList the list of files
+ * @param res the output result in case of errors.
+ */
+void PropsSearchCommand::retrieveFileList(std::list<PropsFile>& fileList, Result& res) {
+    // Check if files supplied manually
+    if (optionStore_.getArgs().size() > 1) {
+        // Skip search term and consider the rest as files
+        auto it = std::begin(optionStore_.getArgs());
+        ++it;
+        for (auto end = std::end(optionStore_.getArgs()); it != end; ++it) {
+            fileList.push_back(PropsFile::make_file(*it));
+        }
+    } else {
+        const auto& option_map = optionStore_.getOptions();
+        // Check an aliased file was supplied
+        if (option_map.count(search_cmd::_ALIAS_FILE_) != 0) {
+            auto& alias = option_map.at(search_cmd::_ALIAS_FILE_);
+            auto* pFile = propsTracker_->getFileWithAlias(alias);
+            if (pFile != nullptr) {
+                fileList.push_back(*pFile);
+            } else {
+                res = res::ERROR;
+                res.setMessage("Alias \"" + alias + "\" not found");
+            }
+        } else if (option_map.count(search_cmd::_MULTI_SEARCH_) != 0) {
+            fileList = propsTracker_->getTrackedFiles();
+        } else if (option_map.count(search_cmd::_GROUP_SEARCH_) != 0) {
+            auto& group = option_map.at(search_cmd::_GROUP_SEARCH_);
+            const std::list<PropsFile *> *pGroupList = propsTracker_->getGroup(group);
+            if (pGroupList != nullptr) {
+                for (auto pFile : *pGroupList) {
+                    fileList.push_back(*pFile);
+                }
+            } else {
+                res = res::ERROR;
+                res.setMessage("Group \"" + group + "\" not found");
+            }
+        } else {
+            // Take master if no other option set
+            auto masterFile = propsTracker_->getMasterFile();
+            if (masterFile != nullptr) {
+                fileList.push_back(*masterFile);
+            }
+        }
+    }
 }

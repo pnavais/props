@@ -20,7 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <pcrecpp.h>
-#include <props_tracker_factory.h>
+#include <file_utils.h>
 
 // Prototypes for globals
 const pcrecpp::RE &COMMENTED_LINE();
@@ -36,31 +36,6 @@ const pcrecpp::RE &COMMENTED_LINE() {
     return COMMENTED_LINE;
 }
 
-
-/**
- * Search the key in the master tracked file or
- * globally on every tracked filed.
- *
- * @param key the key to find
- * @return the value of the key in the file
- */
-PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
-{
-    std::list<string> filesTracked;
-    PropsTracker* propsTracker = &PropsTrackerFactory::getDefaultTracker();
-    if (global) {
-        for (auto &propsFile : propsTracker->getTrackedFiles()) {
-            filesTracked.push_back(propsFile.getFileName());
-        }
-    } else {
-        if (propsTracker->getMasterFile() != nullptr) {
-            filesTracked.push_back(propsTracker->getMasterFile()->getFileName());
-        }
-    }
-	return find_value(key, filesTracked);
-}
-
-
 /**
  * Finds the value for the key in the specified file.
  *
@@ -68,9 +43,9 @@ PropsSearchResult PropsReader::find_value(const string& key, const bool& global)
  * @param file the source file
  * @return the value for the key in the file
  */
-PropsSearchResult PropsReader::find_value(const string &key, const std::list<string> &files)
+std::unique_ptr<PropsSearchResult> PropsReader::find_value(const string &key, const std::list<PropsFile> &files)
 {
-    PropsSearchResult result(key);
+    std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(key));
 
 	// Prepare regex
 	std::stringstream regex_str;
@@ -81,7 +56,9 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
 	// TODO: Process using a queue and threads
 	for (auto &file : files)
     {
-	    std::ifstream infile(file);
+
+        const string &fullPath = FileUtils::getAbsolutePath(file.getFileName());
+	    std::ifstream infile(fullPath);
 
         if (infile) {
             // TODO: Process dividing file in chunks and in parallel
@@ -91,7 +68,7 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
                 if (!COMMENTED_LINE().PartialMatch(line)) {
                     if (regex.PartialMatch(line, &value_r)) {
                         infile.close();
-                        result.add(file, value_r);
+                        result->add(file.getFileName(), value_r);
                         break;
                     }
                 } else {
@@ -99,7 +76,7 @@ PropsSearchResult PropsReader::find_value(const string &key, const std::list<str
                 }
             }
         } else {
-            std::cerr << rang::fgB::red << "File \"" << file << "\" not found" << rang::fg::reset << std::endl;
+            std::cerr << rang::fgB::red << "File \"" << file.getFileName() << "\" not found" << rang::fg::reset << std::endl;
         }
     }
 

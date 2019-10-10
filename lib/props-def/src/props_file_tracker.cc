@@ -491,6 +491,34 @@ Result PropsFileTracker::save() {
 }
 
 /**
+ * Removes all currently tracked files
+ *
+ * @return the result of the operation
+ */
+Result PropsFileTracker::clear() {
+    Result res{res::VALID};
+
+    if (trackedFiles_.empty()) {
+        res.setSeverity(res::WARN);
+        res.setMessage("No files currently tracked");
+    } else {
+        trackedGroups_.clear();
+        aliasedMapFiles_.clear();
+        trackedMapFiles_.clear();
+
+        trackedFiles_.clear();
+
+        res = save();
+
+        if (res.isValid()) {
+            res.setMessage("Removed all tracked files");
+        }
+    }
+
+    return res;
+}
+
+/**
  * Updates the tracker config file with the given tracked file.
  * In case the config file is not detected a full dump is performed.
  *

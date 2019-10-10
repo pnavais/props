@@ -93,6 +93,13 @@ public:
     virtual Result save() = 0;
 
     /**
+     * Removes all currently tracked files
+     *
+     * @return the result of the operation
+     */
+    virtual Result clear() = 0;
+
+    /**
      * Sets the file as master, revoking current
      * master condition.
      *

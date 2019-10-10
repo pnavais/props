@@ -29,8 +29,8 @@
  * supplied
  * @retun the result of the command
  */
-PropsResult PropsUnknownCommand::execute() {
-    PropsResult result;
+std::unique_ptr<PropsResult> PropsUnknownCommand::execute() {
+    auto result = new PropsResult;
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
 
@@ -38,8 +38,8 @@ PropsResult PropsUnknownCommand::execute() {
 
     rang::setControlMode(rang::control::Auto);
 
-    result.setResult(Result{res::ERROR});
-    result.setOutput(out.str());
+    result->setResult(Result{res::ERROR});
+    result->setOutput(out.str());
 
-    return result;
+    return std::unique_ptr<PropsResult>(result);
 }

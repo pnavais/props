@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-#include <props_search_result.h>
-#include <props_file_tracker.h>
-#include <props_tracker_factory.h>
-
 #include "props_search_result.h"
 
 /**
@@ -39,19 +35,6 @@ const std::string &PropsSearchResult::getKey() const {
  */
 void PropsSearchResult::add(const std::string &file, const std::string &value) {
     this->fileKeys_[file].push_back(value);
-}
-
-/**
- * Retrieves the results for the given key in the master file
- * or optionally (if global mode enabled) in the rest of tracked
- * files.
- *
- * @param key the searched key
- * @param results the results for the given key
- */
-p_search_res::result_map PropsSearchResult::get() const {
-    std::string masterFile = PropsTrackerFactory::getDefaultTracker().getMasterFile()->getFileName();
-    return get(std::list<std::string>({masterFile}));
 }
 
 /**
@@ -79,5 +62,16 @@ p_search_res::result_map PropsSearchResult::get(const std::list<std::string> &fi
  * @param out the stream with formatted result.
  */
 void PropsSearchResult::format(std::ostream& out) const {
+    out << output_;
+
+    if (!fileKeys_.empty()) {
+        std::cout << "ALgo hay !!" << std::endl;
+        for (auto& fileKey : fileKeys_) {
+            std::cout << rang::fgB::yellow << "Fichero -> [" << fileKey.first << "] :"  << rang::fg::reset << std::endl;
+            for (auto& match : fileKey.second) {
+                std::cout << "match [" << match << "]" << std::endl;
+            }
+        }
+    }
 
 }
