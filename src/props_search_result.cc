@@ -15,6 +15,8 @@
  */
 
 #include "props_search_result.h"
+#include "string_utils.h"
+
 
 /**
  * Retrieves the key.
@@ -33,8 +35,8 @@ const std::string &PropsSearchResult::getKey() const {
  * @param key the searched key
  * @param value the value found
  */
-void PropsSearchResult::add(const std::string &file, const std::string &value) {
-    this->fileKeys_[file].push_back(value);
+void PropsSearchResult::add(const std::string &file, const p_search_res::Match &match) {
+    this->fileKeys_[file].push_back(match);
 }
 
 /**
@@ -65,11 +67,12 @@ void PropsSearchResult::format(std::ostream& out) const {
     out << output_;
 
     if (!fileKeys_.empty()) {
-        std::cout << "ALgo hay !!" << std::endl;
         for (auto& fileKey : fileKeys_) {
-            std::cout << rang::fgB::yellow << "Fichero -> [" << fileKey.first << "] :"  << rang::fg::reset << std::endl;
+            out << std::endl << rang::style::bold << rang::fgB::green << fileKey.first << rang::style::reset << std::endl;
+            int i=1;
             for (auto& match : fileKey.second) {
-                std::cout << "match [" << match << "]" << std::endl;
+                out << rang::style::bold << rang::fgB::yellow << i << rang::style::reset << ":" << StringUtils::highlight(match.fullLine_, key_) << std::endl;
+                i++;
             }
         }
     }

@@ -94,6 +94,37 @@ public:
      */
     static std::pair<std::size_t, std::size_t> getWindowSize();
 
+   /**
+    * Replaces first substring of a given input string with a replacement text.
+    *
+    * @param str the input string
+    * @param from the text to search
+    * @param to the replacement text
+    * @return true if the operation succeeded, false otherwise
+    * otherwise
+    */
+    static bool replace(std::string& str, const std::string& from, const std::string& to);
+
+    /**
+     * Replaces all substrings of a given input string with a replacement text.
+     *
+     * @param str the input string
+     * @param from the text to search
+     * @param to the replacement text
+     * @return true if the operation succeeded, false otherwise
+     * otherwise
+     */
+    static bool replaceAll(std::string& str, const std::string& from, const std::string& to);
+
+    /**
+     * Highlights all occurrences of a text in a given string
+     *
+     * @param str the input string
+     * @param text the text to highlight
+     * return the highlight version of the string
+     */
+    static std::string highlight(const std::string& str, const std::string& text);
+
     /**
      * Checks if a string consists only of whitespaces
      *

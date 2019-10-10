@@ -25,7 +25,13 @@
 #include <list>
 
 namespace p_search_res {
-    typedef std::map<std::string, std::list<std::string>> result_map;
+    typedef struct Match {
+            std::string fullLine_;
+            std::string value_;
+    } Match;
+
+    typedef std::map<std::string, std::list<Match>> result_map;
+
 }
 
 class PropsSearchResult : public PropsResult {
@@ -53,15 +59,7 @@ public:
      * @param file the file where the key was found
      * @param value the value found
      */
-    void add(const std::string &file, const std::string &value);
-
-    /**
-     * Retrieves the results for the given key in the master file
-     * and optionally (if global mode enabled) in the rest of tracked files.
-     *
-     * @param results the results for the master and optionally other files
-     */
-    p_search_res::result_map get() const;
+    void add(const std::string &file, const p_search_res::Match &value);
 
     /**
      * Retrieves the results for the given file.

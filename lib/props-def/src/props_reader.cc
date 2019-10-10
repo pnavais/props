@@ -56,25 +56,22 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(const string &key, co
 	// TODO: Process using a queue and threads
 	for (auto &file : files)
     {
-
         const string &fullPath = FileUtils::getAbsolutePath(file.getFileName());
 	    std::ifstream infile(fullPath);
 
         if (infile) {
-            // TODO: Process dividing file in chunks and in parallel
+            // TODO: Process dividing file in chunks and in parallel (mmap ?)
             string line;
             while (std::getline(infile, line)) {
                 // Try to find the regex in line, and report results.
                 if (!COMMENTED_LINE().PartialMatch(line)) {
                     if (regex.PartialMatch(line, &value_r)) {
-                        infile.close();
-                        result->add(file.getFileName(), value_r);
-                        break;
+                        result->add(file.getFileName(), p_search_res::Match{ line, value_r});
                     }
-                } else {
-                    std::cout << rang::fgB::yellow << "Skipping commented line " << line << rang::fg::reset << std::endl;
                 }
             }
+
+            infile.close();
         } else {
             std::cerr << rang::fgB::red << "File \"" << file.getFileName() << "\" not found" << rang::fg::reset << std::endl;
         }

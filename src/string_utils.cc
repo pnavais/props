@@ -16,6 +16,7 @@
 
 #include "string_utils.h"
 #include "config_static.h"
+#include "rang.hpp"
 #include <sstream>
 
 #if defined(IS_LINUX) || defined(IS_MAC)
@@ -180,6 +181,61 @@ std::pair<std::size_t, std::size_t> StringUtils::getWindowSize() {
 #endif
 
     return std::make_pair(rows, cols);
+}
+
+/**
+ * Replaces first substring of a given input string with a replacement text.
+ *
+ * @param str the input string
+ * @param from the text to search
+ * @param to the replacement text
+ * @return true if the operation succeeded, false otherwise
+ * otherwise
+ */
+bool StringUtils::replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
+/**
+ * Replaces all substrings of a given input string with a replacement text.
+ *
+ * @param str the input string
+ * @param from the text to search
+ * @param to the replacement text
+ * @return true if the operation succeeded, false otherwise
+ * otherwise
+ */
+bool StringUtils::replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return false;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+
+    return true;
+}
+
+/**
+ * Highlights all occurrences of a text in a given string
+ *
+ * @param str the input string
+ * @param text the text to highlight
+ * return the highlight version of the string
+ */
+std::string StringUtils::highlight(const std::string& str, const std::string& text) {
+    std::ostringstream out;
+    rang::setControlMode(rang::control::Force);
+    out << rang::style::reversed << rang::fgB::yellow << text << rang::style::reset;
+    rang::setControlMode(rang::control::Auto);
+    std::string hlStr = str;
+    replace(hlStr, text, out.str());
+    return hlStr;
 }
 
 /**

@@ -86,8 +86,6 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     std::string term = optionStore_.getArgs().front();
     std::unique_ptr<PropsSearchResult> searchResult(nullptr);
 
-    std::cout << "Searching term [" << term << "]" << std::endl;
-
     // Compute the list of input files
     std::list<PropsFile> fileList;
 
@@ -100,11 +98,6 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
         searchResult.reset(new PropsSearchResult(term));
         searchResult->setResult(res);
     } else {
-        std::cout << "Files to lookup" << std::endl;
-        for (auto& movida : fileList) {
-            std::cout << "File -> [" << movida.getFileName() << "]" << std::endl;
-        }
-
         searchResult = PropsReader::find_value(term, fileList);
         searchResult->setResult(res);
     }
