@@ -66,6 +66,13 @@ public:
     static std::basic_string<char> toUpper(const std::basic_string<char>& input);
 
     /**
+     * Converts a string to lower case.
+     *
+     * @param input the input string
+     */
+    static std::basic_string<char> toLower(const std::basic_string<char> &input);
+
+    /**
      * Breaks the input text into lines of the same size avoiding splitting
      *  words at the end of the string using a maximum text occupancy with
      *  respect to the current terminal size.

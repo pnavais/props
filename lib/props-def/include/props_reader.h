@@ -23,7 +23,19 @@
 #include <props_search_result.h>
 #include <props_file.h>
 
-using namespace std;
+namespace search {
+
+    static const char DEFAULT_KEY_SEPARATOR[] = "=";
+    static const char KEY_SEPARATOR[] = "search.key_separator";
+
+    typedef enum Case { USE_CASE, NO_CASE, DEFAULT } Case;
+
+    typedef struct SearchOptions {
+        std::string key_;
+        Case caseSensitive_;
+        std::string separator_;
+    } SearchOptions;
+}
 
 /**
  * Performs the lookup of values in properties files
@@ -41,7 +53,7 @@ public:
      *  @param global the flag enabling global search
      *  @return the results of the search
      */
-     static std::unique_ptr<PropsSearchResult> find_value(const string& key, const std::list<PropsFile>& files);
+     static std::unique_ptr<PropsSearchResult> find_value(const search::SearchOptions& searchOptions, const std::list<PropsFile>& files);
 
 };
 

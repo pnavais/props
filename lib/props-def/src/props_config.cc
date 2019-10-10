@@ -23,6 +23,7 @@
  * Private function prototypes.
  */
 void convertValue(const toml::value& value, std::string& s);
+void readTableProperties(const toml::basic_value<toml::discard_comments>& data, const std::string& sectionName, std::map<std::string, std::string>& properties);
 
 /**
  * Converts a TOML value to a string.
@@ -76,7 +77,6 @@ const std::string* PropsConfig::getValue(const std::string& key) const {
  * file is not valid.
  */
 void PropsConfig::parseConfig() {
-
     auto& configFilePath = config::CONFIG_FILE_PATH();
     Result result{res::VALID};
 
@@ -84,18 +84,31 @@ void PropsConfig::parseConfig() {
         try {
             const auto data = toml::parse(configFilePath);
 
-            const auto& generalMap = toml::find<std::map<std::string, toml::value >>(data, "General");
-            for (auto& generalEntry : generalMap) {
-                const toml::value& value = generalEntry.second;
-
-                std::string s;
-                convertValue(value, s);
-                properties_["general."+generalEntry.first] = s;
-            }
+            const toml::basic_value<toml::discard_comments> value = toml::parse(configFilePath);
+            readTableProperties(data, "General", properties_);
+            readTableProperties(data, "Search", properties_);
         } catch (std::exception &e) {
             throw InitializationException("Error parsing configuration file. Details : " + std::string(e.what()));
         }
     }
+}
 
+/**
+ * Read a table's properties from the parsed data.
+ *
+ * @param data the parsed data
+ * @param sectionName the section name
+ * @param properties the properties map
+ */
+void readTableProperties(const toml::basic_value<toml::discard_comments>& data, const std::string& sectionName, std::map<std::string, std::string>& properties) {
+    const auto& generalMap = toml::find<std::map<std::string, toml::value >>(data, sectionName);
+    for (auto& generalEntry : generalMap) {
+        const toml::value& value = generalEntry.second;
+
+        std::string s;
+        convertValue(value, s);
+
+        properties[StringUtils::toLower(sectionName)+"."+generalEntry.first] = s;
+    }
 }
 

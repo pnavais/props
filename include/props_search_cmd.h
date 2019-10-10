@@ -25,6 +25,8 @@ namespace search_cmd {
     const char* const _SEARCH_VALUE_  = "value";
     const char* const _GROUP_SEARCH_  = "group";
     const char* const _MULTI_SEARCH_  = "multi";
+    const char* const _IGNORE_CASE_   = "ignore-case";
+    const char* const _SEPARATOR_     = "separator";
     const char* const _USE_REGEX_     = "expression";
     const char *const _SEARCH_CMD_    = "search";
 }
@@ -49,8 +51,10 @@ public:
                                      { PropsOption::make_opt(search_cmd::_ALIAS_FILE_, "Searches in a tracked file using the alias", {"<alias>"}),
                                        PropsOption::make_opt(search_cmd::_SEARCH_VALUE_, "Perform a search by value"),
                                        PropsOption::make_opt(search_cmd::_USE_REGEX_, "The term is expressed as a regular expression"),
+                                       PropsOption::make_opt(search_cmd::_IGNORE_CASE_, "Performs a case-insensitive search"),
                                        PropsOption::make_opt(search_cmd::_MULTI_SEARCH_, "Perform a global search in all tracked files"),
-                                       PropsOption::make_opt(search_cmd::_GROUP_SEARCH_, "Perform a search by a tracker group", {"<group_name>"})}) };
+                                       PropsOption::make_opt(search_cmd::_GROUP_SEARCH_, "Perform a search by a tracker group", {"<group_name>"}),
+                                       PropsOption::make_opt(search_cmd::_SEPARATOR_, "Separator between keys and values", {"<separator>"}) }) };
     }
 
     /**

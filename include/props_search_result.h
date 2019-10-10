@@ -31,7 +31,6 @@ namespace p_search_res {
     } Match;
 
     typedef std::map<std::string, std::list<Match>> result_map;
-
 }
 
 class PropsSearchResult : public PropsResult {

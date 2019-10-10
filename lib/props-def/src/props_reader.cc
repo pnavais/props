@@ -21,6 +21,7 @@
 #include <sstream>
 #include <pcrecpp.h>
 #include <file_utils.h>
+#include <props_config.h>
 
 // Prototypes for globals
 const pcrecpp::RE &COMMENTED_LINE();
@@ -43,25 +44,32 @@ const pcrecpp::RE &COMMENTED_LINE() {
  * @param file the source file
  * @return the value for the key in the file
  */
-std::unique_ptr<PropsSearchResult> PropsReader::find_value(const string &key, const std::list<PropsFile> &files)
+std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchOptions &searchOptions, const std::list<PropsFile> &files)
 {
+    const std::string& key = searchOptions.key_;
+    std::string keySeparator = searchOptions.separator_;
+
+    if (keySeparator.empty()) {
+        keySeparator = PropsConfig::getDefault().getValue<std::string>(search::KEY_SEPARATOR, search::DEFAULT_KEY_SEPARATOR);
+    }
+
     std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(key));
 
 	// Prepare regex
 	std::stringstream regex_str;
-	regex_str << "^" << key << "=(.+)";
+	regex_str << "^" << key << keySeparator << "(.+)";
     pcrecpp::RE regex(regex_str.str());
-	string value_r;
+	std::string value_r;
 
 	// TODO: Process using a queue and threads
 	for (auto &file : files)
     {
-        const string &fullPath = FileUtils::getAbsolutePath(file.getFileName());
+        const std::string &fullPath = FileUtils::getAbsolutePath(file.getFileName());
 	    std::ifstream infile(fullPath);
 
         if (infile) {
             // TODO: Process dividing file in chunks and in parallel (mmap ?)
-            string line;
+            std::string line;
             while (std::getline(infile, line)) {
                 // Try to find the regex in line, and report results.
                 if (!COMMENTED_LINE().PartialMatch(line)) {

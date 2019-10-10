@@ -103,6 +103,20 @@ std::basic_string<char> StringUtils::toUpper(const std::basic_string<char> &inpu
 }
 
 /**
+ * Converts a string to lower case.
+ *
+ * @param input the input string
+ */
+std::basic_string<char> StringUtils::toLower(const std::basic_string<char> &input) {
+    std::basic_string<char> output = input;
+    for (auto &p : output) {
+        p = static_cast<char>(tolower(p));
+    }
+
+    return output;
+}
+
+/**
  * Breaks the input text into lines of the same size avoiding splitting
  * words at the end of the string.
  *

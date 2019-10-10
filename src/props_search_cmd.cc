@@ -35,9 +35,11 @@ void PropsSearchCommand::parse(const int& argc, char* argv[]) {
     if (optionStore_.getOptions().count(search_cmd::_ALIAS_FILE_) != 0) {
         searchOptions++;
     }
+
     if (optionStore_.getOptions().count(search_cmd::_GROUP_SEARCH_) != 0) {
         searchOptions++;
     }
+
     if (optionStore_.getOptions().count(search_cmd::_MULTI_SEARCH_) != 0) {
         searchOptions++;
     }
@@ -71,6 +73,8 @@ std::unique_ptr<PropsResult> PropsSearchCommand::execute() {
     if (searchResult != nullptr) {
         searchResult->getExecResult().showMessage(out);
         searchResult->setOutput(out.str());
+    } else {
+        searchResult.reset(new PropsResult());
     }
 
     return searchResult;
@@ -86,9 +90,12 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     std::string term = optionStore_.getArgs().front();
     std::unique_ptr<PropsSearchResult> searchResult(nullptr);
 
+    // Retrieve search options
+    std::string keySeparator = (optionStore_.getOptions().count(search_cmd::_SEPARATOR_) != 0) ?
+                                optionStore_.getOptions().at(search_cmd::_SEPARATOR_) : "";
+    
     // Compute the list of input files
     std::list<PropsFile> fileList;
-
     retrieveFileList(fileList, res);
 
     if (fileList.empty()) {
@@ -98,7 +105,7 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
         searchResult.reset(new PropsSearchResult(term));
         searchResult->setResult(res);
     } else {
-        searchResult = PropsReader::find_value(term, fileList);
+        searchResult = PropsReader::find_value(search::SearchOptions{term, search::DEFAULT, keySeparator}, fileList);
         searchResult->setResult(res);
     }
 
