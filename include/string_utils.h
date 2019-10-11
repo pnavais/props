@@ -203,6 +203,29 @@ public:
         return !(iss >> f >> t).fail();
     }
 
+    /**
+     *
+     * @tparam T the target type
+     * @param str1 the source
+     * @param str2
+     * @param loc
+     * @return the position of the match
+     */
+    template<typename T>
+    size_t  ci_find( const T& source, const T& subStr, const std::locale& loc = std::locale());
+
+private:
+
+    template<typename charT>
+    struct loc_equal {
+        loc_equal( const std::locale& loc ) : loc_(loc) {}
+        bool operator()(charT ch1, charT ch2) {
+            return std::toupper(ch1, loc_) == std::toupper(ch2, loc_);
+        }
+    private:
+        const std::locale& loc_;
+    };
+
 };
 
 #endif //PROPS_STRING_UTILS_H
