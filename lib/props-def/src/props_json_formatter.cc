@@ -30,7 +30,7 @@
 void JsonPropsFormatter::format(const PropsSearchResult* result, std::ostream& out) const {
 
     if (result != nullptr) {
-        const std::string &key = result->getKey();
+        const std::string &key = result->getSearchOptions().key_;
         const auto &fileKeys = result->getFileKeys();
 
         if (!fileKeys.empty()) {
@@ -68,6 +68,7 @@ void JsonPropsFormatter::format(const PropsSearchResult* result, std::ostream& o
             out << "{" << std::endl;
             out << StringUtils::expand(SPACER,2) << R"("results": {)" << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("key": ")"<< key << "\"," << std::endl;
+            out << StringUtils::expand(SPACER, 4) << R"("type": ")"<< ((result->getSearchOptions().matchValue_) ? "by_value" : "by_key") << "\"," << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("total_matches": )" << numMatches << "," << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("num_files": )" << fileKeys.size() << "," << std::endl;
             out << matches.str();

@@ -94,22 +94,24 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     std::string keySeparator = (optionStore_.getOptions().count(search_cmd::_SEPARATOR_) != 0) ?
                                 optionStore_.getOptions().at(search_cmd::_SEPARATOR_) : "";
 
-    search::Opt caseSensitive     =  (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0)   ? search::NO_OPT : search::DEFAULT;
-    search::Opt allowPartialMatch =  (optionStore_.getOptions().count(search_cmd::_PARTIAL_MATCH_) != 0) ? search::USE_OPT : search::DEFAULT;
+    p_search_res::Opt caseSensitive     =  (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0)   ? p_search_res::NO_OPT : p_search_res::DEFAULT;
+    p_search_res::Opt allowPartialMatch =  (optionStore_.getOptions().count(search_cmd::_PARTIAL_MATCH_) != 0) ? p_search_res::USE_OPT : p_search_res::DEFAULT;
+    const bool& matchValue        =  (optionStore_.getOptions().count(search_cmd::_SEARCH_VALUE_) != 0);
 
-    
     // Compute the list of input files
     std::list<PropsFile> fileList;
     retrieveFileList(fileList, res);
+
+    p_search_res::SearchOptions searchOptions{term, caseSensitive, keySeparator, allowPartialMatch, matchValue};
 
     if (fileList.empty()) {
         res = res::ERROR;
         res.setSeverity(res::WARN);
         res.setMessage("There are no files to lookup");
-        searchResult.reset(new PropsSearchResult(term));
+        searchResult.reset(new PropsSearchResult(searchOptions));
         searchResult->setResult(res);
     } else {
-        searchResult = PropsReader::find_value(search::SearchOptions{term, caseSensitive, keySeparator, allowPartialMatch}, fileList);
+        searchResult = PropsReader::find_value(searchOptions, fileList);
         searchResult->setResult(res);
         searchResult->setEnableJson((optionStore_.getOptions().count(search_cmd::_USE_JSON_) != 0));
     }

@@ -44,37 +44,42 @@ const pcrecpp::RE &COMMENTED_LINE() {
  * @param file the source file
  * @return the value for the key in the file
  */
-std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchOptions &searchOptions, const std::list<PropsFile> &files)
+std::unique_ptr<PropsSearchResult> PropsReader::find_value(const p_search_res::SearchOptions &searchOptions, const std::list<PropsFile> &files)
 {
     pcrecpp::RE_Options opt;
-    const std::string& key     = searchOptions.key_;
-    std::string keySeparator   = searchOptions.separator_;
-    search::Opt caseSensitive  = searchOptions.caseSensitive_;
-    search::Opt partialMatch   = searchOptions.partialMatch_;
+    const std::string& key    = searchOptions.key_;
+    std::string keySeparator  = searchOptions.separator_;
+    p_search_res::Opt caseSensitive = searchOptions.caseSensitive_;
+    p_search_res::Opt partialMatch  = searchOptions.partialMatch_;
+    const bool& matchValue    = searchOptions.matchValue_;
 
     // Get Default values
     if (keySeparator.empty()) {
         keySeparator = PropsConfig::getDefault().getValue<std::string>(search::KEY_SEPARATOR, search::DEFAULT_KEY_SEPARATOR);
     }
 
-    if (caseSensitive == search::DEFAULT) {
+    if (caseSensitive == p_search_res::DEFAULT) {
         bool ignore_case = PropsConfig::getDefault().getValue<bool>(search::KEY_IGNORE_CASE, search::DEFAULT_IGNORE_CASE);
-        caseSensitive = (ignore_case) ? search::NO_OPT : search::USE_OPT;
+        caseSensitive = (ignore_case) ? p_search_res::NO_OPT : p_search_res::USE_OPT;
     }
 
-    if (partialMatch == search::DEFAULT) {
+    if (partialMatch == p_search_res::DEFAULT) {
         bool allow_partial_match = PropsConfig::getDefault().getValue<bool>(search::KEY_ALLOW_PARTIAL_MATCH, search::DEFAULT_ALLOW_PARTIAL_MATCH);
-        partialMatch = (allow_partial_match) ? search::USE_OPT : search::NO_OPT;
+        partialMatch = (allow_partial_match) ? p_search_res::USE_OPT : p_search_res::NO_OPT;
     }
 
-    std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(key));
+    std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(searchOptions));
 
 	// Prepare regex
 	std::stringstream regex_str;
-    opt.set_caseless(caseSensitive == search::NO_OPT);
-    std::string partStr = (partialMatch == search::USE_OPT) ? ".*" : "";
+    opt.set_caseless(caseSensitive == p_search_res::NO_OPT);
+    std::string partStr = (partialMatch == p_search_res::USE_OPT) ? ".*" : "";
 
-    regex_str << "^" << partStr << key << partStr << keySeparator << "(.+)";
+    if (matchValue) {
+        regex_str << "^(.+)" << keySeparator << partStr << key << partStr << "$";
+    } else {
+        regex_str << "^" << partStr << key << partStr << keySeparator << "(.+)";
+    }
     pcrecpp::RE regex(regex_str.str(), opt);
 	std::string value_r;
 
@@ -91,7 +96,7 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchO
                 // Try to find the regex in line, and report results.
                 if (!COMMENTED_LINE().PartialMatch(line)) {
                     if (regex.PartialMatch(line, &value_r)) {
-                        result->add(file.getFileName(), p_search_res::Match{ line, value_r, (caseSensitive == search::USE_OPT)});
+                        result->add(file.getFileName(), p_search_res::Match{ line, value_r, (caseSensitive == p_search_res::USE_OPT)});
                     }
                 }
             }

@@ -28,7 +28,7 @@
 void SimplePropsFormatter::format(const PropsSearchResult* result, std::ostream& out) const {
 
     if (result != nullptr) {
-        const std::string &key = result->getKey();
+        const std::string &key = result->getSearchOptions().key_;
         const auto &fileKeys = result->getFileKeys();
 
         if (!fileKeys.empty()) {

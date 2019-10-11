@@ -25,6 +25,17 @@
 #include <list>
 
 namespace p_search_res {
+
+    typedef enum Opt { USE_OPT, NO_OPT, DEFAULT } Opt;
+
+    typedef struct SearchOptions {
+        std::string key_;
+        Opt caseSensitive_;
+        std::string separator_;
+        Opt partialMatch_;
+        bool matchValue_;
+    } SearchOptions;
+
     typedef struct Match {
             std::string fullLine_;
             std::string value_;
@@ -43,14 +54,16 @@ public:
      *
      * @param key the key
      */
-    explicit PropsSearchResult(std::string key) : key_(std::move(key)) {}
+    explicit PropsSearchResult(p_search_res::SearchOptions searchOptions) : searchOptions_(std::move(searchOptions)) {}
 
     /**
-     * Retrieves the key
+     * Retrieves the search options
      *
-     * @return the key
+     * @return the search options
      */
-    const std::string &getKey() const;
+    const p_search_res::SearchOptions& getSearchOptions() const {
+        return searchOptions_;
+    }
 
     /**
      * Appends the pair key/value found in the given file
@@ -107,7 +120,7 @@ public:
 private:
 
     p_search_res::result_map fileKeys_;
-    std::string key_;
+    p_search_res::SearchOptions searchOptions_;
     bool enableJson_{false};
 };
 

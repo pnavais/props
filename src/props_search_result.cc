@@ -20,15 +20,6 @@
 
 
 /**
- * Retrieves the key.
- *
- * @return the key
- */
-const std::string &PropsSearchResult::getKey() const {
-    return key_;
-}
-
-/**
  * Appends the pair key/value found in the given file
  * to the results map.
  *

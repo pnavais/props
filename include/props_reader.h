@@ -31,16 +31,6 @@ namespace search {
     static const bool DEFAULT_IGNORE_CASE = false;
     static const char KEY_ALLOW_PARTIAL_MATCH[] = "search.allow_partial_match";
     static const bool DEFAULT_ALLOW_PARTIAL_MATCH = false;
-
-    typedef enum Opt { USE_OPT, NO_OPT, DEFAULT } Opt;
-
-    typedef struct SearchOptions {
-        std::string key_;
-        Opt caseSensitive_;
-        std::string separator_;
-        Opt partialMatch_;
-
-    } SearchOptions;
 }
 
 /**
@@ -59,7 +49,7 @@ public:
      *  @param global the flag enabling global search
      *  @return the results of the search
      */
-     static std::unique_ptr<PropsSearchResult> find_value(const search::SearchOptions& searchOptions, const std::list<PropsFile>& files);
+     static std::unique_ptr<PropsSearchResult> find_value(const p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
 
 };
 
