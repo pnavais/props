@@ -111,6 +111,7 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     } else {
         searchResult = PropsReader::find_value(search::SearchOptions{term, caseSensitive, keySeparator, allowPartialMatch}, fileList);
         searchResult->setResult(res);
+        searchResult->setEnableJson((optionStore_.getOptions().count(search_cmd::_USE_JSON_) != 0));
     }
 
     return searchResult;

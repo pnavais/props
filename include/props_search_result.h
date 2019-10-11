@@ -70,6 +70,15 @@ public:
     p_search_res::result_map get(const std::list<std::string> &fileNames) const;
 
     /**
+     * Retrieves all results
+     *
+     * @param results the results for all files
+     */
+    const p_search_res::result_map& getFileKeys() const {
+        return fileKeys_;
+    }
+
+    /**
      * Formats the contents of the result in an
      * output stream.
      *
@@ -77,10 +86,29 @@ public:
      */
     void format(std::ostream& out) const override;
 
+    /**
+     * Enables/disables JSON output
+     *
+     * @param enableJson true to enable, false otherwise
+     */
+    void setEnableJson(const bool& enableJson) {
+        enableJson_ = enableJson;
+    }
+
+    /**
+     * Check if JSON output is enabled
+     *
+     * @return true if JSON output enabled, false otherwise
+     */
+    const bool& isEnableJson() const {
+        return enableJson_;
+    }
+
 private:
 
     p_search_res::result_map fileKeys_;
     std::string key_;
+    bool enableJson_{false};
 };
 
 

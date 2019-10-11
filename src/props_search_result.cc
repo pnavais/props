@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <props_formatter_factory.h>
 #include "props_search_result.h"
 #include "string_utils.h"
 
@@ -65,16 +66,8 @@ p_search_res::result_map PropsSearchResult::get(const std::list<std::string> &fi
  */
 void PropsSearchResult::format(std::ostream& out) const {
     out << output_;
-
-    if (!fileKeys_.empty()) {
-        for (auto& fileKey : fileKeys_) {
-            out << std::endl << rang::style::bold << rang::fgB::green << fileKey.first << rang::style::reset << std::endl;
-            int i=1;
-            for (auto& match : fileKey.second) {
-                out << rang::style::bold << rang::fgB::yellow << i << rang::style::reset << ":" << StringUtils::highlight(match.fullLine_, key_, match.caseSensitive_) << std::endl;
-                i++;
-            }
-        }
+    auto formatter = isEnableJson() ? PropsFormatterFactory::getFormatter(formatter::JSON_FORMATTER) : PropsFormatterFactory::getDefaultFormatter();
+    if (formatter != nullptr) {
+        formatter->format(this, out);
     }
-
 }

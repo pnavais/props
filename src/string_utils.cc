@@ -70,6 +70,24 @@ std::string StringUtils::padding(const std::string &input, const std::size_t &ma
 }
 
 /**
+ * Repeats the input pattern the given number
+ * of times.
+ *
+ * @param input the input pattern
+ * @param nTimes the number of repetitions
+ * @return the expanded string
+ */
+std::string StringUtils::expand(const std::string& input, const std::size_t& nTimes) {
+    std::ostringstream out;
+    size_t counter = 0;
+    while (counter < nTimes) {
+        out << input;
+        counter++;
+    }
+    return out.str();
+}
+
+/**
  * Transforms a list of string values to a flat string
  * using the provided separator.
  *

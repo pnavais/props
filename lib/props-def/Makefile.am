@@ -8,4 +8,4 @@ AM_CXXFLAGS = $(WARN_CXXFLAGS)
 
 # Build rules for libraries.
 noinst_LIBRARIES = libprops.a
-libprops_a_SOURCES = src/props_config.cc src/props_reader.cc src/props_file_tracker.cc src/props_tracker_factory.cc
+libprops_a_SOURCES = src/props_config.cc src/props_reader.cc src/props_file_tracker.cc src/props_tracker_factory.cc src/props_formatter_factory.cc src/props_simple_formatter.cc src/props_json_formatter.cc
