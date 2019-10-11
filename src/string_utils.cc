@@ -215,6 +215,23 @@ bool StringUtils::replace(std::string& str, const std::string& from, const std::
 }
 
 /**
+ * Finds a substring from a given string ignoring case.
+ *
+ * @tparam T the target type
+ * @param source the source string
+ * @param text the text to find
+ * @param loc the locale
+ * @return the position of the match
+ */
+template<typename T>
+size_t  StringUtils::ci_find( const T& source, const T& text, const std::locale& loc) {
+    typename T::const_iterator it = std::search( source.begin(), source.end(),
+                                                 text.begin(), text.end(), loc_equal<typename T::value_type>(loc) );
+    if ( it != source.end() ) return it - source.begin();
+    else return -1; // not found
+}
+
+/**
  * Replaces all substrings of a given input string with a replacement text.
  *
  * @param str the input string

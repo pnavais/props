@@ -204,15 +204,16 @@ public:
     }
 
     /**
+     * Finds a substring from a given string ignoring case.
      *
      * @tparam T the target type
-     * @param str1 the source
-     * @param str2
-     * @param loc
+     * @param source the source string
+     * @param text the text to find
+     * @param loc the locale
      * @return the position of the match
      */
     template<typename T>
-    size_t  ci_find( const T& source, const T& subStr, const std::locale& loc = std::locale());
+    static size_t  ci_find( const T& source, const T& text, const std::locale& loc = std::locale());
 
 private:
 
