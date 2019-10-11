@@ -62,6 +62,8 @@ public:
      * Converts a string to upper case.
      *
      * @param input the input string
+     *
+     * @return the uppercase version of the string
      */
     static std::basic_string<char> toUpper(const std::basic_string<char>& input);
 
@@ -69,6 +71,8 @@ public:
      * Converts a string to lower case.
      *
      * @param input the input string
+     *
+     * @return the lowercase version of the string
      */
     static std::basic_string<char> toLower(const std::basic_string<char> &input);
 
@@ -79,6 +83,7 @@ public:
      *
      *  @param input        the input string
      *  @param widthPercent the percentage occupancy with respect to screen width
+     *
      *  @return the list of wrapped strings
      */
     static std::list<std::string> fitText(const std::string& input, const short& widthPercent);
@@ -107,10 +112,12 @@ public:
     * @param str the input string
     * @param from the text to search
     * @param to the replacement text
+    * @param caseSensitive enable/disable case sensitivity
+    *
     * @return true if the operation succeeded, false otherwise
     * otherwise
     */
-    static bool replace(std::string& str, const std::string& from, const std::string& to);
+    static bool replace(std::string& str, const std::string& from, const std::string& to, const bool& caseSensitive = true);
 
     /**
      * Replaces all substrings of a given input string with a replacement text.
@@ -118,19 +125,34 @@ public:
      * @param str the input string
      * @param from the text to search
      * @param to the replacement text
+     * @param caseSensitive enable/disable case sensitivity
+     *
      * @return true if the operation succeeded, false otherwise
      * otherwise
      */
-    static bool replaceAll(std::string& str, const std::string& from, const std::string& to);
+    static bool replaceAll(std::string& str, const std::string& from, const std::string& to, const bool& caseSensitive = true);
+
+    /**
+     * Find Case Insensitive Sub String in a given substring.
+     *
+     * @param input the input data
+     * @param text the text to search
+     * @param pos the position to start from
+     *
+     * @return the position of the found match
+     */
+    static size_t find_ci(std::string input, std::string text, size_t pos = 0);
 
     /**
      * Highlights all occurrences of a text in a given string
      *
      * @param str the input string
      * @param text the text to highlight
-     * return the highlight version of the string
+     * @param caseSensitive enable/disable case sensitivity
+     *
+     * @return the highlighted version of the string
      */
-    static std::string highlight(const std::string& str, const std::string& text);
+    static std::string highlight(const std::string& str, const std::string& text, const bool& caseSensitive = true);
 
     /**
      * Checks if a string consists only of whitespaces
@@ -145,6 +167,7 @@ public:
      * Checks if a string is empty or consists only of whitespaces.
      *
      * @param input the string to check
+     *
      * @return true if the string is empty or contains only whitespaces,
      * false otherwise
      */
@@ -156,6 +179,7 @@ public:
      *
      * @param str the input string
      * @param chars characters to remove
+     *
      * @return the string trimmed on its left side
      */
     static std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
@@ -166,6 +190,7 @@ public:
     *
     * @param str the input string
     * @param chars characters to remove
+     *
     * @return the string trimmed on its right side
     */
     static std::string& rtrim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
@@ -176,6 +201,7 @@ public:
     *
     * @param str the input string
     * @param chars characters to remove
+     *
     * @return the string trimmed
     */
     static std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ");
@@ -188,6 +214,7 @@ public:
      * @param t the target
      * @param s the source string
      * @param f the conversion function (i.e. one of std::hex, std::dec or std::oct)
+     *
      * @return true if the operation succeeded, false otherwise
      */
     template <class T>
@@ -203,29 +230,6 @@ public:
         return !(iss >> f >> t).fail();
     }
 
-    /**
-     * Finds a substring from a given string ignoring case.
-     *
-     * @tparam T the target type
-     * @param source the source string
-     * @param text the text to find
-     * @param loc the locale
-     * @return the position of the match
-     */
-    template<typename T>
-    static size_t  ci_find( const T& source, const T& text, const std::locale& loc = std::locale());
-
-private:
-
-    template<typename charT>
-    struct loc_equal {
-        loc_equal( const std::locale& loc ) : loc_(loc) {}
-        bool operator()(charT ch1, charT ch2) {
-            return std::toupper(ch1, loc_) == std::toupper(ch2, loc_);
-        }
-    private:
-        const std::locale& loc_;
-    };
 
 };
 

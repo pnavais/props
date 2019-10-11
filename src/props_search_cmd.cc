@@ -94,7 +94,8 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     std::string keySeparator = (optionStore_.getOptions().count(search_cmd::_SEPARATOR_) != 0) ?
                                 optionStore_.getOptions().at(search_cmd::_SEPARATOR_) : "";
 
-    search::Case caseSensitive =  (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0) ? search::NO_CASE : search::DEFAULT;
+    search::Opt caseSensitive     =  (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0)   ? search::NO_OPT : search::DEFAULT;
+    search::Opt allowPartialMatch =  (optionStore_.getOptions().count(search_cmd::_PARTIAL_MATCH_) != 0) ? search::USE_OPT : search::DEFAULT;
 
     
     // Compute the list of input files
@@ -108,7 +109,7 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
         searchResult.reset(new PropsSearchResult(term));
         searchResult->setResult(res);
     } else {
-        searchResult = PropsReader::find_value(search::SearchOptions{term, caseSensitive, keySeparator}, fileList);
+        searchResult = PropsReader::find_value(search::SearchOptions{term, caseSensitive, keySeparator, allowPartialMatch}, fileList);
         searchResult->setResult(res);
     }
 

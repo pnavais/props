@@ -29,13 +29,17 @@ namespace search {
     static const char DEFAULT_KEY_SEPARATOR[] = "=";
     static const char KEY_IGNORE_CASE[] = "search.ignore_case";
     static const bool DEFAULT_IGNORE_CASE = false;
+    static const char KEY_ALLOW_PARTIAL_MATCH[] = "search.allow_partial_match";
+    static const bool DEFAULT_ALLOW_PARTIAL_MATCH = false;
 
-    typedef enum Case { USE_CASE, NO_CASE, DEFAULT } Case;
+    typedef enum Opt { USE_OPT, NO_OPT, DEFAULT } Opt;
 
     typedef struct SearchOptions {
         std::string key_;
-        Case caseSensitive_;
+        Opt caseSensitive_;
         std::string separator_;
+        Opt partialMatch_;
+
     } SearchOptions;
 }
 

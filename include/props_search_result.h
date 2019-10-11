@@ -28,6 +28,7 @@ namespace p_search_res {
     typedef struct Match {
             std::string fullLine_;
             std::string value_;
+            bool caseSensitive_;
     } Match;
 
     typedef std::map<std::string, std::list<Match>> result_map;

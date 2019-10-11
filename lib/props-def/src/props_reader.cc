@@ -49,24 +49,32 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchO
     pcrecpp::RE_Options opt;
     const std::string& key     = searchOptions.key_;
     std::string keySeparator   = searchOptions.separator_;
-    search::Case caseSensitive = searchOptions.caseSensitive_;
+    search::Opt caseSensitive  = searchOptions.caseSensitive_;
+    search::Opt partialMatch   = searchOptions.partialMatch_;
 
+    // Get Default values
     if (keySeparator.empty()) {
         keySeparator = PropsConfig::getDefault().getValue<std::string>(search::KEY_SEPARATOR, search::DEFAULT_KEY_SEPARATOR);
     }
 
     if (caseSensitive == search::DEFAULT) {
         bool ignore_case = PropsConfig::getDefault().getValue<bool>(search::KEY_IGNORE_CASE, search::DEFAULT_IGNORE_CASE);
-        caseSensitive = (ignore_case) ? search::NO_CASE : search::USE_CASE;
+        caseSensitive = (ignore_case) ? search::NO_OPT : search::USE_OPT;
     }
 
-    opt.set_caseless(caseSensitive == search::NO_CASE);
+    if (partialMatch == search::DEFAULT) {
+        bool allow_partial_match = PropsConfig::getDefault().getValue<bool>(search::KEY_ALLOW_PARTIAL_MATCH, search::DEFAULT_ALLOW_PARTIAL_MATCH);
+        partialMatch = (allow_partial_match) ? search::USE_OPT : search::NO_OPT;
+    }
 
     std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(key));
 
 	// Prepare regex
 	std::stringstream regex_str;
-	regex_str << "^" << key << keySeparator << "(.+)";
+    opt.set_caseless(caseSensitive == search::NO_OPT);
+    std::string partStr = (partialMatch == search::USE_OPT) ? ".*" : "";
+
+    regex_str << "^" << partStr << key << partStr << keySeparator << "(.+)";
     pcrecpp::RE regex(regex_str.str(), opt);
 	std::string value_r;
 
@@ -83,7 +91,7 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchO
                 // Try to find the regex in line, and report results.
                 if (!COMMENTED_LINE().PartialMatch(line)) {
                     if (regex.PartialMatch(line, &value_r)) {
-                        result->add(file.getFileName(), p_search_res::Match{ line, value_r});
+                        result->add(file.getFileName(), p_search_res::Match{ line, value_r, (caseSensitive == search::USE_OPT)});
                     }
                 }
             }

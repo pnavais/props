@@ -71,7 +71,7 @@ void PropsSearchResult::format(std::ostream& out) const {
             out << std::endl << rang::style::bold << rang::fgB::green << fileKey.first << rang::style::reset << std::endl;
             int i=1;
             for (auto& match : fileKey.second) {
-                out << rang::style::bold << rang::fgB::yellow << i << rang::style::reset << ":" << StringUtils::highlight(match.fullLine_, key_) << std::endl;
+                out << rang::style::bold << rang::fgB::yellow << i << rang::style::reset << ":" << StringUtils::highlight(match.fullLine_, key_, match.caseSensitive_) << std::endl;
                 i++;
             }
         }

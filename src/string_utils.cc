@@ -203,32 +203,16 @@ std::pair<std::size_t, std::size_t> StringUtils::getWindowSize() {
  * @param str the input string
  * @param from the text to search
  * @param to the replacement text
+ * @param caseSensitive enable/disable case sensitivity
  * @return true if the operation succeeded, false otherwise
  * otherwise
  */
-bool StringUtils::replace(std::string& str, const std::string& from, const std::string& to) {
-    size_t start_pos = str.find(from);
+bool StringUtils::replace(std::string& str, const std::string& from, const std::string& to, const bool& caseSensitive) {
+    size_t start_pos = (caseSensitive) ? str.find(from) : find_ci(str, from);
     if(start_pos == std::string::npos)
         return false;
     str.replace(start_pos, from.length(), to);
     return true;
-}
-
-/**
- * Finds a substring from a given string ignoring case.
- *
- * @tparam T the target type
- * @param source the source string
- * @param text the text to find
- * @param loc the locale
- * @return the position of the match
- */
-template<typename T>
-size_t  StringUtils::ci_find( const T& source, const T& text, const std::locale& loc) {
-    typename T::const_iterator it = std::search( source.begin(), source.end(),
-                                                 text.begin(), text.end(), loc_equal<typename T::value_type>(loc) );
-    if ( it != source.end() ) return it - source.begin();
-    else return -1; // not found
 }
 
 /**
@@ -237,19 +221,34 @@ size_t  StringUtils::ci_find( const T& source, const T& text, const std::locale&
  * @param str the input string
  * @param from the text to search
  * @param to the replacement text
+ * @param caseSensitive enable/disable case sensitivity
  * @return true if the operation succeeded, false otherwise
  * otherwise
  */
-bool StringUtils::replaceAll(std::string& str, const std::string& from, const std::string& to) {
+bool StringUtils::replaceAll(std::string& str, const std::string& from, const std::string& to, const bool& caseSensitive) {
     if(from.empty())
         return false;
     size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    while((start_pos = ((caseSensitive) ? str.find(from, start_pos) : find_ci(str, from, start_pos))) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
 
     return true;
+}
+
+/**
+ * Find Case Insensitive Sub String in a given substring.
+ *
+ * @param input the input data
+ * @param text the text to search
+ * @param pos the position to start from
+ */
+size_t StringUtils::find_ci(std::string input, std::string text, size_t pos) {
+    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    std::transform(text.begin(), text.end(), text.begin(), ::tolower);
+
+    return input.find(text, pos);
 }
 
 /**
@@ -259,13 +258,20 @@ bool StringUtils::replaceAll(std::string& str, const std::string& from, const st
  * @param text the text to highlight
  * return the highlight version of the string
  */
-std::string StringUtils::highlight(const std::string& str, const std::string& text) {
+std::string StringUtils::highlight(const std::string& str, const std::string& text, const bool& caseSensitive) {
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
-    out << rang::style::reversed << rang::fgB::yellow << text << rang::style::reset;
+    std::string replStr = text;
+    if (!caseSensitive) {
+        auto pos = find_ci(str, text);
+        replStr = str.substr(pos, text.size());
+    }
+    out << rang::style::reversed << rang::fgB::yellow << replStr << rang::style::reset;
     rang::setControlMode(rang::control::Auto);
     std::string hlStr = str;
-    replace(hlStr, text, out.str());
+
+    replace(hlStr, replStr, out.str());
+
     return hlStr;
 }
 
