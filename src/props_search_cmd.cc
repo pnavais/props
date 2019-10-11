@@ -93,6 +93,9 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     // Retrieve search options
     std::string keySeparator = (optionStore_.getOptions().count(search_cmd::_SEPARATOR_) != 0) ?
                                 optionStore_.getOptions().at(search_cmd::_SEPARATOR_) : "";
+
+    search::Case caseSensitive =  (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0) ? search::NO_CASE : search::DEFAULT;
+
     
     // Compute the list of input files
     std::list<PropsFile> fileList;
@@ -105,7 +108,7 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
         searchResult.reset(new PropsSearchResult(term));
         searchResult->setResult(res);
     } else {
-        searchResult = PropsReader::find_value(search::SearchOptions{term, search::DEFAULT, keySeparator}, fileList);
+        searchResult = PropsReader::find_value(search::SearchOptions{term, caseSensitive, keySeparator}, fileList);
         searchResult->setResult(res);
     }
 

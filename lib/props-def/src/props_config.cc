@@ -23,7 +23,7 @@
  * Private function prototypes.
  */
 void convertValue(const toml::value& value, std::string& s);
-void readTableProperties(const toml::basic_value<toml::discard_comments>& data, const std::string& sectionName, std::map<std::string, std::string>& properties);
+bool readTableProperties(const toml::table& tab, const std::string& sectionName, std::map<std::string, std::string>& properties);
 
 /**
  * Converts a TOML value to a string.
@@ -83,10 +83,10 @@ void PropsConfig::parseConfig() {
     if (FileUtils::fileExists(configFilePath)) {
         try {
             const auto data = toml::parse(configFilePath);
+            const auto& tab  = toml::get<toml::table>(data);
 
-            const toml::basic_value<toml::discard_comments> value = toml::parse(configFilePath);
-            readTableProperties(data, "General", properties_);
-            readTableProperties(data, "Search", properties_);
+            readTableProperties(tab, "General", properties_);
+            readTableProperties(tab, "Search", properties_);
         } catch (std::exception &e) {
             throw InitializationException("Error parsing configuration file. Details : " + std::string(e.what()));
         }
@@ -100,15 +100,23 @@ void PropsConfig::parseConfig() {
  * @param sectionName the section name
  * @param properties the properties map
  */
-void readTableProperties(const toml::basic_value<toml::discard_comments>& data, const std::string& sectionName, std::map<std::string, std::string>& properties) {
-    const auto& generalMap = toml::find<std::map<std::string, toml::value >>(data, sectionName);
-    for (auto& generalEntry : generalMap) {
-        const toml::value& value = generalEntry.second;
+bool readTableProperties(const toml::table& tab, const std::string& sectionName, std::map<std::string, std::string>& properties) {
 
-        std::string s;
-        convertValue(value, s);
+    bool res = true;
+    if (tab.count(sectionName) != 0) {
+        const auto& section = toml::get<toml::table>(tab.at(sectionName));
 
-        properties[StringUtils::toLower(sectionName)+"."+generalEntry.first] = s;
+        for (auto& generalEntry : section) {
+            const toml::value& value = generalEntry.second;
+            std::string s;
+            convertValue(value, s);
+
+            properties[StringUtils::toLower(sectionName)+"."+generalEntry.first] = s;
+        }
+    } else {
+        res = false;
     }
+
+    return res;
 }
 

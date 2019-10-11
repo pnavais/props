@@ -104,6 +104,7 @@ public:
     template <class T>
     T getValue(const std::string& key, const T& defaultValue) {
         const std::string* val = getValue(key);
+
         bool res = true;
         T target = defaultValue;
         if (val != nullptr) {

@@ -193,7 +193,13 @@ public:
     template <class T>
     static bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&) = std::dec)
     {
-        std::istringstream iss(s);
+        std::string source = s;
+
+        if (std::is_same<T, bool>::value) {
+            source = (s == "true") ? "1" : "0";
+        }
+        std::istringstream iss(source);
+
         return !(iss >> f >> t).fail();
     }
 

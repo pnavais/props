@@ -25,8 +25,10 @@
 
 namespace search {
 
-    static const char DEFAULT_KEY_SEPARATOR[] = "=";
     static const char KEY_SEPARATOR[] = "search.key_separator";
+    static const char DEFAULT_KEY_SEPARATOR[] = "=";
+    static const char KEY_IGNORE_CASE[] = "search.ignore_case";
+    static const bool DEFAULT_IGNORE_CASE = false;
 
     typedef enum Case { USE_CASE, NO_CASE, DEFAULT } Case;
 

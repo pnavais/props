@@ -46,19 +46,28 @@ const pcrecpp::RE &COMMENTED_LINE() {
  */
 std::unique_ptr<PropsSearchResult> PropsReader::find_value(const search::SearchOptions &searchOptions, const std::list<PropsFile> &files)
 {
-    const std::string& key = searchOptions.key_;
-    std::string keySeparator = searchOptions.separator_;
+    pcrecpp::RE_Options opt;
+    const std::string& key     = searchOptions.key_;
+    std::string keySeparator   = searchOptions.separator_;
+    search::Case caseSensitive = searchOptions.caseSensitive_;
 
     if (keySeparator.empty()) {
         keySeparator = PropsConfig::getDefault().getValue<std::string>(search::KEY_SEPARATOR, search::DEFAULT_KEY_SEPARATOR);
     }
+
+    if (caseSensitive == search::DEFAULT) {
+        bool ignore_case = PropsConfig::getDefault().getValue<bool>(search::KEY_IGNORE_CASE, search::DEFAULT_IGNORE_CASE);
+        caseSensitive = (ignore_case) ? search::NO_CASE : search::USE_CASE;
+    }
+
+    opt.set_caseless(caseSensitive == search::NO_CASE);
 
     std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(key));
 
 	// Prepare regex
 	std::stringstream regex_str;
 	regex_str << "^" << key << keySeparator << "(.+)";
-    pcrecpp::RE regex(regex_str.str());
+    pcrecpp::RE regex(regex_str.str(), opt);
 	std::string value_r;
 
 	// TODO: Process using a queue and threads
