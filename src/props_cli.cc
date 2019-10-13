@@ -19,6 +19,7 @@
 #include "props_cmd_factory.h"
 #include <cstring>
 #include <string_utils.h>
+#include <props_config.h>
 
 /**
  * Parses the command line arguments to
@@ -47,7 +48,19 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
             if (command != nullptr) {
                 command->parse(argc-1, argv+1);
             } else {
-                command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
+                // Check alias
+                const std::string* alias = PropsConfig::getDefault().getValue(std::string("alias.") + argv[1]);
+                if (alias != nullptr) {
+                    std::cout << "Hay un alias !!! [" << *alias << "]" << std::endl;
+
+                    /*command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));
+                    if (command != nullptr) {
+                        command->parse(argc-1, argv+1);
+                    }*/
+                }
+                if (command == nullptr) {
+                    command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
+                }
             }
 	    }
 	}

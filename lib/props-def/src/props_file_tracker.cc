@@ -129,40 +129,48 @@ void PropsFileTracker::setFirstAsMaster() {
  *
  * @param files the file to add
  * @param result the result of the operation
+ * @param updateConfig update the tracker config on successful operation
  */
-void PropsFileTracker::addFiles(std::list<PropsFile> &files, Result &result) {
+void PropsFileTracker::addFiles(std::list<PropsFile> &files, Result &result, const bool& updateConfig) {
 
-    std::ostringstream errorStream;
     size_t numFailed = 0;
     res::severity severity{res::NORMAL};
-    char prefix = '\0';
     for (auto& file : files) {
         Result partialResult{res::VALID};
-        addFile(file, partialResult);
-        if (!result.isValid()) {
-            errorStream << prefix << result.getMessage();
-            prefix = '\n';
+        addFile(file, partialResult, false);
+        if (!partialResult.isValid()) {
+            std::string errMsg = (partialResult.getSeverity() == res::WARN) ? "WARN: " : "ERROR: ";
+            partialResult.setMessage(errMsg + partialResult.getMessage());
+            partialResult.showMessage();
             numFailed++;
-            severity = (severity != res::CRITICAL) ? result.getSeverity() : severity;
+            severity = (severity != res::CRITICAL) ? partialResult.getSeverity() : severity;
         }
     }
 
     size_t numCorrect = files.size() - numFailed;
     std::ostringstream outputMsg;
 
-
     if (numFailed > 0) {
         result = res::ERROR;
         result.setSeverity(severity);
     }
 
-    if (files.size()>1) {
-        outputMsg << "[" << numCorrect << "/" << files.size() << "] ";
+    if (numCorrect == 0) {
+        outputMsg << "No files added to the tracker";
     } else {
-        outputMsg << numCorrect;
+        if (files.size() > 1) {
+            outputMsg << "[" << numCorrect << "/" << files.size() << "] files added to the tracker";
+        } else {
+            outputMsg << numCorrect << " file" << ((numCorrect != 1) ? "s" : "") << " added to the tracker";
+        }
     }
 
-    outputMsg << " file" << ((numCorrect!=1) ? "s" : "") << " added to the tracker";
+    if ((numCorrect > 0) && (updateConfig)) {
+        Result partialResult{res::VALID};
+        partialResult = save();
+        result = (result.isValid()) ? partialResult : result;
+    }
+
     result.setMessage(outputMsg.str());
 }
 
@@ -171,8 +179,9 @@ void PropsFileTracker::addFiles(std::list<PropsFile> &files, Result &result) {
  *
  * @param file the file to add
  * @param result the result of the operation
+ * @param updateConfig update the tracker config on successful operation
  */
-void PropsFileTracker::addFile(PropsFile &file, Result &result) {
+void PropsFileTracker::addFile(PropsFile &file, Result &result, const bool& updateConfig) {
 
     std::string fullFilePath = FileUtils::getAbsolutePath(file.getFileName());
 
@@ -188,7 +197,7 @@ void PropsFileTracker::addFile(PropsFile &file, Result &result) {
         result = storeFile(file);
 
         // Update the config
-        if (result.isValid()) {
+        if (result.isValid() && updateConfig) {
             result = save();
         }
     } else {
@@ -693,7 +702,7 @@ Result PropsFileTracker::group(const std::string& name, const std::string& targe
  * @param group the group to remove
  * @return the result of the operation
  */
-Result PropsFileTracker::removeGroup(const std::string& group) {
+Result PropsFileTracker::removeGroup(const std::string& group, const bool& untrack) {
     Result res{res::VALID};
     const std::string nGroup = normalizeGroup(group);
 
@@ -702,10 +711,14 @@ Result PropsFileTracker::removeGroup(const std::string& group) {
 
         if (groups != nullptr) {
             for (auto &propsFile : *groups) {
-                propsFile->setGroup("");
+                if (untrack) {
+                    trackedFiles_.remove(*propsFile);
+                } else {
+                    propsFile->setGroup("");
+                }
             }
             trackedGroups_.erase(nGroup);
-            res = save();
+            res = res.isValid() ? save() : res;
             if (res.isValid()) {
                 res.setMessage("Group \"" + nGroup + "\" removed from tracker");
             }

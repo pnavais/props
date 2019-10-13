@@ -200,9 +200,10 @@ public:
      * contained files to the default group.
      *
      * @param group the group to remove
+     * @param untrack removes the files instead of moving to default group
      * @return the result of the operation
      */
-    virtual Result removeGroup(const std::string& group) = 0;
+    virtual Result removeGroup(const std::string& group, const bool& untrack = false) = 0;
 
     /**
      * Moves the files from source group to target group.

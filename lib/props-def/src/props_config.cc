@@ -86,7 +86,8 @@ void PropsConfig::parseConfig() {
             const auto& tab  = toml::get<toml::table>(data);
 
             readTableProperties(tab, "General", properties_);
-            readTableProperties(tab, "Search", properties_);
+            readTableProperties(tab, "Search",  properties_);
+            readTableProperties(tab, "Alias",   properties_);
         } catch (std::exception &e) {
             throw InitializationException("Error parsing configuration file. Details : " + std::string(e.what()));
         }

@@ -56,7 +56,7 @@ public:
                        "Additionally this command allows listing all "
                        "currently tracked properties files.";
 
-        args_ = { PropsArg::make_cmd(tracker_cmd::_TRACKER_ADD_CMD_, { "<file>" } , "Adds the file to the tracker",
+        args_ = { PropsArg::make_cmd(tracker_cmd::_TRACKER_ADD_CMD_, { "<file...>" } , "Adds the file(s) to the tracker",
                            { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "Sets an alias for the file", {"<name>"}),
                              PropsOption::make_opt(tracker_cmd::_MASTER_FILE_, "Sets the file as master"),
                              PropsOption::make_opt(tracker_cmd::_GROUP_NAME_, "Sets a group for the file", {"<name>"})}),
@@ -72,7 +72,8 @@ public:
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_GROUP_CMD_, { "<file|alias>", "<group>" } , "Moves file to the group",
                                      { PropsOption::make_opt(tracker_cmd::_ALIAS_FILE_, "the name specified is an alias") }),
-                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNGROUP_CMD_, { "<group>" } , "Removes a given group moving all its contained files to the default group"),
+                  PropsArg::make_cmd(tracker_cmd::_TRACKER_UNGROUP_CMD_, { "<group>" } , "Removes a given group moving all its contained files to the default group",
+                                     { PropsOption::make_opt(tracker_cmd::_TRACKER_UNTRACK_CMD_, "Untracks all files in the group") }),
                   PropsArg::make_cmd(tracker_cmd::_TRACKER_RENAME_GROUP_CMD_, { "<old_group>", "<new_group>" } , "Changes the name of an existing group",
                                      { PropsOption::make_opt(tracker_cmd::_FORCE_MOVE_, "move to new group event if already existing") })};
     }

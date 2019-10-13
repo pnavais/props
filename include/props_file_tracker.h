@@ -191,9 +191,10 @@ public:
      * contained files to the default group.
      *
      * @param group the group to remove
+     * @param untrack removes the files instead of moving them to default group
      * @return the result of the operation
      */
-    Result removeGroup(const std::string& group) override;
+    Result removeGroup(const std::string& group, const bool& untrack) override;
 
     /**
      * Moves the files from source group to target group.
@@ -236,16 +237,18 @@ private:
      *
      * @param file the file to add
      * @param result the result of the operation
+     * @param updateConfig update the tracker config on successful operation
      */
-    void addFile(PropsFile &file, Result &result);
+    void addFile(PropsFile &file, Result &result, const bool& updateConfig = true);
 
     /**
      * Adds the given files to the tracker
      *
      * @param files the file to add
      * @param result the result of the operation
+     * @param updateConfig update the tracker config on successful operation
      */
-    void addFiles(std::list<PropsFile> &files, Result &result);
+    void addFiles(std::list<PropsFile> &files, Result &result, const bool& updateConfig = true);
 
     /**
      * Removes the given file from the tracker using the file path

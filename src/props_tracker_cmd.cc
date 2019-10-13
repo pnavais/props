@@ -324,7 +324,7 @@ Result PropsTrackerCommand::ungroup() {
     const auto& option_map = optionStore_.getOptions();
 
     if (option_map.count(tracker_cmd::_GROUP_NAME_) != 0) {
-        res = propsTracker_->removeGroup(option_map.at(tracker_cmd::_GROUP_NAME_));
+        res = propsTracker_->removeGroup(option_map.at(tracker_cmd::_GROUP_NAME_), option_map.count(tracker_cmd::_TRACKER_UNTRACK_CMD_) != 0);
     } else {
         res = res::ERROR;
         res.setMessage("No group specified");
