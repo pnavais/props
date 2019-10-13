@@ -66,9 +66,11 @@ void JsonPropsFormatter::format(const PropsSearchResult* result, std::ostream& o
 
             // Show header + matches
             out << "{" << std::endl;
-            out << StringUtils::expand(SPACER,2) << R"("results": {)" << std::endl;
+            out << StringUtils::expand(SPACER,2)  << R"("results": {)" << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("key": ")"<< key << "\"," << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("type": ")"<< ((result->getSearchOptions().matchValue_) ? "by_value" : "by_key") << "\"," << std::endl;
+            out << StringUtils::expand(SPACER, 4) << R"("is_regex: )" << ((result->getSearchOptions().isRegex_) ? "true" : "false") << "," << std::endl;
+            out << StringUtils::expand(SPACER, 4) << R"("case_sensitive: )" << ((result->getSearchOptions().caseSensitive_ == p_search_res::NO_OPT) ? "false" : "true") << "," << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("total_matches": )" << numMatches << "," << std::endl;
             out << StringUtils::expand(SPACER, 4) << R"("num_files": )" << fileKeys.size() << "," << std::endl;
             out << matches.str();

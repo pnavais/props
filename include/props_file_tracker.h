@@ -48,6 +48,17 @@ public:
     }
 
     /**
+     * Adds new files to the tracker
+     *
+     * @param file the file to add
+     */
+    Result add(std::list<PropsFile>& files) override {
+        Result result{res::VALID};
+        addFiles(files, result);
+        return result;
+    }
+
+    /**
      * Removes a tracked file using the file name
      *
      * @param the file to remove from the tracker
@@ -224,8 +235,17 @@ private:
      * Adds the given file to the tracker
      *
      * @param file the file to add
+     * @param result the result of the operation
      */
     void addFile(PropsFile &file, Result &result);
+
+    /**
+     * Adds the given files to the tracker
+     *
+     * @param files the file to add
+     * @param result the result of the operation
+     */
+    void addFiles(std::list<PropsFile> &files, Result &result);
 
     /**
      * Removes the given file from the tracker using the file path

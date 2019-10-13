@@ -39,6 +39,13 @@ public:
     virtual Result add(PropsFile &file) = 0;
 
     /**
+     * Adds new files to the tracker
+     *
+     * @param file the file to add
+     */
+    virtual Result add(std::list<PropsFile>& files) = 0;
+
+    /**
      * Removes a tracked file using the file name
      *
      * @param filePath the file to remove from the tracker

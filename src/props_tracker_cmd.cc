@@ -61,7 +61,7 @@ std::unique_ptr<PropsResult> PropsTrackerCommand::execute() {
     Result res{res::VALID};
 
     if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_ADD_CMD_) {
-        res = trackFile();
+        res = (optionStore_.getArgs().size()>1) ? trackFiles() : trackFile();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_LS_CMD_) {
         propsTracker_->listTracked();
     } else if (optionStore_.getCmdName() == tracker_cmd::_TRACKER_UNALIAS_CMD_) {
@@ -90,7 +90,7 @@ std::unique_ptr<PropsResult> PropsTrackerCommand::execute() {
 }
 
 /**
- * Tracks the selected filed.
+ * Tracks the selected file.
  *
  * @return the result of the operation
  */
@@ -106,6 +106,7 @@ Result PropsTrackerCommand::trackFile() {
     if (option_map.count(tracker_cmd::_MASTER_FILE_) != 0) {
         propsFile.setMaster(true);
     }
+
     // Sets group (if available)
     if (option_map.count(tracker_cmd::_GROUP_NAME_) != 0) {
         propsFile.setGroup(option_map.at(tracker_cmd::_GROUP_NAME_));
@@ -115,6 +116,37 @@ Result PropsTrackerCommand::trackFile() {
     Result res = propsTracker_->add(propsFile);
     if (res.isValid()) {
         res.setMessage("Now tracking \"" + propsFile.getFileName() + "\"");
+    }
+
+    return res;
+}
+
+/**
+ * Tracks the selected files.
+ *
+ * @return the result of the operation
+ */
+Result PropsTrackerCommand::trackFiles() {
+    std::list<PropsFile> propsFiles;
+    const auto& option_map = optionStore_.getOptions();
+
+    // Check if alias or master set (not compatible with multiple files)
+    if ((option_map.count(tracker_cmd::_ALIAS_FILE_) != 0) || (option_map.count(tracker_cmd::_MASTER_FILE_) != 0)) {
+        throw InitializationException("Cannot set alias/master option when adding multiple files to the tracker");
+    }
+
+    for (auto& file : optionStore_.getArgs()) {
+        PropsFile propsFile = PropsFile::make_file(file);
+        // Sets group (if available)
+        if (option_map.count(tracker_cmd::_GROUP_NAME_) != 0) {
+            propsFile.setGroup(option_map.at(tracker_cmd::_GROUP_NAME_));
+        }
+        propsFiles.push_back(propsFile);
+    }
+
+    Result res = propsTracker_->add(propsFiles);
+    if (res.isValid()) {
+        res.setMessage("Now tracking " + std::to_string(propsFiles.size()) + " files");
     }
 
     return res;

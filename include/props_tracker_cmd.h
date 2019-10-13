@@ -97,11 +97,18 @@ public:
 private:
 
     /**
-     * Tracks the selected filed.
+     * Tracks the selected file.
      *
      * @return the result of the operation
      */
     Result trackFile();
+
+    /**
+     * Tracks the selected files.
+     *
+     * @return the result of the operation
+     */
+    Result trackFiles();
 
     /**
      * Removes from the tracker the selected filed using the file

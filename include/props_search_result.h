@@ -34,12 +34,15 @@ namespace p_search_res {
         std::string separator_;
         Opt partialMatch_;
         bool matchValue_;
+        bool isRegex_;
     } SearchOptions;
 
     typedef struct Match {
+            std::string input_;
+            SearchOptions searchOptions_;
             std::string fullLine_;
+            std::string key_;
             std::string value_;
-            bool caseSensitive_;
     } Match;
 
     typedef std::map<std::string, std::list<Match>> result_map;

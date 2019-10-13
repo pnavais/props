@@ -125,9 +125,52 @@ void PropsFileTracker::setFirstAsMaster() {
 }
 
 /**
+ * Adds the given files to the tracker
+ *
+ * @param files the file to add
+ * @param result the result of the operation
+ */
+void PropsFileTracker::addFiles(std::list<PropsFile> &files, Result &result) {
+
+    std::ostringstream errorStream;
+    size_t numFailed = 0;
+    res::severity severity{res::NORMAL};
+    char prefix = '\0';
+    for (auto& file : files) {
+        Result partialResult{res::VALID};
+        addFile(file, partialResult);
+        if (!result.isValid()) {
+            errorStream << prefix << result.getMessage();
+            prefix = '\n';
+            numFailed++;
+            severity = (severity != res::CRITICAL) ? result.getSeverity() : severity;
+        }
+    }
+
+    size_t numCorrect = files.size() - numFailed;
+    std::ostringstream outputMsg;
+
+
+    if (numFailed > 0) {
+        result = res::ERROR;
+        result.setSeverity(severity);
+    }
+
+    if (files.size()>1) {
+        outputMsg << "[" << numCorrect << "/" << files.size() << "] ";
+    } else {
+        outputMsg << numCorrect;
+    }
+
+    outputMsg << " file" << ((numCorrect!=1) ? "s" : "") << " added to the tracker";
+    result.setMessage(outputMsg.str());
+}
+
+/**
  * Adds the given file to the tracker
  *
  * @param file the file to add
+ * @param result the result of the operation
  */
 void PropsFileTracker::addFile(PropsFile &file, Result &result) {
 

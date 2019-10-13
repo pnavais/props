@@ -31,6 +31,8 @@ namespace search {
     static const bool DEFAULT_IGNORE_CASE = false;
     static const char KEY_ALLOW_PARTIAL_MATCH[] = "search.allow_partial_match";
     static const bool DEFAULT_ALLOW_PARTIAL_MATCH = false;
+    static const char KEY_ENABLE_HIGHLIGHT[] = "search.highlight_results";
+    static const bool DEFAULT_ENABLE_HIGHLIGHT = true;
 }
 
 /**
@@ -49,7 +51,24 @@ public:
      *  @param global the flag enabling global search
      *  @return the results of the search
      */
-     static std::unique_ptr<PropsSearchResult> find_value(const p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
+     static std::unique_ptr<PropsSearchResult> find_value(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
+
+private:
+
+    /**
+     * Amend input options if default values needed.
+     *
+     * @param searchOptions the search options
+     */
+    static void fixSearchOptions(p_search_res::SearchOptions& searchOptions);
+
+    /**
+     * Builds the search regular expression from the given search options.
+     *
+     * @param searchOptions the search options
+     * @param regex_str the built string regex
+     */
+    static void buildRegex(const p_search_res::SearchOptions& searchOptions, std::string& regex_str);
 
 };
 
