@@ -21,10 +21,20 @@
 #include <list>
 #include <sstream>
 
+#define N_(msgid) msgid
 #define DEFAULT_PATTERN   " "
 #define DEFAULT_SEPARATOR ","
+#define SPLIT_CMDLINE_BAD_ENDING     1
+#define SPLIT_CMDLINE_UNCLOSED_QUOTE 2
 
 const size_t MAX_STR_WIDTH = 10;
+
+namespace str_errors {
+        const char * const split_cmdline_errors[] = {
+            N_("cmdline ends with \\"),
+                    N_("unclosed quote")
+        };
+}
 
 class StringUtils {
 
@@ -239,6 +249,15 @@ public:
 
         return !(iss >> f >> t).fail();
     }
+
+    /**
+     * Splits a given command line string into an array of arguments.
+     *
+     * @param cmdline the command line
+     * @param argv the array of arguments
+     * @return the number of arguments or error code if negative
+     */
+    static int split_cmdline(const std::string& inputStr, char *** argv);
 
 
 };

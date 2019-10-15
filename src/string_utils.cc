@@ -352,3 +352,71 @@ std::string& StringUtils::rtrim(std::string &str, const std::string &chars) {
 std::string& StringUtils::trim(std::string &str, const std::string &chars) {
     return ltrim(rtrim(str, chars), chars);
 }
+
+/**
+ * Splits a given command line string into an array of arguments.
+ *
+ * @param cmdline the command line
+ * @param argv the array of arguments
+ * @return the number of arguments or error code if negative
+ */
+int StringUtils::split_cmdline(const std::string& inputStr, char *** argv) {
+    int src, dst;
+    char quoted = 0;
+
+    std::list<char *> argList;
+
+    char* cmdline = new char[inputStr.size() + 1];
+    strcpy(cmdline, inputStr.c_str());
+
+    for (src = dst = 0; cmdline[src];) {
+        char c = cmdline[src];
+        if (!quoted && isspace(c)) {
+            cmdline[dst++] = 0;
+            while (cmdline[++src]
+                   && isspace(cmdline[src])); /* skip */
+            argList.push_back(cmdline + dst);
+        } else if (!quoted && (c == '\'' || c == '"')) {
+            quoted = c;
+            src++;
+        } else if (c == quoted) {
+            quoted = 0;
+            src++;
+        } else {
+            if (c == '\\' && quoted != '\'') {
+                src++;
+                c = cmdline[src];
+                if (!c) {
+                    return -SPLIT_CMDLINE_BAD_ENDING;
+                }
+            }
+            cmdline[dst++] = c;
+            src++;
+        }
+    }
+
+    cmdline[dst] = 0;
+
+    if (quoted) {
+        return -SPLIT_CMDLINE_UNCLOSED_QUOTE;
+    }
+
+    (*argv) = new char*[argList.size()];
+    int counter = 0;
+    for (auto& str : argList) {
+        (*argv)[counter] = new char[sizeof(str)+1];
+        strcpy((*argv)[counter], str);
+        counter++;
+    }
+
+
+    delete [] cmdline;
+
+    std::cout << "INDICION 2" << std::endl;
+    for (int i=0; i<counter; i++) {
+        std::cout << "ARGV [" << i << "] = |" << argv[i] << "|" << std::endl;
+    }
+
+    return counter;
+
+}

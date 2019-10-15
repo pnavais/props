@@ -52,6 +52,21 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
                 const std::string* alias = PropsConfig::getDefault().getValue(std::string("alias.") + argv[1]);
                 if (alias != nullptr) {
                     std::cout << "Hay un alias !!! [" << *alias << "]" << std::endl;
+                    char ***argv_alias;
+
+                    int ret = StringUtils::split_cmdline(*alias, argv_alias);
+                    std::cout << "RET |" << ret << "|" << std::endl;
+                    if (ret >= 0) {
+                        std::cout << "Cuantos ? [" << ret << "]" << std::endl;
+                        if (argv_alias == nullptr) {
+                            std::cout << "CAGO EN LA PUTA" << std::endl;
+                        }
+                        for (int i=0; i<ret; i++) {
+                            //std::cout << "ARGV_ALIAS[" << i << "] = |" << argv_alias[i] << "|" << std::endl;
+                        }
+                    } else {
+                        throw InitializationException("Error parsing alias ["+*alias+"] : "+str_errors::split_cmdline_errors[ret]);
+                    }
 
                     /*command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));
                     if (command != nullptr) {
