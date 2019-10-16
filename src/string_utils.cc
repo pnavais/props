@@ -360,7 +360,7 @@ std::string& StringUtils::trim(std::string &str, const std::string &chars) {
  * @param argv the array of arguments
  * @return the number of arguments or error code if negative
  */
-int StringUtils::split_cmdline(const std::string& inputStr, char *** argv) {
+int StringUtils::split_cmdline(const std::string& inputStr, char **& argv) {
     int src, dst;
     char quoted = 0;
 
@@ -368,6 +368,7 @@ int StringUtils::split_cmdline(const std::string& inputStr, char *** argv) {
 
     char* cmdline = new char[inputStr.size() + 1];
     strcpy(cmdline, inputStr.c_str());
+    argList.push_back(cmdline);
 
     for (src = dst = 0; cmdline[src];) {
         char c = cmdline[src];
@@ -401,22 +402,15 @@ int StringUtils::split_cmdline(const std::string& inputStr, char *** argv) {
         return -SPLIT_CMDLINE_UNCLOSED_QUOTE;
     }
 
-    (*argv) = new char*[argList.size()];
+    argv = new char*[argList.size()];
     int counter = 0;
     for (auto& str : argList) {
-        (*argv)[counter] = new char[sizeof(str)+1];
-        strcpy((*argv)[counter], str);
+        argv[counter] = new char[sizeof(str)+1];
+        strcpy(argv[counter], str);
         counter++;
     }
 
-
     delete [] cmdline;
 
-    std::cout << "INDICION 2" << std::endl;
-    for (int i=0; i<counter; i++) {
-        std::cout << "ARGV [" << i << "] = |" << argv[i] << "|" << std::endl;
-    }
-
     return counter;
-
 }

@@ -51,21 +51,30 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
                 // Check alias
                 const std::string* alias = PropsConfig::getDefault().getValue(std::string("alias.") + argv[1]);
                 if (alias != nullptr) {
-                    std::cout << "Hay un alias !!! [" << *alias << "]" << std::endl;
-                    char ***argv_alias;
+                    char **argv_alias;
+                    char **argv_ext;
 
                     int ret = StringUtils::split_cmdline(*alias, argv_alias);
-                    std::cout << "RET |" << ret << "|" << std::endl;
+
                     if (ret >= 0) {
-                        std::cout << "Cuantos ? [" << ret << "]" << std::endl;
-                        if (argv_alias == nullptr) {
-                            std::cout << "CAGO EN LA PUTA" << std::endl;
-                        }
+                        int total = ret + (argc-1);
+                        argv_ext = new char*[total];
+                        argv_ext[0] = new char[sizeof(argv[0])];
+                        strcpy(argv_ext[0], argv[0]);
+
                         for (int i=0; i<ret; i++) {
-                            //std::cout << "ARGV_ALIAS[" << i << "] = |" << argv_alias[i] << "|" << std::endl;
+                            argv_ext[i+1] = new char[sizeof(argv_alias[i])];
+                            strcpy(argv_ext[i+1], argv_alias[i]);
+                            delete[] argv_alias[i];
+                        }
+                        delete[] argv_alias;
+
+                        for (int i=2; i<argc; i++) {
+                            argv_ext[ret+i-1] = new char[sizeof(argv[i])];
+                            strcpy(argv_ext[ret+i-1], argv[i]);
                         }
                     } else {
-                        throw InitializationException("Error parsing alias ["+*alias+"] : "+str_errors::split_cmdline_errors[ret]);
+                        throw InitializationException("Error parsing alias ["+*alias+"] : "+str_errors::get_error(ret));
                     }
 
                     /*command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));

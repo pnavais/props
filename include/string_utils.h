@@ -30,10 +30,14 @@
 const size_t MAX_STR_WIDTH = 10;
 
 namespace str_errors {
-        const char * const split_cmdline_errors[] = {
-            N_("cmdline ends with \\"),
-                    N_("unclosed quote")
-        };
+    const char *const split_cmdline_errors[] = {
+            N_("command ends with \\"),
+            N_("unclosed quote")
+    };
+
+    inline const char *get_error(int split_cmdline_errno) {
+        return split_cmdline_errors[-split_cmdline_errno - 1];
+    }
 }
 
 class StringUtils {
@@ -257,7 +261,7 @@ public:
      * @param argv the array of arguments
      * @return the number of arguments or error code if negative
      */
-    static int split_cmdline(const std::string& inputStr, char *** argv);
+    static int split_cmdline(const std::string& inputStr, char **& argv);
 
 
 };
