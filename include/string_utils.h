@@ -171,12 +171,20 @@ public:
      * Highlights all occurrences of a text in a given string
      *
      * @param str the input string
-     * @param text the text to highlight
-     * @param caseSensitive enable/disable case sensitivity
-     *
-     * @return the highlighted version of the string
+     * @param replStr the text to highlight
+     * return the highlight version of the string
      */
-    static std::string highlight(const std::string& str, const std::string& text, const bool& caseSensitive = true);
+    static std::string highlight(const std::string& str, const std::string& replStr, const bool& caseSensitive = true);
+
+    /**
+     * Highlights all occurrences of a text in a given string
+     *
+     * @param str the input string
+     * @param regex the regular expression to use for replacement
+     * @param replStr the text to highlight
+     * return the highlight version of the string
+     */
+    static std::string highlight(const std::string& str, const std::string& regex, const std::string& replStr, const bool& caseSensitive);
 
     /**
      * Checks if a string consists only of whitespaces

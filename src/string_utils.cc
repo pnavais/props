@@ -23,6 +23,7 @@
 
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <pcrecpp.h>
 
 #endif
 
@@ -269,26 +270,39 @@ size_t StringUtils::find_ci(std::string input, std::string text, size_t pos) {
     return input.find(text, pos);
 }
 
+
 /**
  * Highlights all occurrences of a text in a given string
  *
  * @param str the input string
- * @param text the text to highlight
+ * @param replStr the text to highlight
  * return the highlight version of the string
  */
-std::string StringUtils::highlight(const std::string& str, const std::string& text, const bool& caseSensitive) {
+std::string StringUtils::highlight(const std::string& str, const std::string& replStr, const bool& caseSensitive) {
+    return highlight(str, replStr, replStr, caseSensitive);
+}
+
+/**
+ * Highlights all occurrences of a text in a given string
+ *
+ * @param str the input string
+ * @param regex the regular expression to use for replacement
+ * @param replStr the text to highlight
+ * return the highlight version of the string
+ */
+std::string StringUtils::highlight(const std::string& str, const std::string& regex, const std::string& replStr, const bool& caseSensitive) {
     std::ostringstream out;
     rang::setControlMode(rang::control::Force);
-    std::string replStr = text;
-    if (!caseSensitive) {
-        auto pos = find_ci(str, text);
-        replStr = str.substr(pos, text.size());
-    }
+
+    // Regex options
+    pcrecpp::RE_Options opt;
+    opt.set_caseless(caseSensitive);
+
     out << rang::style::reversed << rang::fgB::yellow << replStr << rang::style::reset;
     rang::setControlMode(rang::control::Auto);
     std::string hlStr = str;
 
-    replace(hlStr, replStr, out.str());
+    pcrecpp::RE(regex, opt).Replace(out.str(), &hlStr);
 
     return hlStr;
 }

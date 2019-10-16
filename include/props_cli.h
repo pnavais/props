@@ -35,9 +35,25 @@ public:
      *
      * @param argc the number of arguments
      * @param argv the array of arguments
+     *
      * @return the props params holder
      */
     static PropsCommand* parse(const int& argc, char* argv[]);
+
+private:
+
+    /**
+     * Parses the command line arguments to
+     * provide the props command instance.
+     *
+     * @param argc the number of arguments
+     * @param argv the array of arguments
+     * @param argv_ext the new array of arguments for the alias or null
+     * if alias not found
+     *
+     * @return the size of the extender argc or -1 if alias not found
+     */
+    static int getAliasArgs(const int &argc, char *argv[], char **&argv_ext);
 
 };
 

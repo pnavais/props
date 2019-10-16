@@ -48,41 +48,13 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
             if (command != nullptr) {
                 command->parse(argc-1, argv+1);
             } else {
-                // Check alias
-                const std::string* alias = PropsConfig::getDefault().getValue(std::string("alias.") + argv[1]);
-                if (alias != nullptr) {
-                    char **argv_alias;
-                    char **argv_ext;
-
-                    int ret = StringUtils::split_cmdline(*alias, argv_alias);
-
-                    if (ret >= 0) {
-                        int total = ret + (argc-1);
-                        argv_ext = new char*[total];
-                        argv_ext[0] = new char[sizeof(argv[0])];
-                        strcpy(argv_ext[0], argv[0]);
-
-                        for (int i=0; i<ret; i++) {
-                            argv_ext[i+1] = new char[sizeof(argv_alias[i])];
-                            strcpy(argv_ext[i+1], argv_alias[i]);
-                            delete[] argv_alias[i];
-                        }
-                        delete[] argv_alias;
-
-                        for (int i=2; i<argc; i++) {
-                            argv_ext[ret+i-1] = new char[sizeof(argv[i])];
-                            strcpy(argv_ext[ret+i-1], argv[i]);
-                        }
-                    } else {
-                        throw InitializationException("Error parsing alias ["+*alias+"] : "+str_errors::get_error(ret));
-                    }
-
-                    /*command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv[1]));
-                    if (command != nullptr) {
-                        command->parse(argc-1, argv+1);
-                    }*/
-                }
-                if (command == nullptr) {
+                // Check alias as last resort
+                char **argv_ext;
+                int argc_ext = PropsCLI::getAliasArgs(argc, argv, argv_ext);
+                command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv_ext[1]));
+                if (command != nullptr) {
+                    command->parse(argc_ext-1, argv_ext+1);
+                } else {
                     command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
                 }
             }
@@ -90,4 +62,50 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
 	}
 
 	return (command != nullptr) ? command : nullptr;
+}
+
+/**
+ * Parses the command line arguments to
+ * provide the props command instance.
+ *
+ * @param argc the number of arguments
+ * @param argv the array of arguments
+ * @param argv_ext the new array of arguments for the alias or null
+ * if alias not found
+ */
+int PropsCLI::getAliasArgs(const int& argc, char* argv[], char**& argv_ext) {
+
+    int argc_ext = -1;
+    const std::string* alias = PropsConfig::getDefault().getValue(std::string("alias.") + argv[1]);
+
+    if (alias != nullptr) {
+        char **argv_alias;
+
+        // Split alias
+        int ret = StringUtils::split_cmdline(*alias, argv_alias);
+
+        // Replace argv with alias args
+        if (ret >= 0) {
+            argc_ext = ret + (argc - 1);
+            argv_ext = new char *[argc_ext];
+            argv_ext[0] = new char[sizeof(argv[0])];
+            strcpy(argv_ext[0], argv[0]);
+
+            for (int i = 0; i < ret; i++) {
+                argv_ext[i + 1] = new char[sizeof(argv_alias[i])];
+                strcpy(argv_ext[i + 1], argv_alias[i]);
+                delete[] argv_alias[i];
+            }
+            delete[] argv_alias;
+
+            for (int i = 2; i < argc; i++) {
+                argv_ext[ret + i - 1] = new char[sizeof(argv[i])];
+                strcpy(argv_ext[ret + i - 1], argv[i]);
+            }
+        } else {
+            throw InitializationException("Error parsing alias [" + *alias + "] : " + str_errors::get_error(ret));
+        }
+    }
+
+    return argc_ext;
 }

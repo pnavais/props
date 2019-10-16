@@ -42,7 +42,7 @@ void SimplePropsFormatter::format(const PropsSearchResult* result, std::ostream&
                 int i = 1;
                 for (auto &match : fileKey.second) {
                     const std::string& match_str = (enableHighlight)
-                        ? StringUtils::highlight(match.fullLine_, ((match.searchOptions_.matchValue_) ? match.value_ : match.key_), match.searchOptions_.caseSensitive_)
+                        ? StringUtils::highlight(match.fullLine_,  match.searchOptions_.key_, ((match.searchOptions_.matchValue_) ? match.value_ : match.key_), match.searchOptions_.caseSensitive_)
                         : match.fullLine_;
 
                     out << rang::style::bold << rang::fgB::yellow << i << rang::style::reset << ":"
