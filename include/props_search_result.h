@@ -23,6 +23,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <pcre_stringpiece.h>
 
 namespace p_search_res {
 
@@ -37,12 +38,17 @@ namespace p_search_res {
         bool isRegex_;
     } SearchOptions;
 
+    typedef struct StringMatch {
+        std::string str_;
+        size_t position;
+    } StringMatch;
+
     typedef struct Match {
             std::string input_;
             SearchOptions searchOptions_;
             std::string fullLine_;
-            std::string key_;
-            std::string value_;
+            StringMatch key_;
+            StringMatch value_;
     } Match;
 
     typedef std::map<std::string, std::list<Match>> result_map;

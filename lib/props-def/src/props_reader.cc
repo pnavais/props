@@ -62,8 +62,10 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchO
     buildRegex(searchOptions, regex_in);
     pcrecpp::RE regex(regex_in, opt);
 
-    std::string value_k;
-	std::string value_r;
+    //std::string value_k;
+	//std::string value_r;
+	pcrecpp::StringPiece value_k;
+    pcrecpp::StringPiece value_r;
 
     if (regex.NumberOfCapturingGroups() > 2) {
         throw ExecutionException("Too many capture groups specified");
@@ -82,7 +84,13 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchO
                 // Try to find the regex in line, and keep results.
                 if (!COMMENTED_LINE().PartialMatch(line)) {
                     if (regex.PartialMatch(line, &value_k, &value_r)) {
-                        result->add(file.getFileName(), p_search_res::Match{ input, searchOptions, line, value_k, value_r });
+                        size_t pos_k = value_k.data() - line.data();
+                        size_t pos_r = value_r.data() - line.data();
+                        result->add(file.getFileName(), p_search_res::Match{ input,
+                                                                             searchOptions,
+                                                                             line,
+                                                                             p_search_res::StringMatch{value_k.as_string(), pos_k},
+                                                                             p_search_res::StringMatch{value_r.as_string(), pos_r }});
                     }
                 }
             }
@@ -134,14 +142,18 @@ void PropsReader::buildRegex(const p_search_res::SearchOptions& searchOptions, s
 
     // Prepare regex
     std::stringstream regex_stream;
-    std::string partStr = (searchOptions.partialMatch_ == p_search_res::USE_OPT) ? ".*" : "";
+    std::string partStr = (searchOptions.partialMatch_ == p_search_res::USE_OPT) ? ".*?" : "";
 
     if (matchValue) {
         regex_stream << "^(.+)" << searchOptions.separator_  << partStr << "(" << key  << ")" << partStr << "$";
     } else {
-        regex_stream << "^" << partStr << "(" << key << ")" << partStr << searchOptions.separator_  << "(.+)";
+        if (key.back() == '$') {
+            std::string key_rpl = key.substr(0, key.length() - 1);
+            regex_stream << "^" << partStr << "(" << key_rpl << ")" << searchOptions.separator_  << "(.+)";
+        } else {
+            regex_stream << "^" << partStr << "(" << key << ")" << partStr << searchOptions.separator_  << "(.+)";
+        }
     }
 
     regex_str = regex_stream.str();
-
 }

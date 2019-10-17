@@ -53,7 +53,7 @@ void JsonPropsFormatter::format(const PropsSearchResult* result, std::ostream& o
                 for (auto &match : fileKey.second) {
                     matches << StringUtils::expand(SPACER, 10) << prefix << std::endl;
                     matches << StringUtils::expand(SPACER, 12) << R"("full_match": ")" << match.fullLine_ << "\"," << std::endl;
-                    matches << StringUtils::expand(SPACER, 12) << R"("value": ")" << match.value_ << "\"" << std::endl;
+                    matches << StringUtils::expand(SPACER, 12) << R"("value": ")" << match.value_.str_ << "\"" << std::endl;
                     prefix = "},\n" + StringUtils::expand(SPACER, 10) + "{";
                 }
                 matches << StringUtils::expand(SPACER, 10) << "}" << std::endl;

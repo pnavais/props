@@ -19,6 +19,7 @@
 #include "props_cmd_factory.h"
 #include <cstring>
 #include <string_utils.h>
+#include <memory_utils.h>
 #include <props_config.h>
 
 /**
@@ -54,6 +55,7 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
                 command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv_ext[1]));
                 if (command != nullptr) {
                     command->parse(argc_ext-1, argv_ext+1);
+                    MemoryUtils::free2DArray<char>(argv_ext, argc_ext);
                 } else {
                     command = PropsCommandFactory::getDefault().getUnknownCommand(argv[1]);
                 }

@@ -276,33 +276,18 @@ size_t StringUtils::find_ci(std::string input, std::string text, size_t pos) {
  *
  * @param str the input string
  * @param replStr the text to highlight
+ * @param pos position of the match
  * return the highlight version of the string
  */
-std::string StringUtils::highlight(const std::string& str, const std::string& replStr, const bool& caseSensitive) {
-    return highlight(str, replStr, replStr, caseSensitive);
-}
-
-/**
- * Highlights all occurrences of a text in a given string
- *
- * @param str the input string
- * @param regex the regular expression to use for replacement
- * @param replStr the text to highlight
- * return the highlight version of the string
- */
-std::string StringUtils::highlight(const std::string& str, const std::string& regex, const std::string& replStr, const bool& caseSensitive) {
+std::string StringUtils::highlight(const std::string& str, const std::string& replStr, const size_t& pos) {
     std::ostringstream out;
+
     rang::setControlMode(rang::control::Force);
-
-    // Regex options
-    pcrecpp::RE_Options opt;
-    opt.set_caseless(caseSensitive);
-
     out << rang::style::reversed << rang::fgB::yellow << replStr << rang::style::reset;
     rang::setControlMode(rang::control::Auto);
     std::string hlStr = str;
 
-    pcrecpp::RE(regex, opt).Replace(out.str(), &hlStr);
+    hlStr.replace(pos, replStr.size(), out.str());
 
     return hlStr;
 }
