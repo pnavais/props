@@ -52,7 +52,7 @@ PropsCommand* PropsCLI::parse(const int& argc, char* argv[])
                 // Check alias as last resort
                 char **argv_ext;
                 int argc_ext = PropsCLI::getAliasArgs(argc, argv, argv_ext);
-                command = PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv_ext[1]));
+                command = (argc_ext >= 0) ? PropsCommandFactory::getDefault().getCommand(StringUtils::toUpper(argv_ext[1])) : nullptr;
                 if (command != nullptr) {
                     command->parse(argc_ext-1, argv_ext+1);
                     MemoryUtils::free2DArray<char>(argv_ext, argc_ext);
