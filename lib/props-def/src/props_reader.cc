@@ -30,24 +30,16 @@
 const pcrecpp::RE &COMMENTED_LINE();
 void* search_files(void* data);
 
-// Controls the file queue access
-pthread_mutex_t filesQueueMutex;
-
 /**
-  * Namespace for constants
-  */
+ * Namespace for reader
+ */
 namespace reader {
     static const long DEFAULT_MAX_WORKER_THREADS = 5;
     static const char* MAX_WORKER_THREADS = "general.max_worker_threads";
-    typedef struct FileSearchData {
-        p_search_res::SearchOptions* searchOptions_;
-        pcrecpp::RE* regex_;
-        std::deque<PropsFile>* filesQueue_;
-        PropsSearchResult* searchResult_;
-        
-    } FileSearchData;
 }
 
+// Controls the file queue access
+pthread_mutex_t filesQueueMutex;
 
 /**
  * Retrieves the regular expression for
@@ -72,13 +64,15 @@ void* search_files(void* data) {
     bool keep_processing = true;
 
     if (data != nullptr) {
-        auto *searchData = (reader::FileSearchData*) data;
+        auto *searchData = (search::FileSearchData*) data;
         auto *filesQueue = searchData->filesQueue_;
-        
+        auto* regex = (pcrecpp::RE*)searchData->regex_;
+
         while (keep_processing) {
             pthread_mutex_lock (&filesQueueMutex);
 
             std::unique_ptr<PropsFile> file;
+
             if (!filesQueue->empty()) {
                 file.reset(new PropsFile(filesQueue->back()));
                 filesQueue->pop_back();
@@ -89,7 +83,6 @@ void* search_files(void* data) {
             pthread_mutex_unlock(&filesQueueMutex);
 
             if (file != nullptr) {
-
                 const std::string &input = searchData->searchOptions_->key_;
                 pcrecpp::StringPiece value_k;
                 pcrecpp::StringPiece value_r;
@@ -103,9 +96,11 @@ void* search_files(void* data) {
                     while (std::getline(infile, line)) {
                         // Try to find the regex in line, and keep results.
                         if (!COMMENTED_LINE().PartialMatch(line)) {
-                            if (searchData->regex_->PartialMatch(line, &value_k, &value_r)) {
+                            std::cout << "Entro con line " << std::endl;
+                            if (regex->PartialMatch(line, &value_k, &value_r)) {
                                 size_t pos_k = value_k.data() - line.data();
                                 size_t pos_r = value_r.data() - line.data();
+                                std::cout << "HAY MATCHINGER Z !!!" << std::endl;
                                 searchData->searchResult_->add(file->getFileName(), p_search_res::Match{input,
                                                                                     *(searchData->searchOptions_),
                                                                                     line,
@@ -136,50 +131,58 @@ void* search_files(void* data) {
  * @param file the source file
  * @return the value for the key in the file
  */
-std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchOptions &searchOptions, const std::list<PropsFile> &files)
-{
-    std::unique_ptr<PropsSearchResult> searchResult(new PropsSearchResult(searchOptions));
+std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchOptions &searchOptions, const std::list<PropsFile> &files) {
+    search::FileSearchData fileSearchData = buildSearchData(searchOptions, files);
+    std::unique_ptr<PropsSearchResult> searchResult(fileSearchData.searchResult_);
 
-    // Amend options if defaults needed
-    fixSearchOptions(searchOptions);
-
-    // Regex options
-    pcrecpp::RE_Options opt;
-    opt.set_caseless((searchOptions.caseSensitive_ == p_search_res::NO_OPT));
-
-    // Build regex
-    std::string regex_in;
-    buildRegex(searchOptions, regex_in);
-    pcrecpp::RE regex(regex_in, opt);
-
-    if (regex.NumberOfCapturingGroups() > 2) {
-        throw ExecutionException("Too many capture groups specified");
-    }
-
-    // Configure threading 
-    pthread_mutex_init(&filesQueueMutex, nullptr);
-    
+    // Configure threading
     auto maxWorkerThreads = PropsConfig::getDefault().getValue<size_t>(reader::MAX_WORKER_THREADS, reader::DEFAULT_MAX_WORKER_THREADS);
     maxWorkerThreads = (maxWorkerThreads > files.size()) ? files.size() : maxWorkerThreads;
 
+    pthread_mutex_init(&filesQueueMutex, nullptr);
+
     ThreadGroup threadGroup("READER_GROUP", maxWorkerThreads);
     threadGroup.setThreadFunction(search_files);
-
-    // Fill the queue with input files
-    std::deque<PropsFile> filesQueue;
-    for (auto& file : files) {
-        filesQueue.push_back(file);
-    }
-
-    reader::FileSearchData fileSearchData { &searchOptions, &regex, &filesQueue, searchResult.get() };
     threadGroup.setData(&fileSearchData);
-
     threadGroup.start();
     threadGroup.wait();
 
     pthread_mutex_destroy(&filesQueueMutex);
 
 	return searchResult;
+}
+
+/**
+ *  Finds the value of the given key searching in the mater tracked file
+ *  or globally on every tracked file and replace its value with the given
+ *  new one.
+ *
+ * @param key the key to find
+ * @param newValue the new value to set
+ * @param files the list of files to search
+ *
+ * @return the results of the search
+ */
+std::unique_ptr<PropsSearchResult> PropsReader::find_and_replace_value(p_search_res::SearchOptions& searchOptions, const std::string& newValue, const std::list<PropsFile>& files) {
+    std::cout << "NEW VALUE => [" << newValue << "]" << std::endl;
+    search::FileSearchData fileSearchData = buildSearchData(searchOptions, files);
+    std::unique_ptr<PropsSearchResult> searchResult(fileSearchData.searchResult_);
+
+    // Configure threading
+    auto maxWorkerThreads = PropsConfig::getDefault().getValue<size_t>(reader::MAX_WORKER_THREADS, reader::DEFAULT_MAX_WORKER_THREADS);
+    maxWorkerThreads = (maxWorkerThreads > files.size()) ? files.size() : maxWorkerThreads;
+
+    pthread_mutex_init(&filesQueueMutex, nullptr);
+
+    ThreadGroup threadGroup("READER_GROUP", maxWorkerThreads);
+    threadGroup.setThreadFunction(search_files);
+    threadGroup.setData(&fileSearchData);
+    threadGroup.start();
+    threadGroup.wait();
+
+    pthread_mutex_destroy(&filesQueueMutex);
+
+    return searchResult;
 }
 
 /**
@@ -235,4 +238,40 @@ void PropsReader::buildRegex(const p_search_res::SearchOptions& searchOptions, s
     }
 
     regex_str = regex_stream.str();
+}
+
+/**
+ * Retrieves the search data for the given options and file list.
+ *
+ * @param searchOptions the search options
+ * @param files the list of files to process
+ * @return the built search data
+ */
+search::FileSearchData PropsReader::buildSearchData(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files) {
+
+    auto* pSearchResult = new PropsSearchResult(searchOptions);
+
+    // Amend options if defaults needed
+    fixSearchOptions(searchOptions);
+
+    // Regex options
+    pcrecpp::RE_Options opt;
+    opt.set_caseless((searchOptions.caseSensitive_ == p_search_res::NO_OPT));
+
+    // Build regex
+    std::string regex_in;
+    buildRegex(searchOptions, regex_in);
+    pcrecpp::RE regex(regex_in, opt);
+
+    if (regex.NumberOfCapturingGroups() > 2) {
+        throw ExecutionException("Too many capture groups specified");
+    }
+
+    // Fill the queue with input files
+    auto* pFilesQueue = new std::deque<PropsFile>();
+    for (auto& file : files) {
+        pFilesQueue->push_back(file);
+    }
+
+    return search::FileSearchData { &searchOptions, &regex, pFilesQueue, pSearchResult };
 }

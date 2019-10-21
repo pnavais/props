@@ -22,9 +22,12 @@
 #include <memory>
 #include <props_search_result.h>
 #include <props_file.h>
+#include <deque>
 
+/**
+ * Namespace for search options
+ */
 namespace search {
-
     static const char KEY_SEPARATOR[] = "search.key_separator";
     static const char DEFAULT_KEY_SEPARATOR[] = "=";
     static const char KEY_IGNORE_CASE[] = "search.ignore_case";
@@ -33,6 +36,13 @@ namespace search {
     static const bool DEFAULT_ALLOW_PARTIAL_MATCH = false;
     static const char KEY_ENABLE_HIGHLIGHT[] = "search.highlight_results";
     static const bool DEFAULT_ENABLE_HIGHLIGHT = true;
+
+    typedef struct FileSearchData {
+        p_search_res::SearchOptions* searchOptions_;
+        void* regex_;
+        std::deque<PropsFile>* filesQueue_;
+        PropsSearchResult* searchResult_;
+    } FileSearchData;
 }
 
 /**
@@ -49,9 +59,23 @@ public:
      *  @param key the key to find
      *  @param files the list of files to search
      *  @param global the flag enabling global search
-     *  @return the results of the search
+     *
+     * @return the results of the search
      */
      static std::unique_ptr<PropsSearchResult> find_value(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
+
+    /**
+     *  Finds the value of the given key searching in the mater tracked file
+     *  or globally on every tracked file and replace its value with the given
+     *  new one.
+     *
+     * @param key the key to find
+     * @param newValue the new value to set
+     * @param files the list of files to search
+     *
+     * @return the results of the search
+     */
+    static std::unique_ptr<PropsSearchResult> find_and_replace_value(p_search_res::SearchOptions& searchOptions, const std::string& newValue, const std::list<PropsFile>& files);
 
 private:
 
@@ -69,6 +93,15 @@ private:
      * @param regex_str the built string regex
      */
     static void buildRegex(const p_search_res::SearchOptions& searchOptions, std::string& regex_str);
+
+    /**
+     * Retrieves the search data for the given options and file list.
+     *
+     * @param searchOptions the search options
+     * @param files the list of files to process
+     * @return the built search data
+     */
+    static search::FileSearchData buildSearchData(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
 
 };
 

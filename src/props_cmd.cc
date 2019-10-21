@@ -75,15 +75,19 @@ void PropsCommand::getHelp(std::ostream& out)
     // Display argument information
     for (auto& arg : args_) {
         out << prefix << (arg.getOptions().empty() ? "" : "[");
-        out << arg.getName();
+        if (!arg.isAnonymous()) {
+            out << arg.getName() << " ";
+        }
+        prefix = "";
         for (auto& attachedArg : arg.getAttachedArgs()) {
-            out << " " << attachedArg;
+            out << prefix << attachedArg;
+            prefix = " ";
         }
         out << (arg.getOptions().empty() ? "" : " <options>...]");
         prefix = " | ";
 
         desc_cmd << "\t\t" << StringUtils::padding("<"+arg.getName()+">", max_size+2)
-                            << ":  " << arg.getDescription() << std::endl;
+                            << ": " << arg.getDescription() << std::endl;
 
         if (!arg.getOptions().empty()) {
             options << rang::fgB::yellow << "\n " << arg.getName();

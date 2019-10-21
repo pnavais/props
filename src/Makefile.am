@@ -5,7 +5,7 @@ bin_PROGRAMS = props
 
 props_SOURCES = props.cc  props_cli.cc  props_cmd.cc  props_cmd_factory.cc  props_help_cmd.cc  \
 props_search_result.cc  props_tracker_cmd.cc props_unknown_cmd.cc props_search_cmd.cc \
-arg_parser.cc string_utils.cc file_utils.cc thread_group.cc
+props_edit_cmd.cc arg_parser.cc string_utils.cc file_utils.cc thread_group.cc
 #props_LDFLAGS = -Wl,-Bdynamic
 props_LDADD = $(PROPS_LIB_FUNC)
 
