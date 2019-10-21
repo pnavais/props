@@ -7,7 +7,7 @@ find_package ( PCRE )
 # "props.cc",etc. The extensions are automatically found.
 file(GLOB EXEC_SOURCES "*.cc")
 file(GLOB EXEC_HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-add_executable (props ${EXEC_SOURCES} ${EXEC_HEADERS} props_search_cmd.cc ../include/props_formatter.h ../include/memory_utils.h)
+add_executable (props ${EXEC_SOURCES} ${EXEC_HEADERS} props_search_cmd.cc ../include/props_formatter.h ../include/memory_utils.h thread_group.cc ../include/thread_group.h)
 
 # Link the executable to the Props default library. Since the Props default library has
 # public include directories we will use those link directories when building

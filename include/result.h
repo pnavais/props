@@ -39,6 +39,17 @@ public:
     Result() = delete;
 
     /**
+     * Copy constructor
+     *
+     * @param result
+     */
+    Result(const Result& result) {
+        validity_ = result.validity_;
+        message_  = result.message_;
+        severity_ = result.severity_;
+    }
+
+    /**
      * Constructor with validity flag and message
      * @param validity the validity flag
      * @param message the message
@@ -192,6 +203,19 @@ public:
      */
     Result &operator=(const bool &validity) {
         validity_ = validity;
+        return *this;
+    }
+
+    /**
+     * Assignment operator from a given result.
+     *
+     * @param validity the validity
+     * @return the result
+     */
+    Result &operator=(const Result &result) {
+        validity_ = result.validity_;
+        message_ = result.message_;
+        severity_ = result.severity_;
         return *this;
     }
 

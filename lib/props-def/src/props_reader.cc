@@ -23,9 +23,31 @@
 #include <file_utils.h>
 #include <props_config.h>
 #include <exec_exception.h>
+#include <thread_group.h>
+#include <deque>
 
 // Prototypes for globals
 const pcrecpp::RE &COMMENTED_LINE();
+void* search_files(void* data);
+
+// Controls the file queue access
+pthread_mutex_t filesQueueMutex;
+
+/**
+  * Namespace for constants
+  */
+namespace reader {
+    static const long DEFAULT_MAX_WORKER_THREADS = 5;
+    static const char* MAX_WORKER_THREADS = "general.max_worker_threads";
+    typedef struct FileSearchData {
+        p_search_res::SearchOptions* searchOptions_;
+        pcrecpp::RE* regex_;
+        std::deque<PropsFile>* filesQueue_;
+        PropsSearchResult* searchResult_;
+        
+    } FileSearchData;
+}
+
 
 /**
  * Retrieves the regular expression for
@@ -39,6 +61,75 @@ const pcrecpp::RE &COMMENTED_LINE() {
 }
 
 /**
+ * Process a file queue finding potential matches for
+ * the search terms provided.
+ * 
+ * @param data the files queue and search terms
+ * @return the result of the operation
+ */
+void* search_files(void* data) {
+    auto* result = new Result{res::VALID};
+    bool keep_processing = true;
+
+    if (data != nullptr) {
+        auto *searchData = (reader::FileSearchData*) data;
+        auto *filesQueue = searchData->filesQueue_;
+        
+        while (keep_processing) {
+            pthread_mutex_lock (&filesQueueMutex);
+
+            std::unique_ptr<PropsFile> file;
+            if (!filesQueue->empty()) {
+                file.reset(new PropsFile(filesQueue->back()));
+                filesQueue->pop_back();
+            } else {
+                keep_processing = false;
+            }
+
+            pthread_mutex_unlock(&filesQueueMutex);
+
+            if (file != nullptr) {
+
+                const std::string &input = searchData->searchOptions_->key_;
+                pcrecpp::StringPiece value_k;
+                pcrecpp::StringPiece value_r;
+
+                const std::string &fullPath = FileUtils::getAbsolutePath(file->getFileName());
+                std::ifstream infile(fullPath);
+
+                if (infile) {
+                    // TODO: Process dividing file in chunks and in parallel (mmap ?)
+                    std::string line;
+                    while (std::getline(infile, line)) {
+                        // Try to find the regex in line, and keep results.
+                        if (!COMMENTED_LINE().PartialMatch(line)) {
+                            if (searchData->regex_->PartialMatch(line, &value_k, &value_r)) {
+                                size_t pos_k = value_k.data() - line.data();
+                                size_t pos_r = value_r.data() - line.data();
+                                searchData->searchResult_->add(file->getFileName(), p_search_res::Match{input,
+                                                                                    *(searchData->searchOptions_),
+                                                                                    line,
+                                                                                    p_search_res::StringMatch{
+                                                                                            value_k.as_string(), pos_k},
+                                                                                    p_search_res::StringMatch{
+                                                                                            value_r.as_string(),
+                                                                                            pos_r}});
+                            }
+                        }
+                    }
+                    infile.close();
+                } else {
+                    std::cerr << rang::fgB::red << "File \"" << file->getFileName() << "\" not found" << rang::fg::reset
+                              << std::endl;
+                }
+            }            
+        }
+    }
+
+    pthread_exit(result);
+}
+
+/**
  * Finds the value for the key in the specified file.
  *
  * @param key the key to search
@@ -47,8 +138,7 @@ const pcrecpp::RE &COMMENTED_LINE() {
  */
 std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchOptions &searchOptions, const std::list<PropsFile> &files)
 {
-    std::unique_ptr<PropsSearchResult> result(new PropsSearchResult(searchOptions));
-    const std::string& input = searchOptions.key_;
+    std::unique_ptr<PropsSearchResult> searchResult(new PropsSearchResult(searchOptions));
 
     // Amend options if defaults needed
     fixSearchOptions(searchOptions);
@@ -62,45 +152,34 @@ std::unique_ptr<PropsSearchResult> PropsReader::find_value(p_search_res::SearchO
     buildRegex(searchOptions, regex_in);
     pcrecpp::RE regex(regex_in, opt);
 
-    //std::string value_k;
-	//std::string value_r;
-	pcrecpp::StringPiece value_k;
-    pcrecpp::StringPiece value_r;
-
     if (regex.NumberOfCapturingGroups() > 2) {
         throw ExecutionException("Too many capture groups specified");
     }
 
-	// TODO: Process using a queue and threads
-	for (auto &file : files)
-    {
-        const std::string &fullPath = FileUtils::getAbsolutePath(file.getFileName());
-	    std::ifstream infile(fullPath);
+    // Configure threading 
+    pthread_mutex_init(&filesQueueMutex, nullptr);
+    
+    auto maxWorkerThreads = PropsConfig::getDefault().getValue<size_t>(reader::MAX_WORKER_THREADS, reader::DEFAULT_MAX_WORKER_THREADS);
+    maxWorkerThreads = (maxWorkerThreads > files.size()) ? files.size() : maxWorkerThreads;
 
-        if (infile) {
-            // TODO: Process dividing file in chunks and in parallel (mmap ?)
-            std::string line;
-            while (std::getline(infile, line)) {
-                // Try to find the regex in line, and keep results.
-                if (!COMMENTED_LINE().PartialMatch(line)) {
-                    if (regex.PartialMatch(line, &value_k, &value_r)) {
-                        size_t pos_k = value_k.data() - line.data();
-                        size_t pos_r = value_r.data() - line.data();
-                        result->add(file.getFileName(), p_search_res::Match{ input,
-                                                                             searchOptions,
-                                                                             line,
-                                                                             p_search_res::StringMatch{value_k.as_string(), pos_k},
-                                                                             p_search_res::StringMatch{value_r.as_string(), pos_r }});
-                    }
-                }
-            }
-            infile.close();
-        } else {
-            std::cerr << rang::fgB::red << "File \"" << file.getFileName() << "\" not found" << rang::fg::reset << std::endl;
-        }
+    ThreadGroup threadGroup("READER_GROUP", maxWorkerThreads);
+    threadGroup.setThreadFunction(search_files);
+
+    // Fill the queue with input files
+    std::deque<PropsFile> filesQueue;
+    for (auto& file : files) {
+        filesQueue.push_back(file);
     }
 
-	return result;
+    reader::FileSearchData fileSearchData { &searchOptions, &regex, &filesQueue, searchResult.get() };
+    threadGroup.setData(&fileSearchData);
+
+    threadGroup.start();
+    threadGroup.wait();
+
+    pthread_mutex_destroy(&filesQueueMutex);
+
+	return searchResult;
 }
 
 /**
