@@ -20,23 +20,13 @@
 #define PROPS_SEARCH_RESULT_H
 
 #include "props_result.h"
+#include "props_search_options.h"
 #include <string>
 #include <map>
 #include <list>
 #include <pcre_stringpiece.h>
 
 namespace p_search_res {
-
-    typedef enum Opt { USE_OPT, NO_OPT, DEFAULT } Opt;
-
-    typedef struct SearchOptions {
-        std::string key_;
-        Opt caseSensitive_;
-        std::string separator_;
-        Opt partialMatch_;
-        bool matchValue_;
-        bool isRegex_;
-    } SearchOptions;
 
     typedef struct StringMatch {
         std::string str_;
@@ -45,7 +35,7 @@ namespace p_search_res {
 
     typedef struct Match {
             std::string input_;
-            SearchOptions searchOptions_;
+            PropsSearchOptions searchOptions_;
             std::string fullLine_;
             StringMatch key_;
             StringMatch value_;
@@ -63,14 +53,14 @@ public:
      *
      * @param key the key
      */
-    explicit PropsSearchResult(p_search_res::SearchOptions searchOptions) : searchOptions_(std::move(searchOptions)) {}
+    explicit PropsSearchResult(PropsSearchOptions searchOptions) : searchOptions_(std::move(searchOptions)) {}
 
     /**
      * Retrieves the search options
      *
      * @return the search options
      */
-    const p_search_res::SearchOptions& getSearchOptions() const {
+    const PropsSearchOptions& getSearchOptions() const {
         return searchOptions_;
     }
 
@@ -129,7 +119,7 @@ public:
 private:
 
     p_search_res::result_map fileKeys_;
-    p_search_res::SearchOptions searchOptions_;
+    PropsSearchOptions searchOptions_;
     bool enableJson_{false};
 };
 

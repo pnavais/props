@@ -38,7 +38,7 @@ namespace search {
     static const bool DEFAULT_ENABLE_HIGHLIGHT = true;
 
     typedef struct FileSearchData {
-        p_search_res::SearchOptions* searchOptions_;
+        PropsSearchOptions* searchOptions_;
         void* regex_;
         std::deque<PropsFile>* filesQueue_;
         PropsSearchResult* searchResult_;
@@ -62,29 +62,17 @@ public:
      *
      * @return the results of the search
      */
-     static std::unique_ptr<PropsSearchResult> find_value(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
-
-    /**
-     *  Finds the value of the given key searching in the mater tracked file
-     *  or globally on every tracked file and replace its value with the given
-     *  new one.
-     *
-     * @param key the key to find
-     * @param newValue the new value to set
-     * @param files the list of files to search
-     *
-     * @return the results of the search
-     */
-    static std::unique_ptr<PropsSearchResult> find_and_replace_value(p_search_res::SearchOptions& searchOptions, const std::string& newValue, const std::list<PropsFile>& files);
+     static std::unique_ptr<PropsSearchResult> processSearch(PropsSearchOptions& searchOptions, const std::list<PropsFile>& files);
 
 private:
+
 
     /**
      * Amend input options if default values needed.
      *
      * @param searchOptions the search options
      */
-    static void fixSearchOptions(p_search_res::SearchOptions& searchOptions);
+    static void fixSearchOptions(PropsSearchOptions& searchOptions);
 
     /**
      * Builds the search regular expression from the given search options.
@@ -92,7 +80,7 @@ private:
      * @param searchOptions the search options
      * @param regex_str the built string regex
      */
-    static void buildRegex(const p_search_res::SearchOptions& searchOptions, std::string& regex_str);
+    static void buildRegex(const PropsSearchOptions& searchOptions, std::string& regex_str);
 
     /**
      * Retrieves the search data for the given options and file list.
@@ -101,7 +89,7 @@ private:
      * @param files the list of files to process
      * @return the built search data
      */
-    static search::FileSearchData buildSearchData(p_search_res::SearchOptions& searchOptions, const std::list<PropsFile>& files);
+    static search::FileSearchData buildSearchData(PropsSearchOptions& searchOptions, const std::list<PropsFile>& files);
 
 };
 

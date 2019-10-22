@@ -93,16 +93,23 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
     std::string keySeparator = (optionStore_.getOptions().count(search_cmd::_SEPARATOR_) != 0) ?
                                 optionStore_.getOptions().at(search_cmd::_SEPARATOR_) : "";
 
-    p_search_res::Opt caseSensitive     = (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0)   ? p_search_res::NO_OPT : p_search_res::DEFAULT;
-    p_search_res::Opt allowPartialMatch = (optionStore_.getOptions().count(search_cmd::_PARTIAL_MATCH_) != 0) ? p_search_res::USE_OPT : p_search_res::DEFAULT;
-    const bool& matchValue              = (optionStore_.getOptions().count(search_cmd::_SEARCH_VALUE_) != 0);
-    const bool& isRegex                 = (optionStore_.getOptions().count(search_cmd::_USE_REGEX_) != 0);
+    global_options::Opt caseSensitive     = (optionStore_.getOptions().count(search_cmd::_IGNORE_CASE_) != 0)   ? global_options::NO_OPT : global_options::DEFAULT;
+    global_options::Opt allowPartialMatch = (optionStore_.getOptions().count(search_cmd::_PARTIAL_MATCH_) != 0) ? global_options::USE_OPT : global_options::DEFAULT;
+    const bool& matchValue                = (optionStore_.getOptions().count(search_cmd::_SEARCH_VALUE_) != 0);
+    const bool& isRegex                   = (optionStore_.getOptions().count(search_cmd::_USE_REGEX_) != 0);
 
     // Compute the list of input files
     std::list<PropsFile> fileList;
     retrieveFileList(fileList, res);
 
-    p_search_res::SearchOptions searchOptions{term, caseSensitive, keySeparator, allowPartialMatch, matchValue, isRegex};
+    PropsSearchOptions searchOptions;
+    searchOptions.setKey(term);
+    searchOptions.setCaseSensitive(caseSensitive);
+    searchOptions.setSeparator(keySeparator);
+    searchOptions.setPartialMatch(allowPartialMatch);
+    searchOptions.setMatchValue(matchValue);
+    searchOptions.setIsRegex(isRegex);
+    searchOptions.setReplace(false);
 
     if (fileList.empty()) {
         res = res::ERROR;
@@ -111,7 +118,7 @@ std::unique_ptr<PropsResult> PropsSearchCommand::search() {
         searchResult.reset(new PropsSearchResult(searchOptions));
         searchResult->setResult(res);
     } else {
-        searchResult = PropsReader::find_value(searchOptions, fileList);
+        searchResult = PropsReader::processSearch(searchOptions, fileList);
         searchResult->setResult(res);
         searchResult->setEnableJson((optionStore_.getOptions().count(search_cmd::_USE_JSON_) != 0));
     }
