@@ -15,7 +15,6 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include <string_utils.h>
 #include <result.h>
 #include "arg_parser.h"
@@ -85,23 +84,24 @@ void ArgParser::readOptions(const PropsArg& arg, ArgStore& argStore, Result& res
         delete[] long_opts;
         opt_index = optind;
 
-
         if (opt_index < argStore.getArgc()) {
             // Skip first non-option if matches argument
             opt_index = (arg.getName() == argStore.getArgv()[opt_index]) ? opt_index + 1 : opt_index;
         }
     }
 
-    // Map non options
-    int index;
-    for (index = opt_index; index < argStore.getArgc(); index++) {
-        argStore.addArg(std::string(argStore.getArgv()[index]));
-    }
+    if (result.isValid()) {
+        // Map non options
+        int index;
+        for (index = opt_index; index < argStore.getArgc(); index++) {
+            argStore.addArg(std::string(argStore.getArgv()[index]));
+        }
 
-    // Check at least same attached args than non options
-    if (arg.getAttachedArgs().size() > argStore.getArgs().size()) {
-        result = res::ERROR;
-        result.setMessage("Missing arguments");
+        // Check at least same attached args than non options
+        if (arg.getAttachedArgs().size() > argStore.getArgs().size()) {
+            result = res::ERROR;
+            result.setMessage("Missing arguments");
+        }
     }
 }
 
@@ -124,10 +124,9 @@ void ArgParser::mapOptions(const PropsArg &arg, ArgStore &argStore, Result &resu
     } else if ((optarg != nullptr) && ((optarg[0] == '-') || StringUtils::isWhiteSpace(optarg))) {
         result = res::ERROR;
         result.setMessage(std::string("Invalid argument supplied \"") + optarg + "\" for option \"" + char(opt) + "\"");
-    }
-    else if (opt == '?') {
+    } else if (opt == '?') {
         result = res::ERROR;
-        auto errorOption = (optopt != 0) ? std::string("\"") + char(optopt) + "\"" : "";
+        auto errorOption = (optopt != 0) ? std::string("\"") + argStore.getArgv()[optind] + "\"" : "";
         result.setMessage(std::string("Invalid option supplied ") + errorOption);
     } else {
         for (const auto &opt_arg : arg.getOptions()) {

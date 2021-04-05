@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <props_search_cmd.h>
+#include "props_search_cmd.h"
+#include "props_edit_cmd.h"
 #include "props_cli.h"
 #include "string_utils.h"
 #include "props_cmd_factory.h"
@@ -30,6 +31,7 @@ PropsCommandFactory::PropsCommandFactory() {
 
     listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsTrackerCommand()));
     listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsSearchCommand()));
+    listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsEditCommand()));
     listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsHelpCommand()));
     listCmds_.push_back(std::unique_ptr<PropsCommand>(new PropsVersionCommand()));
 
