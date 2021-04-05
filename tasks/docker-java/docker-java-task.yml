@@ -3,13 +3,14 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: feeds-emea.axadmin.net/docker/ubuntu
+    repository: ((proget-docker-registry.url))/docker/ubuntu
     tag: 20.04
-    username: sa-ww-gdc-cf-dev
-    password: S0l3er@P@sSw0rd92!E
+    username: ((proget-docker-registry.username))
+    password: ((proget-docker-registry.password))
 
 outputs:
 - name: workspace
+- name: project-metadata
 
 inputs:
 - name: nexus-repo
@@ -30,6 +31,11 @@ run:
 
     if [ -z "$jar_name" ]; then
       jar_name=app.jar
+    fi
+
+    # Create version file if specified
+    if [ -n "$tag" ]; then
+      echo "$tag" > ./project-metadata/version
     fi
 
     cp ./dockerfile_repo/$docker_location/* "${output_dir}/"
