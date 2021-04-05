@@ -3,10 +3,10 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: ((proget-docker-registry.url))/docker/ubuntu
+    repository: feeds-emea.axadmin.net/docker/ubuntu
     tag: 20.04
-    username: ((proget-docker-registry.username))
-    password: ((proget-docker-registry.password))
+    username: sa-ww-gdc-cf-dev
+    password: S0l3er@P@sSw0rd92!E
 
 outputs:
 - name: workspace
