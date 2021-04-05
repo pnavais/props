@@ -38,6 +38,6 @@ run:
       echo "$tag" > ./project-metadata/version
     fi
 
-    cp ./dockerfile_repo/$docker_location/* "${output_dir}/"
+    cp ./pipeline_repo/$docker_location/* "${output_dir}/"
     cp ./nexus-repo/*.jar "${output_dir}/$jar_name"
     chmod +x ${output_dir}/$jar_name
