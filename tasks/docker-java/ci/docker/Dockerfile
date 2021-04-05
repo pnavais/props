@@ -1,4 +1,4 @@
-FROM feeds.axadmin.net/docker/openjdk:8-slim
+FROM feeds.axadmin.net/docker/library/openjdk:8-slim
 
 RUN apt-get update && apt-get install -y \
 	apt-transport-https \
